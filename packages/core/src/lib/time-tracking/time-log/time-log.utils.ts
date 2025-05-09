@@ -1,4 +1,4 @@
-import moment from 'moment';
+import * as moment from 'moment';
 import { reduce } from 'underscore';
 import { ArraySum } from '@gauzy/utils';
 import { ITimeLog, TimeLogPartialStatus, TimeLogType } from '@gauzy/contracts';
