@@ -137,6 +137,10 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 		this.weekDayList = dayRange;
 	}
 
+	getGroupDate(date: string | Date) {
+		return moment(date).tz(this.filters.timeZone).format('YYYY-MM-DD');
+	}
+
 	/**
 	 * Handles changes to timesheet filters and triggers data updates.
 	 *
@@ -193,7 +197,7 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 				.groupBy('projectId')
 				.map((innerLogs, _projectId) => {
 					const byDate = chain(innerLogs)
-						.groupBy((log) => moment(log.startedAt).format('YYYY-MM-DD'))
+						.groupBy((log) => moment(log.startedAt).tz(this.filters.timeZone).format('YYYY-MM-DD'))
 						.mapObject((res) => {
 							const sum = res.reduce((iteratee, log) => iteratee + log.duration, 0);
 							return { sum, logs: res };
@@ -204,7 +208,8 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 					const dates = {};
 
 					this.weekDayList.forEach((date) => {
-						dates[date] = byDate[date] || 0;
+						const tzDate = moment(date).tz(this.filters.timeZone).format('YYYY-MM-DD');
+						dates[tzDate] = byDate[tzDate] || 0;
 					});
 
 					return { project, dates };
