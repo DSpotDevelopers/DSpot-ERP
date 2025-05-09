@@ -123,6 +123,7 @@ export interface ITimeLog
 	isBillable?: boolean;
 	isRunning?: boolean;
 	isEdited?: boolean;
+	partialStatus: TimeLogPartialStatus;
 }
 
 export interface ITimeLogCreateInput extends IBasePerTenantAndOrganizationEntityModel {
@@ -595,4 +596,11 @@ export interface IGetInvoiceTimeLogs {
 	employeeIds?: string[];
 	groupBy?: string;
 	relations?: string[];
+}
+
+export enum TimeLogPartialStatus {
+	TO_RIGHT = 1,
+	COMPLETE = 0,
+	TO_LEFT = -1,
+	BOTH_SIDES = -2,
 }

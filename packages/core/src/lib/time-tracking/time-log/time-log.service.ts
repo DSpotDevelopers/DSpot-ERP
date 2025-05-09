@@ -49,7 +49,7 @@ import {
 import { getDateRangeFormat, getDaysBetweenDates } from './../../core/utils';
 import { RequestContext } from '../../core/context';
 import { moment } from './../../core/moment-extend';
-import { calculateAverage, calculateAverageActivity, calculateDuration } from './time-log.utils';
+import { calculateAverage, calculateAverageActivity, calculateDuration, fixTimeLogsBoundary } from './time-log.utils';
 import { prepareSQLQuery as p } from './../../database/database.helper';
 import { TypeOrmTimeLogRepository } from './repository/type-orm-time-log.repository';
 import { MikroOrmTimeLogRepository } from './repository/mikro-orm-time-log.repository';
@@ -167,7 +167,12 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			this.getFilterTimeLogQuery(qb, request, true);
 		});
 
-		const timeLogs = await query.getMany();
+		let timeLogs = await query.getMany();
+
+		/**
+		 * Adjust the time logs to adjust the startedAt and stoppedAt to the date range and recalculate the duration.
+		 */
+		timeLogs = fixTimeLogsBoundary(timeLogs, request.startDate, request.endDate, request.timeZone);
 
 		// Set up the where clause using the provided filter function
 		return timeLogs;
@@ -188,7 +193,9 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		let invoiceData: IReportDayData;
 		switch (request.groupBy) {
 			case ReportGroupFilterEnum.employee:
-				invoiceData = await this.commandBus.execute(new GetTimeLogGroupByEmployeeCommand(timeLogs, {}, timeZone));
+				invoiceData = await this.commandBus.execute(
+					new GetTimeLogGroupByEmployeeCommand(timeLogs, {}, timeZone)
+				);
 				break;
 			case ReportGroupFilterEnum.project:
 				invoiceData = await this.commandBus.execute(
@@ -1043,9 +1050,20 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				moment.utc(request.endDate || moment().endOf('day'))
 			);
 			query.andWhere(
+				/**
+				 * Allow to get time logs that are partially in the date range.
+				 * The first element in the results can be started before the date range but it will be ended in the date range.
+				 * The last element in the results can be started in the date range but it will be ended after the date range.
+				 *
+				 * For this cases we should adjust the results to adjust the startedAt and stoppedAt to the date range 
+				 * and recalculate the duration. Check fixTimeLogsBoundary function for more details.
+				 */
 				new Brackets((qb) => {
-					qb.where(p(`"${query.alias}"."startedAt" >= :startDate`), { startDate });
-					qb.andWhere(p(`"${query.alias}"."startedAt" < :endDate`), { endDate });
+					qb.where(p(`"${query.alias}"."startedAt" BETWEEN :startDate AND :endDate`), { startDate, endDate });
+					qb.orWhere(p(`"${query.alias}"."stoppedAt" BETWEEN :startDate AND :endDate`), {
+						startDate,
+						endDate
+					});
 				})
 			);
 		}
