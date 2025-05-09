@@ -33,10 +33,10 @@ interface WeeklyDayData {
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-weekly-timesheet',
-    templateUrl: './weekly.component.html',
-    styleUrls: ['./weekly.component.scss'],
-    standalone: false
+	selector: 'ngx-weekly-timesheet',
+	templateUrl: './weekly.component.html',
+	styleUrls: ['./weekly.component.scss'],
+	standalone: false
 })
 export class WeeklyComponent extends BaseSelectorFilterComponent implements OnInit, OnDestroy {
 	PermissionsEnum = PermissionsEnum;
@@ -129,7 +129,7 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 
 		while (!current.isAfter(end)) {
 			// Include end date in the range
-			dayRange.push(current.format('YYYY-MM-DD')); // Add formatted date to the list
+			dayRange.push(current.toDate()); // Add formatted date to the list
 			current.add(1, 'day'); // Move to the next day
 		}
 
