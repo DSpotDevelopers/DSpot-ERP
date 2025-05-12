@@ -1,9 +1,9 @@
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { filter, tap } from 'rxjs/operators';
 import { NbDialogRef, NbDialogService } from '@nebular/theme';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { ITimeLog, PermissionsEnum, IOrganization, TimeLogSourceEnum } from '@gauzy/contracts';
+import { ITimeLog, PermissionsEnum, IOrganization, TimeLogSourceEnum, TimeLogPartialStatus } from '@gauzy/contracts';
 import { TimeLogsLabel } from '@gauzy/ui-core/common';
 import { Store, TimeTrackerService, TimesheetService } from '@gauzy/ui-core/core';
 import { EditTimeLogModalComponent } from './../edit-time-log-modal';
@@ -15,7 +15,7 @@ import { EditTimeLogModalComponent } from './../edit-time-log-modal';
 	styleUrls: ['view-time-log-modal.component.scss'],
 	standalone: false
 })
-export class ViewTimeLogModalComponent implements OnInit, OnDestroy {
+export class ViewTimeLogModalComponent implements OnInit {
 	organization: IOrganization;
 	PermissionsEnum = PermissionsEnum;
 	TimeLogsLabel = TimeLogsLabel;
@@ -64,7 +64,11 @@ export class ViewTimeLogModalComponent implements OnInit, OnDestroy {
 	onDeleteConfirm() {
 		const { id: organizationId } = this.organization;
 		const request = {
-			logIds: [this.timeLog.id],
+			logIds: [{
+				id: this.timeLog.id,
+				partialStatus: this.timeLog.partialStatus,
+				referenceDate: this.timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? this.timeLog.stoppedAt : this.timeLog.startedAt,
+			}],
 			organizationId
 		};
 		this.timesheetService.deleteLogs(request).then((res) => {
@@ -92,6 +96,4 @@ export class ViewTimeLogModalComponent implements OnInit, OnDestroy {
 	redirectToClient() {
 		this.router.navigate(['/pages/contacts/view/', this.timeLog.organizationContact.id]);
 	}
-
-	ngOnDestroy(): void { }
 }

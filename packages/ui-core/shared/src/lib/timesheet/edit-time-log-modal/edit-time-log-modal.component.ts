@@ -14,7 +14,8 @@ import {
 	ISelectedEmployee,
 	TimeLogType,
 	TimeLogSourceEnum,
-	ITimerStatusWithWeeklyLimits
+	ITimerStatusWithWeeklyLimits,
+	TimeLogPartialStatus
 } from '@gauzy/contracts';
 import { toUTC, toLocal, distinctUntilChange } from '@gauzy/ui-core/common';
 import { Store, TimesheetService, TimeTrackerService, ToastrService } from '@gauzy/ui-core/core';
@@ -458,7 +459,11 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 
 		// Prepare the request object for deleting logs.
 		const request = {
-			logIds: [timeLog.id],
+			logs: [{
+				id: timeLog.id,
+				partialStatus: timeLog.partialStatus,
+				referenceDate: timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt,
+			}],
 			organizationId
 		};
 

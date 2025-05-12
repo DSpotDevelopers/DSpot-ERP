@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy, Output } from '@angular/core';
-import { IOrganization, ITimeLog, PermissionsEnum, TimeLogSourceEnum } from '@gauzy/contracts';
+import { IOrganization, ITimeLog, PermissionsEnum, TimeLogPartialStatus, TimeLogSourceEnum } from '@gauzy/contracts';
 import * as moment from 'moment';
 import { NbDialogService } from '@nebular/theme';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -114,7 +114,11 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 		}
 		const { id: organizationId } = this.organization;
 		const request = {
-			logIds: [timeLog.id],
+			logIds: [{
+				id: timeLog.id,
+				partialStatus: timeLog.partialStatus,
+				referenceDate: timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt,
+			}],
 			organizationId
 		};
 		this.timesheetService.deleteLogs(request).then((res) => {

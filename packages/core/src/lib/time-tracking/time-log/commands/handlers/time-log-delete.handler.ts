@@ -93,7 +93,7 @@ export class TimeLogDeleteHandler implements ICommandHandler<TimeLogDeleteComman
 				timeLog,
 				timeSlotsIds
 			};
-			if (timeLogMap[timeLog.id].partialStatus !== TimeLogPartialStatus.COMPLETE) {
+			if (timeLogMap[timeLog.id]?.partialStatus !== TimeLogPartialStatus.COMPLETE) {
 				params['startedAt'] = timeLogMap[timeLog.id].referenceDate;
 				params['partialStatus'] = timeLogMap[timeLog.id].partialStatus;
 			}
@@ -120,7 +120,7 @@ export class TimeLogDeleteHandler implements ICommandHandler<TimeLogDeleteComman
 	): Promise<DeleteResult | UpdateResult> {
 		const logsToDelete = []
 		for (const log of timeLogs) {
-			if (timeLogMap[log.id].partialStatus === TimeLogPartialStatus.COMPLETE) {
+			if (!timeLogMap[log.id] || timeLogMap[log.id].partialStatus === TimeLogPartialStatus.COMPLETE) {
 				logsToDelete.push(log.id);
 			} else {
 				// UPdate the log startedAt or stoppedAt to the referenceDate
