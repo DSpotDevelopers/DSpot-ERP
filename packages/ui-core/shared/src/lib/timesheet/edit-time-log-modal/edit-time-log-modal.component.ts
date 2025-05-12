@@ -23,10 +23,10 @@ import { TranslateService } from '@ngx-translate/core';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-edit-time-log-modal',
-    templateUrl: './edit-time-log-modal.component.html',
-    styleUrls: ['./edit-time-log-modal.component.scss'],
-    standalone: false
+	selector: 'ngx-edit-time-log-modal',
+	templateUrl: './edit-time-log-modal.component.html',
+	styleUrls: ['./edit-time-log-modal.component.scss'],
+	standalone: false
 })
 export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestroy {
 	// Permissions and basic state initialization
@@ -71,6 +71,8 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 		return this._timeLog;
 	}
 
+	@Input() timezone: string;
+
 	/*
 	 * TimeLog Mutation Form
 	 */
@@ -99,7 +101,7 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 		private readonly _timeTrackerService: TimeTrackerService,
 		private readonly _durationFormatPipe: DurationFormatPipe,
 		public readonly _translateService: TranslateService
-	) {}
+	) { }
 
 	ngOnInit() {
 		const { startedAt, stoppedAt } = this.timeLog;
@@ -384,7 +386,7 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 		if (
 			!isEditing &&
 			this.timeDiff + this.timerStatusWithWeeklyLimits.workedThisWeek >
-				Math.trunc(this.timerStatusWithWeeklyLimits.reWeeklyLimit * 3600)
+			Math.trunc(this.timerStatusWithWeeklyLimits.reWeeklyLimit * 3600)
 		) {
 			this.showMaxLimitReachedToast();
 			return;
@@ -410,7 +412,10 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 				tenantId,
 				logType: TimeLogType.MANUAL,
 				source: TimeLogSourceEnum.WEB_TIMER,
-				employeeId: this.form.value.employeeId || employee?.id // Fallback to current employee ID
+				employeeId: this.form.value.employeeId || employee?.id, // Fallback to current employee ID,
+				partialStatus: this._timeLog?.partialStatus ?? 0,
+				// TODO Fix value based on the partialStatus
+				referenceDate: this._timeLog?.startedAt,
 			};
 
 			// Create or update the time log based on the mode

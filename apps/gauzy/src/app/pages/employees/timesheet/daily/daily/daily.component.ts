@@ -43,10 +43,10 @@ import {
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-daily-timesheet',
-    templateUrl: './daily.component.html',
-    styleUrls: ['./daily.component.scss'],
-    standalone: false
+	selector: 'ngx-daily-timesheet',
+	templateUrl: './daily.component.html',
+	styleUrls: ['./daily.component.scss'],
+	standalone: false
 })
 export class DailyComponent extends BaseSelectorFilterComponent implements AfterViewInit, OnInit, OnDestroy {
 	public PermissionsEnum = PermissionsEnum; // Enum for permissions.
@@ -312,14 +312,14 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 	openAdd(): void {
 		if (this.limitReached) return;
 		const defaultTimeLog = {
-			startedAt: moment().set({ hour: 8, minute: 0, second: 0 }).toDate(),
-			stoppedAt: moment().set({ hour: 9, minute: 0, second: 0 }).toDate(),
+			startedAt: moment().tz(this.filters.timeZone).set({ hour: 8, minute: 0, second: 0 }).toDate(),
+			stoppedAt: moment().tz(this.filters.timeZone).set({ hour: 9, minute: 0, second: 0 }).toDate(),
 			employeeId: this.request.employeeIds?.[0] || null,
 			projectId: this.request.projectIds?.[0] || null
 		};
 
 		this._dialogService
-			.open(EditTimeLogModalComponent, { context: { timeLog: defaultTimeLog } })
+			.open(EditTimeLogModalComponent, { context: { timeLog: defaultTimeLog, timezone: this.filters.timeZone } })
 			.onClose.pipe(
 				// Filter out falsy results
 				filter((timeLog: ITimeLog) => !!timeLog),
@@ -346,7 +346,7 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 		}
 
 		this._dialogService
-			.open(EditTimeLogModalComponent, { context: { timeLog } })
+			.open(EditTimeLogModalComponent, { context: { timeLog, timezone: this.filters.timeZone } })
 			.onClose.pipe(
 				// Filter out falsy results
 				filter((editedTimeLog: ITimeLog) => !!editedTimeLog),
@@ -370,8 +370,8 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 	openView(timeLog: ITimeLog): void {
 		this._dialogService
 			.open(ViewTimeLogModalComponent, {
-				context: { timeLog },
-				dialogClass: 'view-log-dialog'
+				context: { timeLog, timezone: this.filters.timeZone },
+				dialogClass: 'view-log-dialog',
 			})
 			.onClose.pipe(
 				// Filter out falsy results
@@ -558,13 +558,13 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 
 		this.contextMenus = deletePermission
 			? [
-					{
-						title: this.getTranslation('TIMESHEET.DELETE'),
-						data: {
-							action: 'DELETE'
-						}
+				{
+					title: this.getTranslation('TIMESHEET.DELETE'),
+					data: {
+						action: 'DELETE'
 					}
-			  ]
+				}
+			]
 			: [];
 	}
 

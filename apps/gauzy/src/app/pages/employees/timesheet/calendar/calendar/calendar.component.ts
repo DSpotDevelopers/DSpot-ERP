@@ -42,10 +42,10 @@ import {
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-calendar-timesheet',
-    templateUrl: './calendar.component.html',
-    styleUrls: ['./calendar.component.scss'],
-    standalone: false
+	selector: 'ngx-calendar-timesheet',
+	templateUrl: './calendar.component.html',
+	styleUrls: ['./calendar.component.scss'],
+	standalone: false
 })
 export class CalendarComponent extends BaseSelectorFilterComponent implements OnInit, AfterViewInit, OnDestroy {
 	@ViewChild('calendar', { static: true }) calendar: FullCalendarComponent;
@@ -391,7 +391,7 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 	openDialog(timeLog?: ITimeLog | Partial<ITimeLog>) {
 		if (this.limitReached) return;
 
-		const dialog$ = this.nbDialogService.open(EditTimeLogModalComponent, { context: { timeLog } });
+		const dialog$ = this.nbDialogService.open(EditTimeLogModalComponent, { context: { timeLog, timezone: this.filters?.timeZone } });
 		dialog$.onClose
 			.pipe(
 				filter((timeLog: ITimeLog) => !!timeLog),

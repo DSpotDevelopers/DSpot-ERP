@@ -234,7 +234,7 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 		}
 
 		const dialogRef = this.nbDialogService.open(EditTimeLogModalComponent, {
-			context: { timeLog }
+			context: { timeLog, timezone: this.filters?.timeZone }
 		});
 
 		dialogRef.onClose
@@ -282,7 +282,8 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 					projectId: project?.id ?? null,
 					// Adding an employeeId if available
 					employeeId: this.request.employeeIds?.[0] ?? null
-				}
+				},
+				timezone: this.filters?.timeZone
 			}
 		});
 

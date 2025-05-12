@@ -11,16 +11,17 @@ import { combineLatest, Observable, Subject, takeUntil } from 'rxjs';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-view-time-log',
-    templateUrl: './view-time-log.component.html',
-    styleUrls: ['./view-time-log.component.scss'],
-    standalone: false
+	selector: 'ngx-view-time-log',
+	templateUrl: './view-time-log.component.html',
+	styleUrls: ['./view-time-log.component.scss'],
+	standalone: false
 })
 export class ViewTimeLogComponent implements OnInit, OnDestroy {
 	organization: IOrganization;
 	PermissionsEnum = PermissionsEnum;
 	limitReached = false;
 	@Input() timeLogs: ITimeLog[] = [];
+	@Input() timezone: string;
 	@Input() callback: CallableFunction;
 	@Output() close: CallableFunction;
 
@@ -33,7 +34,7 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 		private readonly timesheetService: TimesheetService,
 		private readonly store: Store,
 		private readonly timeTrackerService: TimeTrackerService
-	) {}
+	) { }
 
 	ngOnInit(): void {
 		this.store.selectedOrganization$
@@ -57,10 +58,10 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 		const minutes = moment().minutes();
 		const stoppedAt = new Date(
 			moment(timeLog.startedAt).format('YYYY-MM-DD') +
-				' ' +
-				moment()
-					.set('minutes', minutes - (minutes % 10))
-					.format('HH:mm')
+			' ' +
+			moment()
+				.set('minutes', minutes - (minutes % 10))
+				.format('HH:mm')
 		);
 		const startedAt = moment(stoppedAt).subtract('1', 'hour').toDate();
 		this.openEdit($event, {
@@ -85,7 +86,7 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 		}
 		$event.stopPropagation();
 		this.nbDialogService
-			.open(EditTimeLogModalComponent, { context: { timeLog: timeLog } })
+			.open(EditTimeLogModalComponent, { context: { timeLog: timeLog, timezone: this.timezone } })
 			.onClose.pipe(untilDestroyed(this))
 			.subscribe((data) => {
 				this.callback(data);
@@ -96,7 +97,8 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 		this.nbDialogService
 			.open(ViewTimeLogModalComponent, {
 				context: {
-					timeLog: timeLog
+					timeLog: timeLog,
+					timezone: this.timezone
 				},
 				dialogClass: 'view-log-dialog'
 			})

@@ -15,18 +15,30 @@ import { IDateRange } from '@gauzy/contracts';
 import { merge, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 
+/**
+ * Converts timezone offset to hours
+ * @param offset - timezone offset in format +00:00
+ * @returns hours
+ */
+function offsetToHours(offset: string): number {
+	const [hours, minutes] = offset.split(':').map(Number);
+	const multiplier = hours < 0 ? -1 : 1;
+	return hours + multiplier * minutes / 60;
+}
+
+
 @Component({
-    selector: 'ngx-timer-range-picker',
-    templateUrl: './timer-range-picker.component.html',
-    styleUrls: ['./timer-range-picker.component.scss'],
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => TimerRangePickerComponent),
-            multi: true
-        }
-    ],
-    standalone: false
+	selector: 'ngx-timer-range-picker',
+	templateUrl: './timer-range-picker.component.html',
+	styleUrls: ['./timer-range-picker.component.scss'],
+	providers: [
+		{
+			provide: NG_VALUE_ACCESSOR,
+			useExisting: forwardRef(() => TimerRangePickerComponent),
+			multi: true
+		}
+	],
+	standalone: false
 })
 export class TimerRangePickerComponent implements AfterViewInit {
 	private _maxDate: Date = null;
@@ -34,6 +46,7 @@ export class TimerRangePickerComponent implements AfterViewInit {
 	private _disabledDates: number[] = [];
 	private _destroy$: Subject<void> = new Subject<void>();
 	private _selectedRange: IDateRange;
+	private _timezoneAdjustment: number;
 
 	@Input() allowedDuration: number;
 	@Input() disableEndPicker = false;
@@ -41,7 +54,7 @@ export class TimerRangePickerComponent implements AfterViewInit {
 	@Input() fromEmployeeAppointment = false;
 	@Input() timezoneOffset: string;
 	@Input() customClass?: string = '';
-
+	@Input() timezone: string;
 	@Input('maxDate')
 	public get maxDate(): Date {
 		return this._maxDate;
@@ -86,14 +99,23 @@ export class TimerRangePickerComponent implements AfterViewInit {
 	date: Date;
 	errorMessage: string | null = null;
 
-	constructor(private cd: ChangeDetectorRef) {}
+	constructor(private cd: ChangeDetectorRef) { }
 
-	onChange: any = () => {};
-	onTouched: any = () => {};
+	onChange: any = () => { };
+	onTouched: any = () => { };
 	filter = (date) => !this._disabledDates.includes(date.getTime());
 
 	ngAfterViewInit() {
-		this.timezoneOffset = this.timezoneOffset || timezone.tz(timezone.tz.guess()).format('Z');
+		this.timezoneOffset = this.timezoneOffset || timezone.tz(this.timezone).format('Z');
+
+		// Calculate timezone offset correction to be applied for Date object
+		// Date object is always displayed in local timezone, to get the adjustment and simulate
+		// the real datetime through the Date object, we need to calculate:
+		//   Timezone adjustment = - Local Timezone Offset + Real Timezone Offset
+		//   Adjusted date time = UTC Time - Timezone adjustment
+		const localTimezone = moment().utcOffset() / 60;
+		this._timezoneAdjustment = -localTimezone + offsetToHours(this.timezoneOffset);
+
 		merge(this.dateModel.valueChanges, this.startTimeModel.valueChanges, this.endTimeModel.valueChanges)
 			.pipe(debounceTime(10), takeUntil(this._destroy$))
 			.subscribe(() => {
@@ -196,8 +218,12 @@ export class TimerRangePickerComponent implements AfterViewInit {
 	writeValue(value: IDateRange) {
 		if (value) {
 			this.date = value.start ? moment(value.start).toDate() : new Date();
-			this.startTime = value.start ? moment(value.start).format('HH:mm:ss') : null;
-			this.endTime = value.end ? moment(value.end).format('HH:mm:ss') : null;
+			if (this._timezoneAdjustment !== 0) {
+				// Calculate the adjusted date time if timezone adjustment is needed
+				this.date = new Date(this.date.getTime() + this._timezoneAdjustment * 3600000);
+			}
+			this.startTime = value.start ? moment(value.start).tz(this.timezone).format('HH:mm:ss') : null;
+			this.endTime = value.end ? moment(value.end).tz(this.timezone).format('HH:mm:ss') : null;
 		}
 	}
 

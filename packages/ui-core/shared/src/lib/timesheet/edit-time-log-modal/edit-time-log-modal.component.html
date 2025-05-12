@@ -11,52 +11,34 @@
 		<nb-card-body>
 			<div class="form-group" *ngxPermissionsOnly="[PermissionsEnum.CHANGE_SELECTED_EMPLOYEE]">
 				<div class="description col-6" *ngIf="mode == 'update'; else employeeSelect">
-					<ngx-avatar
-						[id]="timeLog?.employee?.id"
-						[employee]="timeLog?.employee"
-						[name]="timeLog?.employee?.user?.name"
-						[src]="timeLog?.employee?.user?.imageUrl"
-						class="report-table"
-					></ngx-avatar>
+					<ngx-avatar [id]="timeLog?.employee?.id" [employee]="timeLog?.employee"
+						[name]="timeLog?.employee?.user?.name" [src]="timeLog?.employee?.user?.imageUrl"
+						class="report-table"></ngx-avatar>
 				</div>
 				<ng-template #employeeSelect>
 					<div class="col-6">
-						<ga-employee-multi-select
-							name="employeeId"
-							[multiple]="false"
-							label="TIMESHEET.SELECT_EMPLOYEE"
-							[placeholder]="'TIMESHEET.SELECT_EMPLOYEE' | translate"
-							formControlName="employeeId"
-							[customClass]="'required-asterisk'"
-							required
-						>
+						<ga-employee-multi-select name="employeeId" [multiple]="false" label="TIMESHEET.SELECT_EMPLOYEE"
+							[placeholder]="'TIMESHEET.SELECT_EMPLOYEE' | translate" formControlName="employeeId"
+							[customClass]="'required-asterisk'" required>
 						</ga-employee-multi-select>
 					</div>
 
-					<div
-						*ngIf="form.get('employeeId')?.errors?.required && form.get('employeeId')?.touched"
-						class="invalid-feedback d-block"
-					>
+					<div *ngIf="form.get('employeeId')?.errors?.required && form.get('employeeId')?.touched"
+						class="invalid-feedback d-block">
 						{{ 'TIMESHEET.VALIDATION.EMPLOYEE' | translate }}
 					</div>
 				</ng-template>
 			</div>
 			<div class="row range-picker-row">
 				<div class="col-6">
-					<ngx-timer-range-picker
-						name="selectedRange"
-						[date]="futureDateAllowed ? null : today"
-						[selectedRange]="selectedRange"
-						[customClass]="'required-asterisk'"
+					<ngx-timer-range-picker name="selectedRange" [date]="futureDateAllowed ? null : today"
+						[selectedRange]="selectedRange" [customClass]="'required-asterisk'"
 						(selectedRangeChange)="onDateRangeChange($event)"
-						(validationStatus)="onValidationChange($event)"
-						formControlName="selectedRange"
-					>
+						(validationStatus)="onValidationChange($event)" formControlName="selectedRange"
+						[timezone]="timezone">
 					</ngx-timer-range-picker>
-					<div
-						*ngIf="!isValidSelectedRange(selectedRange) && isTimeRangeValid"
-						class="invalid-feedback d-block"
-					>
+					<div *ngIf="!isValidSelectedRange(selectedRange) && isTimeRangeValid"
+						class="invalid-feedback d-block">
 						{{ 'TIMESHEET.VALIDATION.DATE_START_END_TIME_REQUIRED' | translate }}
 					</div>
 				</div>
@@ -85,14 +67,11 @@
 									{{ 'TIMESHEET.DURATION' | translate }}
 								</div>
 							</div>
-							<div
-								[class]="
+							<div [class]="
 									overlaps.at(-1) === overlapTimeLog
 										? 'row item m-0 py-3 align-items-center'
 										: 'row item border-bottom m-0 py-3 align-items-center'
-								"
-								*ngFor="let overlapTimeLog of overlaps"
-							>
+								" *ngFor="let overlapTimeLog of overlaps">
 								<div class="col">
 									<span *ngIf="overlapTimeLog?.project; else noProject">
 										{{ overlapTimeLog?.project?.name }}
@@ -102,8 +81,7 @@
 									</ng-template>
 									<div class="mt-2 small">
 										<span *ngIf="overlapTimeLog?.task; else noToDo">
-											<strong
-												>{{ 'TIMESHEET.TODO' | translate }}
+											<strong>{{ 'TIMESHEET.TODO' | translate }}
 												:
 											</strong>
 											{{ overlapTimeLog?.task?.title }}
@@ -133,47 +111,30 @@
 			<div class="form-group">
 				<div class="col-12 d-flex">
 					<div class="mr-3">
-						<label
-							for="organizationContactId"
-							[ngClass]="organization?.requireClient ? 'required-asterisk' : null"
-							>{{ 'TIMER_TRACKER.SELECT_CLIENT' | translate }}</label
-						>
-						<ga-contact-selector
-							[employeeId]="form.get('employeeId')?.value"
-							name="organizationContactId"
+						<label for="organizationContactId"
+							[ngClass]="organization?.requireClient ? 'required-asterisk' : null">{{
+							'TIMER_TRACKER.SELECT_CLIENT' | translate }}</label>
+						<ga-contact-selector [employeeId]="form.get('employeeId')?.value" name="organizationContactId"
 							formControlName="organizationContactId"
-							[required]="organization?.requireClient"
-						></ga-contact-selector>
-						<div
-							*ngIf="
+							[required]="organization?.requireClient"></ga-contact-selector>
+						<div *ngIf="
 								form.get('organizationContactId')?.errors?.required &&
 								form.get('organizationContactId')?.touched
-							"
-							class="invalid-feedback d-block"
-						>
+							" class="invalid-feedback d-block">
 							{{ 'TIMER_TRACKER.VALIDATION.CLIENT_REQUIRED' | translate }}
 						</div>
 					</div>
 					<div class="ml-3">
 						<label for="projectId" [ngClass]="organization?.requireProject ? 'required-asterisk' : null">{{
 							'TIMER_TRACKER.SELECT_PROJECT' | translate
-						}}</label>
-						<ga-project-selector
-							name="projectId"
-							formControlName="projectId"
-							[skipGlobalChange]="true"
-							[showAllOption]="false"
-							[placeholder]="'TIMER_TRACKER.SELECT_PROJECT' | translate"
-							[defaultSelected]="false"
-							[employeeId]="form.get('employeeId')?.value"
+							}}</label>
+						<ga-project-selector name="projectId" formControlName="projectId" [skipGlobalChange]="true"
+							[showAllOption]="false" [placeholder]="'TIMER_TRACKER.SELECT_PROJECT' | translate"
+							[defaultSelected]="false" [employeeId]="form.get('employeeId')?.value"
 							[organizationContactId]="form.get('organizationContactId')?.value"
-							[required]="organization?.requireProject"
-							requiresEmployee="true"
-						></ga-project-selector>
-						<div
-							*ngIf="form.get('projectId')?.errors?.required && form.get('projectId')?.touched"
-							class="invalid-feedback d-block"
-						>
+							[required]="organization?.requireProject" requiresEmployee="true"></ga-project-selector>
+						<div *ngIf="form.get('projectId')?.errors?.required && form.get('projectId')?.touched"
+							class="invalid-feedback d-block">
 							{{ 'TIMESHEET.VALIDATION.PROJECT' | translate }}
 						</div>
 					</div>
@@ -183,15 +144,11 @@
 			<div class="form-group">
 				<div class="col-6">
 					<label for="organizationTeamId">{{ 'TIMER_TRACKER.SELECT_TEAM' | translate }}</label>
-					<ga-team-selector
-						formControlName="organizationTeamId"
-						[skipGlobalChange]="true"
-						[showAllOption]="false"
-						[defaultSelected]="false"
+					<ga-team-selector formControlName="organizationTeamId" [skipGlobalChange]="true"
+						[showAllOption]="false" [defaultSelected]="false"
 						[placeholder]="'TIMER_TRACKER.SELECT_TEAM' | translate"
 						[employeeId]="getControlValue('employeeId')"
-						[projectId]="getControlValue('projectId')"
-					></ga-team-selector>
+						[projectId]="getControlValue('projectId')"></ga-team-selector>
 				</div>
 			</div>
 
@@ -199,45 +156,27 @@
 				<div class="col-12">
 					<label for="taskId" [ngClass]="organization?.requireTask ? 'required-asterisk' : null">{{
 						'TIMER_TRACKER.SELECT_TASK' | translate
-					}}</label>
-					<ga-task-selector
-						name="taskId"
-						[employeeId]="getControlValue('employeeId')"
-						[projectId]="getControlValue('projectId')"
-						formControlName="taskId"
-						[required]="organization?.requireTask"
-						requiresProject="true"
-						requiresEmployee="true"
-					></ga-task-selector>
-					<div
-						*ngIf="form.get('taskId')?.errors?.required && form.get('taskId')?.touched"
-						class="invalid-feedback d-block"
-					>
+						}}</label>
+					<ga-task-selector name="taskId" [employeeId]="getControlValue('employeeId')"
+						[projectId]="getControlValue('projectId')" formControlName="taskId"
+						[required]="organization?.requireTask" requiresProject="true"
+						requiresEmployee="true"></ga-task-selector>
+					<div *ngIf="form.get('taskId')?.errors?.required && form.get('taskId')?.touched"
+						class="invalid-feedback d-block">
 						{{ 'TIMESHEET.VALIDATION.TASK' | translate }}
 					</div>
 				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-12">
-					<label
-						for="description"
-						[ngClass]="organization?.requireDescription ? 'required-asterisk' : null"
-						>{{ 'TIMER_TRACKER.DESCRIPTION' | translate }}</label
-					>
-					<textarea
-						nbInput
-						fullWidth
-						class="form-control"
-						rows="2"
-						[placeholder]="'TIMER_TRACKER.DESCRIPTION' | translate"
-						name="description"
-						formControlName="description"
-						[required]="organization?.requireDescription"
-					></textarea>
-					<div
-						*ngIf="form.get('description')?.errors?.required && form.get('description')?.touched"
-						class="invalid-feedback d-block"
-					>
+					<label for="description"
+						[ngClass]="organization?.requireDescription ? 'required-asterisk' : null">{{
+						'TIMER_TRACKER.DESCRIPTION' | translate }}</label>
+					<textarea nbInput fullWidth class="form-control" rows="2"
+						[placeholder]="'TIMER_TRACKER.DESCRIPTION' | translate" name="description"
+						formControlName="description" [required]="organization?.requireDescription"></textarea>
+					<div *ngIf="form.get('description')?.errors?.required && form.get('description')?.touched"
+						class="invalid-feedback d-block">
 						{{ 'TIMESHEET.VALIDATION.DESCRIPTION' | translate }}
 					</div>
 				</div>
@@ -246,17 +185,10 @@
 				<div class="col-12">
 					<label for="reason" [ngClass]="organization?.requireReason ? 'required-asterisk' : null">{{
 						'TIMESHEET.REASON' | translate
-					}}</label>
+						}}</label>
 					<nb-form-field fullWidth>
-						<input
-							fullWidth
-							nbInput
-							placeholder="{{ 'TIMESHEET.REASON' | translate }}"
-							name="reason"
-							formControlName="reason"
-							[nbAutocomplete]="auto"
-							[required]="organization?.requireReason"
-						/>
+						<input fullWidth nbInput placeholder="{{ 'TIMESHEET.REASON' | translate }}" name="reason"
+							formControlName="reason" [nbAutocomplete]="auto" [required]="organization?.requireReason" />
 						<nb-autocomplete #auto fullWidth>
 							<nb-option *ngFor="let reason of reasons" [value]="reason">
 								{{ reason }}
@@ -265,10 +197,8 @@
 					</nb-form-field>
 				</div>
 
-				<div
-					*ngIf="form.get('reason')?.errors?.required && form.get('reason')?.touched"
-					class="invalid-feedback d-block"
-				>
+				<div *ngIf="form.get('reason')?.errors?.required && form.get('reason')?.touched"
+					class="invalid-feedback d-block">
 					{{ 'TIMESHEET.VALIDATION.REASON' | translate }}
 				</div>
 			</div>
@@ -276,33 +206,17 @@
 			<div class="form-group"></div>
 		</nb-card-body>
 		<nb-card-footer>
-			<button
-				nbButton
-				status="success"
-				size="small"
-				[nbSpinner]="loading"
-				nbSpinnerStatus="primary"
-				[disabled]="loading || isButtonDisabled"
-				(click)="addTime()"
-			>
+			<button nbButton status="success" size="small" [nbSpinner]="loading" nbSpinnerStatus="primary"
+				[disabled]="loading || isButtonDisabled" (click)="addTime()">
 				<nb-icon icon="save-outline"></nb-icon>
 				{{ (mode == 'create' ? 'TIMESHEET.ADD_TIME' : 'TIMESHEET.UPDATE_TIME') | translate }}
 			</button>
 			<ng-template [ngxPermissionsOnly]="PermissionsEnum.ALLOW_DELETE_TIME">
 				<ng-template ngxTimeTrackingAuthorized [permission]="PermissionsEnum.ALLOW_DELETE_TIME">
-					<button
-						type="button"
-						class="action ml-3"
-						nbButton
-						size="small"
-						status="basic"
-						outline
-						ngxConfirmDialog
-						[message]="'TIMESHEET.DELETE_TIMELOG' | translate"
-						(confirm)="onDeleteConfirm(timeLog)"
-						*ngIf="mode === 'update'"
-						[nbTooltip]="'BUTTONS.DELETE' | translate"
-					>
+					<button type="button" class="action ml-3" nbButton size="small" status="basic" outline
+						ngxConfirmDialog [message]="'TIMESHEET.DELETE_TIMELOG' | translate"
+						(confirm)="onDeleteConfirm(timeLog)" *ngIf="mode === 'update'"
+						[nbTooltip]="'BUTTONS.DELETE' | translate">
 						<nb-icon status="danger" icon="trash-2-outline"></nb-icon>
 					</button>
 				</ng-template>

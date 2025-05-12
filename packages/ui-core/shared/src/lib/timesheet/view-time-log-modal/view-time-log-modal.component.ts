@@ -10,10 +10,10 @@ import { EditTimeLogModalComponent } from './../edit-time-log-modal';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-view-time-log-modal',
-    templateUrl: './view-time-log-modal.component.html',
-    styleUrls: ['view-time-log-modal.component.scss'],
-    standalone: false
+	selector: 'ngx-view-time-log-modal',
+	templateUrl: './view-time-log-modal.component.html',
+	styleUrls: ['view-time-log-modal.component.scss'],
+	standalone: false
 })
 export class ViewTimeLogModalComponent implements OnInit, OnDestroy {
 	organization: IOrganization;
@@ -21,6 +21,7 @@ export class ViewTimeLogModalComponent implements OnInit, OnDestroy {
 	TimeLogsLabel = TimeLogsLabel;
 
 	@Input() timeLog: ITimeLog;
+	@Input() timezone: string;
 
 	constructor(
 		private readonly timesheetService: TimesheetService,
@@ -29,7 +30,7 @@ export class ViewTimeLogModalComponent implements OnInit, OnDestroy {
 		private readonly store: Store,
 		private readonly timeTrackerService: TimeTrackerService,
 		private readonly router: Router
-	) {}
+	) { }
 
 	ngOnInit(): void {
 		this.store.selectedOrganization$
@@ -47,7 +48,7 @@ export class ViewTimeLogModalComponent implements OnInit, OnDestroy {
 		}
 		this.nbDialogService
 			.open(EditTimeLogModalComponent, {
-				context: { timeLog: this.timeLog }
+				context: { timeLog: this.timeLog, timezone: this.timezone }
 			})
 			.onClose.pipe(
 				tap((type) => this.dialogRef.close(type)),
@@ -92,5 +93,5 @@ export class ViewTimeLogModalComponent implements OnInit, OnDestroy {
 		this.router.navigate(['/pages/contacts/view/', this.timeLog.organizationContact.id]);
 	}
 
-	ngOnDestroy(): void {}
+	ngOnDestroy(): void { }
 }
