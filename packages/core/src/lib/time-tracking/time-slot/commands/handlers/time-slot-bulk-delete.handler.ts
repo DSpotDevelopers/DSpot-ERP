@@ -82,11 +82,11 @@ export class TimeSlotBulkDeleteHandler implements ICommandHandler<TimeSlotBulkDe
 			query.andWhere(p(`"${query.alias}"."id" IN (:...timeSlotsIds)`), { timeSlotsIds });
 		}
 
-		if (partialStatus === TimeLogPartialStatus.TO_LEFT) {
+		if (partialStatus == TimeLogPartialStatus.TO_LEFT) {
 			query.andWhere(p(`"${query.alias}"."startedAt" < :startedAt`), { startedAt });
 		}
 
-		if (partialStatus === TimeLogPartialStatus.TO_RIGHT) {
+		if (partialStatus == TimeLogPartialStatus.TO_RIGHT) {
 			query.andWhere(p(`"${query.alias}"."startedAt" > :startedAt`), { startedAt });
 		}
 

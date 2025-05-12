@@ -1,5 +1,6 @@
 import { ICommandHandler, CommandBus, CommandHandler } from '@nestjs/cqrs';
 import { In, DeleteResult, UpdateResult } from 'typeorm';
+import * as moment from 'moment';
 import { pluck } from 'underscore';
 import { ID, IDeleteTimeLogData, TimeLogPartialStatus } from '@gauzy/contracts';
 import { TimesheetRecalculateCommand } from './../../../timesheet/commands/timesheet-recalculate.command';
@@ -9,6 +10,7 @@ import { TimeLogDeleteCommand } from '../time-log-delete.command';
 import { TimeLog } from './../../time-log.entity';
 import { TypeOrmTimeLogRepository } from '../../repository/type-orm-time-log.repository';
 import { MikroOrmTimeLogRepository } from '../..//repository/mikro-orm-time-log.repository';
+import { calculateTimeLogDuration } from '../../time-log.utils';
 
 @CommandHandler(TimeLogDeleteCommand)
 export class TimeLogDeleteHandler implements ICommandHandler<TimeLogDeleteCommand> {
@@ -91,11 +93,15 @@ export class TimeLogDeleteHandler implements ICommandHandler<TimeLogDeleteComman
 				organizationId,
 				employeeId,
 				timeLog,
-				timeSlotsIds
+				timeSlotsIds,
+				partialStatus: TimeLogPartialStatus.COMPLETE
 			};
-			if (timeLogMap[timeLog.id]?.partialStatus !== TimeLogPartialStatus.COMPLETE) {
-				params['startedAt'] = timeLogMap[timeLog.id].referenceDate;
-				params['partialStatus'] = timeLogMap[timeLog.id].partialStatus;
+			if (timeLogMap[timeLog.id] && timeLogMap[timeLog.id].partialStatus != TimeLogPartialStatus.COMPLETE) {
+				// Adjust the startedAt value increasing or decreasing 1 second based on the partialStatus
+				params['startedAt'] = moment(timeLogMap[timeLog.id].referenceDate).add(
+					timeLogMap[timeLog.id].partialStatus == TimeLogPartialStatus.TO_LEFT ? 1 : -1, 'seconds'
+				).toDate();
+				params.partialStatus = timeLogMap[timeLog.id].partialStatus;
 			}
 			// Delete time slots sequentially
 			await this._commandBus.execute(new TimeSlotBulkDeleteCommand(params, forceDelete));
@@ -120,17 +126,31 @@ export class TimeLogDeleteHandler implements ICommandHandler<TimeLogDeleteComman
 	): Promise<DeleteResult | UpdateResult> {
 		const logsToDelete = []
 		for (const log of timeLogs) {
-			if (!timeLogMap[log.id] || timeLogMap[log.id].partialStatus === TimeLogPartialStatus.COMPLETE) {
+			if (!timeLogMap[log.id] || timeLogMap[log.id].partialStatus == TimeLogPartialStatus.COMPLETE) {
 				logsToDelete.push(log.id);
 			} else {
-				// UPdate the log startedAt or stoppedAt to the referenceDate
+				// Update the log startedAt or stoppedAt to the referenceDate
 				const update = {};
-				if (timeLogMap[log.id].partialStatus === TimeLogPartialStatus.TO_LEFT) {
-					update['stoppedAt'] = timeLogMap[log.id].referenceDate;
+				if (timeLogMap[log.id].partialStatus == TimeLogPartialStatus.TO_LEFT) {
+					// If the partialStatus is TO_LEFT (deleting from the left)
+					// set the startedAt to the referenceDate + 1 second
+					const startedAt = moment(timeLogMap[log.id].referenceDate).add(1, 'seconds').toDate();
+					update['startedAt'] = startedAt;
+					log.startedAt = startedAt;
 				} else {
-					update['startedAt'] = timeLogMap[log.id].referenceDate;
+					// If the partialStatus is TO_RIGHT (deleting from the right)
+					// set the stoppedAt to the referenceDate - 1 second
+					const stoppedAt = moment(timeLogMap[log.id].referenceDate).add(-1, 'seconds').toDate();
+					update['stoppedAt'] = stoppedAt;
+					log.stoppedAt = stoppedAt;
 				}
-				await this.typeOrmTimeLogRepository.update({ id: log.id }, update);
+				if (calculateTimeLogDuration(log) <= 0) {
+					// If new time log duration is less than or equal to 0, delete it
+					logsToDelete.push(log.id);
+				} else {
+					// Update the time log
+					await this.typeOrmTimeLogRepository.update({ id: log.id }, update);
+				}
 			}
 		}
 		if (forceDelete) {
