@@ -59,7 +59,7 @@ export function fixTimeLogsBoundary(
 	tz = 'UTC',
 	startOf: moment.unitOfTime.StartOf = 'day'
 ) {
-	if (timeLogs.length === 0) return;
+	if (timeLogs.length === 0) return [];
 
 	const result: ITimeLog[] = [];
 

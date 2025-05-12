@@ -98,9 +98,9 @@ export interface IDateRange {
 }
 export interface ITimeLog
 	extends IBasePerTenantAndOrganizationEntityModel,
-		IRelationalOrganizationProject,
-		IRelationalOrganizationTeam,
-		ITaggable {
+	IRelationalOrganizationProject,
+	IRelationalOrganizationTeam,
+	ITaggable {
 	employee: IEmployee;
 	employeeId: ID;
 	timesheet?: ITimesheet;
@@ -304,9 +304,9 @@ export interface IURLMetaData {
 
 export interface ITimerStatusInput
 	extends ITimeLogTodayFilters,
-		IBaseRelationsEntityModel,
-		IEmployeeEntityInput,
-		IRelationalOrganizationTeam {
+	IBaseRelationsEntityModel,
+	IEmployeeEntityInput,
+	IRelationalOrganizationTeam {
 	source?: TimeLogSourceEnum;
 	employeeIds?: ID[];
 }
@@ -342,7 +342,7 @@ export interface ITimerPosition {
 
 export interface ITimerToggleInput
 	extends IBasePerTenantAndOrganizationEntityModel,
-		Pick<IRelationalOrganizationTeam, 'organizationTeamId'> {
+	Pick<IRelationalOrganizationTeam, 'organizationTeamId'> {
 	projectId?: ID;
 	taskId?: ID;
 	organizationContactId?: ID;
@@ -370,6 +370,8 @@ export interface IManualTimeInput extends IBasePerTenantAndOrganizationEntityMod
 	editedAt?: Date;
 	tags?: string[];
 	isBillable?: boolean;
+	partialStatus?: TimeLogPartialStatus;
+	referenceDate?: Date;
 }
 
 export interface IGetTimeLogInput extends ITimeLogFilters, IBaseRelationsEntityModel {
@@ -560,12 +562,18 @@ export interface IDeleteTimeSlot extends IDeleteEntity {
 	ids: ID[];
 }
 
+export interface IDeleteTimeLogData {
+	id: ID;
+	partialStatus: TimeLogPartialStatus;
+	referenceDate: Date;
+}
+
 /**
  * Interface for deleting time logs.
  * Includes an array of log IDs to be deleted.
  */
 export interface IDeleteTimeLog extends IDeleteEntity {
-	logIds: ID[];
+	logs: IDeleteTimeLogData[];
 }
 
 /**

@@ -31,7 +31,9 @@ import {
 	IReportWeeklyData,
 	IReportWeeklyDate,
 	IAmountOwedReportChart,
-	IDailyReportChart
+	IDailyReportChart,
+	TimeLogPartialStatus,
+	IDeleteTimeLogData
 } from '@gauzy/contracts';
 import { isEmpty, isNotEmpty } from '@gauzy/utils';
 import { TenantAwareCrudService } from './../../core/crud';
@@ -1055,7 +1057,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				 * The first element in the results can be started before the date range but it will be ended in the date range.
 				 * The last element in the results can be started in the date range but it will be ended after the date range.
 				 *
-				 * For this cases we should adjust the results to adjust the startedAt and stoppedAt to the date range 
+				 * For this cases we should adjust the results to adjust the startedAt and stoppedAt to the date range
 				 * and recalculate the duration. Check fixTimeLogsBoundary function for more details.
 				 */
 				new Brackets((qb) => {
@@ -1298,7 +1300,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 	async updateManualTime(id: ID, request: IManualTimeInput): Promise<ITimeLog> {
 		try {
 			const tenantId = RequestContext.currentTenantId() ?? request.tenantId;
-			const { startedAt, stoppedAt, employeeId, organizationId } = request;
+			const { startedAt, stoppedAt, employeeId, organizationId, partialStatus, referenceDate } = request;
 
 			// Validate input
 			if (!startedAt || !stoppedAt) {
@@ -1335,6 +1337,10 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				})
 			);
 
+			if (partialStatus !== TimeLogPartialStatus.COMPLETE) {
+				throw new BadRequestException('Please select valid Date, start time and end time');
+			}
+
 			// Check if the time log will fit the weekly limit
 			await this.checkWeeklyLimitWithConflicts(employee, startedAt, stoppedAt, conflicts, timeLog.duration);
 
@@ -1356,6 +1362,8 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			request.editedAt = new Date();
 
 			// Execute the command to update the time log
+			delete request.partialStatus;
+			delete request.referenceDate;
 			await this.commandBus.execute(new TimeLogUpdateCommand(request, timeLog));
 
 			// Retrieve the updated time log entry
@@ -1392,12 +1400,16 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 	 */
 	async deleteTimeLogs(params: IDeleteTimeLog): Promise<DeleteResult | UpdateResult> {
 		// Early return if no logIds are provided
-		if (isEmpty(params.logIds)) {
+		if (isEmpty(params.logs)) {
 			throw new NotAcceptableException('You cannot delete time logs without IDs');
 		}
 
-		// Ensure logIds is an array
-		const logIds: ID[] = Array.isArray(params.logIds) ? params.logIds : [params.logIds];
+		// Extract the log ids to an array
+		const logIds: ID[] = params.logs.map((value) => value.id);
+		const timeLogMap: Record<ID, IDeleteTimeLogData> = {};
+		for (const log of params.logs) {
+			timeLogMap[log.id] = log;
+		}
 
 		// Get the tenant ID from the request context or the provided tenant ID
 		const tenantId = RequestContext.currentTenantId() ?? params.tenantId;
@@ -1426,7 +1438,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		const timeLogs = await query.getMany();
 
 		// Invoke the command bus to delete the time logs
-		const deleted = await this.commandBus.execute(new TimeLogDeleteCommand(timeLogs, forceDelete));
+		const deleted = await this.commandBus.execute(new TimeLogDeleteCommand(timeLogs, timeLogMap, forceDelete));
 
 		// Generate the activity log
 		for (const timeLog of timeLogs) {
