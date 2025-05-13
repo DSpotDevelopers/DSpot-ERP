@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { filter, tap } from 'rxjs/operators';
 import { NbDialogRef, NbDialogService } from '@nebular/theme';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { ITimeLog, PermissionsEnum, IOrganization, TimeLogSourceEnum, TimeLogPartialStatus } from '@gauzy/contracts';
+import { ITimeLog, PermissionsEnum, IOrganization, TimeLogSourceEnum, TimeLogPartialStatus, TimeFormatEnum } from '@gauzy/contracts';
 import { TimeLogsLabel } from '@gauzy/ui-core/common';
 import { Store, TimeTrackerService, TimesheetService } from '@gauzy/ui-core/core';
 import { EditTimeLogModalComponent } from './../edit-time-log-modal';
@@ -22,6 +22,7 @@ export class ViewTimeLogModalComponent implements OnInit {
 
 	@Input() timeLog: ITimeLog;
 	@Input() timezone: string;
+	@Input() timeFormat: TimeFormatEnum = TimeFormatEnum.FORMAT_24_HOURS;
 
 	constructor(
 		private readonly timesheetService: TimesheetService,

@@ -108,7 +108,7 @@
 											{{
 											log.startedAt
 											| utcToTimezone : filters?.timeZone
-											| timeFormat : true
+											| timeFormat : filters?.timeFormat
 											}}
 										</span>
 										-
@@ -116,7 +116,7 @@
 											{{
 											log.stoppedAt
 											| utcToTimezone : filters?.timeZone
-											| timeFormat : true
+											| timeFormat : filters?.timeFormat
 											}}
 										</span>
 										<ng-template #runningTimer>

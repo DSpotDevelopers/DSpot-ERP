@@ -22,10 +22,10 @@
 			<div class="d-flex flex-column col-12">
 				<small>{{ timeLog?.startedAt | dateFormat }}</small>
 				<small class="duration">{{
-					(timeLog?.startedAt | utcToTimezone: timezone | timeFormat : true) +
+					(timeLog?.startedAt | utcToTimezone: timezone | timeFormat : timeFormat) +
 					' - ' +
 					(!timeLog?.isRunning
-					? (timeLog?.stoppedAt | utcToTimezone: timezone | timeFormat : true)
+					? (timeLog?.stoppedAt | utcToTimezone: timezone | timeFormat : timeFormat)
 					: ('TIMESHEET.TILL_NOW' | translate)) +
 					' (' +
 					(timeLog?.duration | durationFormat) +

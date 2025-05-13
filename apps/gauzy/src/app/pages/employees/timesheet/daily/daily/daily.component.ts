@@ -370,7 +370,7 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 	openView(timeLog: ITimeLog): void {
 		this._dialogService
 			.open(ViewTimeLogModalComponent, {
-				context: { timeLog, timezone: this.filters.timeZone },
+				context: { timeLog, timezone: this.filters.timeZone, timeFormat: this.filters.timeFormat },
 				dialogClass: 'view-log-dialog',
 			})
 			.onClose.pipe(
