@@ -414,9 +414,9 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 				logType: TimeLogType.MANUAL,
 				source: TimeLogSourceEnum.WEB_TIMER,
 				employeeId: this.form.value.employeeId || employee?.id, // Fallback to current employee ID,
-				partialStatus: this._timeLog?.partialStatus ?? 0,
-				// TODO Fix value based on the partialStatus
-				referenceDate: this._timeLog?.startedAt,
+				partialStatus: this._timeLog?.partialStatus ?? TimeLogPartialStatus.COMPLETE,
+				referenceDate: this._timeLog?.partialStatus == TimeLogPartialStatus.TO_LEFT ?
+					this._timeLog?.stoppedAt : this._timeLog.startedAt,
 			};
 
 			// Create or update the time log based on the mode

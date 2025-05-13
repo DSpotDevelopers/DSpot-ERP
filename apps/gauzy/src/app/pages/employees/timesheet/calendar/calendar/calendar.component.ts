@@ -30,7 +30,7 @@ import {
 	TimeTrackerService
 } from '@gauzy/ui-core/core';
 import { isEmpty, toTimezone } from '@gauzy/ui-core/common';
-import { IGetTimeLogInput, ITimeLog, ITimeLogFilters, PermissionsEnum, TimeFormatEnum } from '@gauzy/contracts';
+import { IGetTimeLogInput, ITimeLog, ITimeLogFilters, PermissionsEnum, TimeFormatEnum, TimeLogPartialStatus } from '@gauzy/contracts';
 import {
 	BaseSelectorFilterComponent,
 	EditTimeLogModalComponent,
@@ -341,7 +341,10 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 	async handleEventDrop({ event }: EventDropArg) {
 		await this.updateTimeLog(event.id, {
 			startedAt: event.start,
-			stoppedAt: event.end
+			stoppedAt: event.end,
+			partialStatus: event._def.extendedProps.log.partialStatus,
+			referenceDate: event._def.extendedProps.log.partialStatus == TimeLogPartialStatus.TO_LEFT ?
+				event._def.extendedProps.log.stoppedAt : event._def.extendedProps.log.startedAt,
 		});
 	}
 
@@ -353,7 +356,10 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 	async handleEventResize({ event }: EventResizeDoneArg) {
 		await this.updateTimeLog(event.id, {
 			startedAt: event.start,
-			stoppedAt: event.end
+			stoppedAt: event.end,
+			partialStatus: event._def.extendedProps.log.partialStatus,
+			referenceDate: event._def.extendedProps.log.partialStatus == TimeLogPartialStatus.TO_LEFT ?
+				event._def.extendedProps.log.stoppedAt : event._def.extendedProps.log.startedAt,
 		});
 	}
 
@@ -411,7 +417,7 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 	 * @param timeLog The time log data to update. It can be a complete ITimeLog object or a partial one.
 	 * @returns A promise that resolves when the update operation completes.
 	 */
-	async updateTimeLog(id: string, timeLog: ITimeLog | Partial<ITimeLog>): Promise<void> {
+	async updateTimeLog(id: string, timeLog: (ITimeLog | Partial<ITimeLog>) & { referenceDate: Date }): Promise<void> {
 		try {
 			this.loading = true; // Set loading indicator
 			await this.timesheetService.updateTime(id, timeLog); // Call service to update time log
