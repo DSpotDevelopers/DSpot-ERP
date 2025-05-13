@@ -1337,15 +1337,22 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				})
 			);
 
-			if (partialStatus !== TimeLogPartialStatus.COMPLETE) {
-				throw new BadRequestException('Please select valid Date, start time and end time');
-			}
-
 			// Check if the time log will fit the weekly limit
-			await this.checkWeeklyLimitWithConflicts(employee, startedAt, stoppedAt, conflicts, timeLog.duration);
+			await this.checkWeeklyLimitWithConflicts(
+				employee,
+				startedAt,
+				stoppedAt,
+				conflicts,
+				partialStatus == TimeLogPartialStatus.COMPLETE ? timeLog.duration : moment(
+					partialStatus == TimeLogPartialStatus.TO_LEFT ? referenceDate : timeLog.stoppedAt
+				).diff(
+					partialStatus == TimeLogPartialStatus.TO_LEFT ? timeLog.startedAt : referenceDate,
+					'seconds'
+				)
+			);
 
-			// Resolve conflicts by deleting conflicting time slots
-			if (conflicts?.length) {
+			// Resolve conflicts by deleting conflicting time slots if the time log is complete
+			if (partialStatus == TimeLogPartialStatus.COMPLETE && conflicts?.length) {
 				const times: IDateRange = { start: new Date(startedAt), end: new Date(stoppedAt) };
 
 				// Loop through each conflicting time log
@@ -1361,13 +1368,37 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			// Update the last edited date for the manual time log
 			request.editedAt = new Date();
 
-			// Execute the command to update the time log
+			// Remove non valid fields from the request
 			delete request.partialStatus;
 			delete request.referenceDate;
+
+			// Adjust the time log for the remaining time
+			const newObject = {
+				...timeLog,
+				...request
+			};
+			const remainingTimeUpdate = {}
+			if (partialStatus == TimeLogPartialStatus.TO_LEFT) {
+				remainingTimeUpdate['startedAt'] = moment(referenceDate).add(1, 'seconds').toDate();
+				newObject.stoppedAt = referenceDate;
+			} else if (partialStatus == TimeLogPartialStatus.TO_RIGHT) {
+				remainingTimeUpdate['stoppedAt'] = moment(referenceDate).subtract(1, 'seconds').toDate();
+				newObject.startedAt = referenceDate;
+			}
+
+			if (partialStatus != TimeLogPartialStatus.COMPLETE) {
+				// If the time log is not complete, we need to update the startedAt or stoppedAt
+				// based on the partialStatus, so, request data is overwritten with the remaining time update
+				request = { ...remainingTimeUpdate, editedAt: request.editedAt };
+			}
+
+			console.error("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", request);
+
+			// Execute the command to update the time log
 			await this.commandBus.execute(new TimeLogUpdateCommand(request, timeLog));
 
 			// Retrieve the updated time log entry
-			const newTimeLog = await this.typeOrmRepository.findOneBy({ id });
+			let newTimeLog = await this.typeOrmRepository.findOneBy({ id });
 
 			// Generate the activity log
 			this.activityLogService.logActivity<TimeLog>(
@@ -1382,6 +1413,11 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				timeLog,
 				request
 			);
+
+			if (partialStatus != TimeLogPartialStatus.COMPLETE) {
+				// If the time log is not complete, we need to create new time log entry
+				newTimeLog = await this.addManualTime(newObject);
+			}
 
 			return newTimeLog;
 		} catch (error) {
