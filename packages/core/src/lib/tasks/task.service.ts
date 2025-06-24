@@ -385,6 +385,7 @@ export class TaskService extends TenantAwareCrudService<Task> {
 
 				// Filter by task prefix and number
 				if (isNotEmpty(prefix)) {
+					console.log(query.alias);
 					qb.andWhere(
 						p(`CONCAT("${query.alias}"."prefix", '-', "${query.alias}"."number") ${LIKE_OPERATOR} :prefix`),
 						{
@@ -516,6 +517,15 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			// Apply common filters for tasks
 			this.addTaskCommonFilters(query, options);
 
+			const order = options.order || {};
+			if ('taskNumber' in order) {
+				let direction: 'ASC' | 'DESC' = 'ASC';
+				if (order.taskNumber === -1 || order.taskNumber === 'DESC') {
+					direction = 'DESC';
+				}
+				query.addOrderBy(`${query.alias}.prefix`, direction);
+				query.addOrderBy(`${query.alias}.number`, direction);
+			}
 			const [items, total] = await query.getManyAndCount();
 			return { items, total };
 		} catch (error) {
@@ -782,6 +792,12 @@ export class TaskService extends TenantAwareCrudService<Task> {
 		let advancedFilters: FindOptionsWhere<Task> = {};
 		if (filters) {
 			advancedFilters = this.buildAdvancedWhereCondition(filters, where);
+		}
+
+		if (options.order?.taskNumber) {
+			options.order.prefix = options.order.taskNumber;
+			options.order.number = options.order.taskNumber;
+			delete options.order.taskNumber;
 		}
 
 		// Call the base paginate method
