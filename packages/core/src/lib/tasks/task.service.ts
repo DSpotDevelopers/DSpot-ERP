@@ -385,7 +385,6 @@ export class TaskService extends TenantAwareCrudService<Task> {
 
 				// Filter by task prefix and number
 				if (isNotEmpty(prefix)) {
-					console.log(query.alias);
 					qb.andWhere(
 						p(`CONCAT("${query.alias}"."prefix", '-', "${query.alias}"."number") ${LIKE_OPERATOR} :prefix`),
 						{
@@ -517,15 +516,6 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			// Apply common filters for tasks
 			this.addTaskCommonFilters(query, options);
 
-			const order = options.order || {};
-			if ('taskNumber' in order) {
-				let direction: 'ASC' | 'DESC' = 'ASC';
-				if (order.taskNumber === -1 || order.taskNumber === 'DESC') {
-					direction = 'DESC';
-				}
-				query.addOrderBy(`${query.alias}.prefix`, direction);
-				query.addOrderBy(`${query.alias}.number`, direction);
-			}
 			const [items, total] = await query.getManyAndCount();
 			return { items, total };
 		} catch (error) {

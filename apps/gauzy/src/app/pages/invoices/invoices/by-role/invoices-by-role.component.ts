@@ -82,6 +82,7 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 	invoiceStatusTypes = this.store.hasAnyPermission(PermissionsEnum.ALL_ORG_EDIT)
 		? Object.values(InvoiceStatusTypesEnum)
 		: [InvoiceStatusTypesEnum.SENT, InvoiceStatusTypesEnum.DRAFT];
+	status: InvoiceStatusTypesEnum | null = null;
 	estimateStatusTypes = Object.values(EstimateStatusTypesEnum);
 	settingsContextMenu: NbMenuItem[];
 	columns: string[] = [];
@@ -258,7 +259,7 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 			});
 		}
 
-		const { id } = this.selectedInvoice;
+		const { id } = this.selectedInvoice; //
 		if (!this.checkStatusPermissions('INVOICES_PAGE.EDIT_STATUS_WARNING')) return;
 		await this.navigateBasedOnPermissions(this.isEstimate, 'edit', id);
 	}
@@ -815,6 +816,7 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 		});
 		this._refresh$.next();
 		this.invoices$.next([]);
+		this.status = null;
 	}
 
 	selectColumn($event: string[]) {
