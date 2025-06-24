@@ -259,7 +259,7 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 			});
 		}
 
-		const { id } = this.selectedInvoice; //
+		const { id } = this.selectedInvoice;
 		if (!this.checkStatusPermissions('INVOICES_PAGE.EDIT_STATUS_WARNING')) return;
 		await this.navigateBasedOnPermissions(this.isEstimate, 'edit', id);
 	}
