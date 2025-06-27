@@ -766,13 +766,15 @@
 			"WAIT_UNTIL_RELOAD": "Wacht tot de applicatie opnieuw is geladen"
 		},
 		"ERROR": {
-			"PROJECT_NAME": "Projectnaam is verplicht.",
+			"PROJECT_NAME": "Projectnaam is verplicht en mag niet leeg zijn.",
 			"PROJECT_URL": "Project-URL is ongeldig.",
 			"OPEN_SOURCE_PROJECT_URL": "Open source project-URL is ongeldig.",
 			"INVALID_IMAGE_URL": "Ongeldige afbeelding-URL.",
 			"PROJECT_EMPLOYEE": "Dit veld is verplicht. Selecteer ten minste één werknemer.",
 			"PROJECT_ORGANIZATION_CONTACT": "Dit veld is verplicht. Selecteer een klant.",
-			"PROJECT_OWNER": "Projecteigenaar is verplicht."
+			"PROJECT_OWNER": "Projecteigenaar is verplicht.",
+			"TASK_TITLE": "Taaktitel is verplicht en mag niet leeg zijn.",
+			"INVALID_WHOLE_NUMBER": "Voer een geheel getal in tussen 1 en 100."
 		}
 	},
 	"POP_UPS": {
@@ -3610,6 +3612,11 @@
 			"MAX_LIMIT_REACHED": "Maximale limiet bereikt"
 		},
 		"MESSAGE": {
+			"HOUR": "uur",
+			"HOURS": "uren",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "Kan tijdlog niet toevoegen. De wekelijkse werktijdlimiet van ",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "Kan tijdlog niet bijwerken. De wekelijkse werkurenlimiet van ",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "is bereikt. Neem contact op met de systeembeheerder om limieten aan te passen.",
 			"WORKED_THIS_WEEK": "Deze week gewerkt",
 			"WEEKLY_LIMIT": "Wekelijkse limiet",
 			"ERRORS": "Controleer het formulier op fouten",
@@ -4166,6 +4173,8 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "De server-URL mag niet leeg zijn."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "Wekelijkse limiet overschreden",
+		"PROJECT_TASK_PERMISSION_ERROR": "Timer gestopt omdat u geen toestemming heeft om dit project/deze taak te openen",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "Timer is gestopt omdat je geen toegang hebt tot dit project",
 		"OF_HRS": "Van {{ limit }} uur",
 		"TIME_TRACKER_DISABLED": "Tijdregistratie is uitgeschakeld",
 		"STOP_TIMER_CHANGE_CLIENT": "Stop de timer voordat u de klant wijzigt",

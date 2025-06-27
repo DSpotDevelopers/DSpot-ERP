@@ -726,10 +726,12 @@
 			"WAIT_UNTIL_RELOAD": "Veuillez patienter jusqu'au rechargement de l'application."
 		},
 		"ERROR": {
-			"PROJECT_NAME": "Le nom du projet est requis.",
+			"PROJECT_NAME": "Le nom du projet est requis et ne peut pas être vide.",
 			"PROJECT_URL": "L'URL du projet est invalide.",
 			"OPEN_SOURCE_PROJECT_URL": "L'URL du projet open source est invalide.",
-			"INVALID_IMAGE_URL": "URL de l'image invalide."
+			"INVALID_IMAGE_URL": "URL de l'image invalide.",
+			"TASK_TITLE": "Le titre de la tâche est requis et ne peut pas être vide.",
+			"INVALID_WHOLE_NUMBER": "Veuillez entrer un nombre entier valide entre 1 et 100."
 		}
 	},
 	"POP_UPS": {
@@ -3507,6 +3509,11 @@
 			"MAX_LIMIT_REACHED": "Limite maximale atteinte"
 		},
 		"MESSAGE": {
+			"HOUR": "heure",
+			"HOURS": "heures",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "Impossible d'ajouter l'enregistrement de temps. La limite hebdomadaire de temps de travail de ",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "Impossible de mettre à jour le journal de temps. La limite hebdomadaire de temps de travail de ",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "a été atteinte. Contactez l'administrateur système pour modifier les limites.",
 			"ERRORS": "Veuillez vérifier le formulaire pour les erreurs.",
 			"PROJECT_LOAD": "Impossible de charger les projets.",
 			"COPIED": "Lien copié dans le presse-papiers",
@@ -4062,6 +4069,8 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "L'URL du serveur ne doit pas être null."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "La limite hebdomadaire est dépassée.",
+		"PROJECT_TASK_PERMISSION_ERROR": "Le minuteur s'est arrêté car vous n'avez pas la permission d'accéder à ce projet/tâche",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "Le minuteur a été arrêté car vous n'avez pas l'autorisation d'accéder à ce projet",
 		"OF_HRS": "De {{ limit }} heures",
 		"TIME_TRACKER_DISABLED": "Le suivi du temps a été désactivé.",
 		"STOP_TIMER_CHANGE_CLIENT": "Veuillez arrêter le chronomètre avant de changer de client.",
@@ -4771,6 +4780,34 @@
 	"SERVER_API": "Serveur API",
 	"SERVER_API_LOG": "Journal du serveur API",
 	"COMING_SOON": "This page is coming soon!",
+	"DEFAULT_ERRORS": {
+		"TITLE": {
+			"BAD_REQUEST": "Requête incorrecte",
+			"UNAUTHORIZED": "Non autorisé",
+			"FORBIDDEN": "Interdit",
+			"NOT_FOUND": "Non trouvé",
+			"CONFLICT": "Conflit",
+			"INTERNAL_SERVER_ERROR": "Erreur interne du serveur",
+			"GATEWAY_TIMEOUT": "Délai d'attente de la passerelle dépassé",
+			"SERVICE_UNAVAILABLE": "Service indisponible",
+			"NETWORK_ERROR": "Erreur réseau",
+			"DEFAULT": "Erreur",
+			"CONNECTION_ERROR": "Erreur de connexion"
+		},
+		"MESSAGES": {
+			"BAD_REQUEST": "La requête n'a pas pu être comprise ou des paramètres requis manquaient.",
+			"UNAUTHORIZED": "L'authentification a échoué ou l'utilisateur n'a pas les droits nécessaires.",
+			"FORBIDDEN": "Vous n'avez pas la permission d'accéder à la ressource demandée.",
+			"NOT_FOUND": "La ressource demandée est introuvable.",
+			"CONFLICT": "Un conflit est survenu avec l'état actuel de la ressource.",
+			"INTERNAL_SERVER_ERROR": "Une erreur interne est survenue sur le serveur.",
+			"GATEWAY_TIMEOUT": "Le serveur a dépassé le délai d'attente.",
+			"SERVICE_UNAVAILABLE": "Le service est temporairement indisponible. Veuillez réessayer plus tard.",
+			"NETWORK_ERROR": "Connexion au serveur impossible. Veuillez vérifier votre connexion réseau.",
+			"DEFAULT": "Une erreur inattendue est survenue.",
+			"CONNECTION_ERROR": "Connexion au serveur perdue. Veuillez réessayer plus tard."
+		}
+	},
 	"PLUGIN": {
 		"VIDEO": {
 			"SINGLE": "Vidéo",

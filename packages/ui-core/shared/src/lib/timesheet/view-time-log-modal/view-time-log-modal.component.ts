@@ -3,9 +3,16 @@ import { Router } from '@angular/router';
 import { filter, tap } from 'rxjs/operators';
 import { NbDialogRef, NbDialogService } from '@nebular/theme';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { ITimeLog, PermissionsEnum, IOrganization, TimeLogSourceEnum, TimeLogPartialStatus, TimeFormatEnum } from '@gauzy/contracts';
+import {
+	ITimeLog,
+	PermissionsEnum,
+	IOrganization,
+	TimeLogSourceEnum,
+	TimeLogPartialStatus,
+	TimeFormatEnum
+} from '@gauzy/contracts';
 import { TimeLogsLabel } from '@gauzy/ui-core/common';
-import { Store, TimeTrackerService, TimesheetService } from '@gauzy/ui-core/core';
+import { Store, TimeLogEventService, TimeTrackerService, TimesheetService } from '@gauzy/ui-core/core';
 import { EditTimeLogModalComponent } from './../edit-time-log-modal';
 
 @UntilDestroy({ checkProperties: true })
@@ -21,7 +28,7 @@ export class ViewTimeLogModalComponent implements OnInit {
 	TimeLogsLabel = TimeLogsLabel;
 
 	@Input() timeLog: ITimeLog;
-	@Input() timezone: string;
+	@Input() timeZone: string;
 	@Input() timeFormat: TimeFormatEnum = TimeFormatEnum.FORMAT_24_HOURS;
 
 	constructor(
@@ -30,8 +37,9 @@ export class ViewTimeLogModalComponent implements OnInit {
 		private readonly dialogRef: NbDialogRef<ViewTimeLogModalComponent>,
 		private readonly store: Store,
 		private readonly timeTrackerService: TimeTrackerService,
-		private readonly router: Router
-	) { }
+		private readonly router: Router,
+		public readonly timeLogEventService: TimeLogEventService
+	) {}
 
 	ngOnInit(): void {
 		this.store.selectedOrganization$
@@ -49,7 +57,7 @@ export class ViewTimeLogModalComponent implements OnInit {
 		}
 		this.nbDialogService
 			.open(EditTimeLogModalComponent, {
-				context: { timeLog: this.timeLog, timezone: this.timezone }
+				context: { timeLog: this.timeLog, timeZone: this.timeZone }
 			})
 			.onClose.pipe(
 				tap((type) => this.dialogRef.close(type)),
@@ -65,15 +73,21 @@ export class ViewTimeLogModalComponent implements OnInit {
 	onDeleteConfirm() {
 		const { id: organizationId } = this.organization;
 		const request = {
-			logIds: [{
-				id: this.timeLog.id,
-				partialStatus: this.timeLog.partialStatus,
-				referenceDate: this.timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? this.timeLog.stoppedAt : this.timeLog.startedAt,
-			}],
+			logIds: [
+				{
+					id: this.timeLog.id,
+					partialStatus: this.timeLog.partialStatus,
+					referenceDate:
+						this.timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT
+							? this.timeLog.stoppedAt
+							: this.timeLog.startedAt
+				}
+			],
 			organizationId
 		};
 		this.timesheetService.deleteLogs(request).then((res) => {
 			this.dialogRef.close(res);
+			this.timeLogEventService.notifyChange('deleted');
 			this.checkTimerStatus();
 		});
 	}

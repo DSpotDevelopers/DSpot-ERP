@@ -98,9 +98,9 @@ export interface IDateRange {
 }
 export interface ITimeLog
 	extends IBasePerTenantAndOrganizationEntityModel,
-	IRelationalOrganizationProject,
-	IRelationalOrganizationTeam,
-	ITaggable {
+		IRelationalOrganizationProject,
+		IRelationalOrganizationTeam,
+		ITaggable {
 	employee: IEmployee;
 	employeeId: ID;
 	timesheet?: ITimesheet;
@@ -304,9 +304,9 @@ export interface IURLMetaData {
 
 export interface ITimerStatusInput
 	extends ITimeLogTodayFilters,
-	IBaseRelationsEntityModel,
-	IEmployeeEntityInput,
-	IRelationalOrganizationTeam {
+		IBaseRelationsEntityModel,
+		IEmployeeEntityInput,
+		IRelationalOrganizationTeam {
 	source?: TimeLogSourceEnum;
 	employeeIds?: ID[];
 }
@@ -342,7 +342,7 @@ export interface ITimerPosition {
 
 export interface ITimerToggleInput
 	extends IBasePerTenantAndOrganizationEntityModel,
-	Pick<IRelationalOrganizationTeam, 'organizationTeamId'> {
+		Pick<IRelationalOrganizationTeam, 'organizationTeamId'> {
 	projectId?: ID;
 	taskId?: ID;
 	organizationContactId?: ID;
@@ -610,5 +610,11 @@ export enum TimeLogPartialStatus {
 	TO_RIGHT = 1,
 	COMPLETE = 0,
 	TO_LEFT = -1,
-	BOTH_SIDES = -2,
+	BOTH_SIDES = -2
+}
+
+export enum TimeErrorsEnum {
+	INVALID_TASK_PERMISSIONS = 'invalid-task-permissions',
+	INVALID_PROJECT_PERMISSIONS = 'invalid-project-permissions',
+	WEEKLY_LIMIT_REACHED = 'weekly-limit-reached'
 }

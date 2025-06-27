@@ -766,13 +766,15 @@
 			"WAIT_UNTIL_RELOAD": "يرجى الانتظار حتى يتم إعادة تحميل التطبيق"
 		},
 		"ERROR": {
-			"PROJECT_NAME": "اسم المشروع مطلوب.",
+			"PROJECT_NAME": "اسم المشروع مطلوب ولا يمكن أن يكون فارغًا.",
 			"PROJECT_URL": "رابط المشروع غير صالح.",
 			"OPEN_SOURCE_PROJECT_URL": "رابط المشروع مفتوح المصدر غير صالح.",
 			"INVALID_IMAGE_URL": "عنوان URL للصورة غير صالح.",
 			"PROJECT_EMPLOYEE": "هذا الحقل مطلوب. يرجى اختيار موظف واحد على الأقل.",
 			"PROJECT_ORGANIZATION_CONTACT": "هذا الحقل مطلوب. يرجى اختيار عميل.",
-			"PROJECT_OWNER": "مالك المشروع مطلوب."
+			"PROJECT_OWNER": "مالك المشروع مطلوب.",
+			"TASK_TITLE": "عنوان المهمة مطلوب ولا يمكن أن يكون فارغًا.",
+			"INVALID_WHOLE_NUMBER": "رجى إدخال عدد صحيح بين 1 و100."
 		}
 	},
 	"POP_UPS": {
@@ -3599,6 +3601,11 @@
 			"MAX_LIMIT_REACHED": "تم الوصول إلى الحد الأقصى"
 		},
 		"MESSAGE": {
+			"HOUR": "ساعة",
+			"HOURS": "ساعات",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "تعذر إضافة سجل الوقت. تم الوصول إلى حد العمل الأسبوعي البالغ ",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "يتعذر تحديث سجل الوقت. تم الوصول إلى الحد الأسبوعي لساعات العمل وهو ",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": ". اتصل بمسؤول النظام لتعديل الحدود.",
 			"WORKED_THIS_WEEK": "عملت هذا الأسبوع",
 			"WEEKLY_LIMIT": "الحد الأسبوعي",
 			"ERRORS": "يرجى التحقق من النموذج بحثًا عن الأخطاء",
@@ -4161,6 +4168,8 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "يجب ألا يكون عنوان URL للخادم فارغًا."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "تم تجاوز الحد الأسبوعي",
+		"PROJECT_TASK_PERMISSION_ERROR": "تم إيقاف المؤقت لأنه ليس لديك إذن للوصول إلى هذا المشروع/المهمة",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "تم إيقاف المؤقت لأنك لا تملك إذنًا للوصول إلى هذا المشروع",
 		"OF_HRS": "من {{ limit }} ساعة",
 		"TIME_TRACKER_DISABLED": "تم تعطيل متتبع الوقت",
 		"STOP_TIMER_CHANGE_CLIENT": "يرجى إيقاف المؤقت قبل تغيير العميل",

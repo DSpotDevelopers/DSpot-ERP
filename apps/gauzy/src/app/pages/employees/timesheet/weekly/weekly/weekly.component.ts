@@ -10,12 +10,13 @@ import {
 	IDatePickerConfig,
 	moment,
 	Store,
+	TimeLogEventService,
 	TimesheetFilterService,
 	TimesheetService,
 	TimeTrackerService
 } from '@gauzy/ui-core/core';
 import { IGetTimeLogInput, ITimeLog, IOrganizationProject, ITimeLogFilters, PermissionsEnum } from '@gauzy/contracts';
-import { distinctUntilChange, isEmpty } from '@gauzy/ui-core/common';
+import { isEmpty } from '@gauzy/ui-core/common';
 import { TranslateService } from '@ngx-translate/core';
 import {
 	BaseSelectorFilterComponent,
@@ -46,6 +47,7 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 	loading: boolean;
 	limitReached = false;
 	futureDateAllowed: boolean;
+	hasPermission = false;
 
 	datePickerConfig$: Observable<IDatePickerConfig> = this.dateRangePickerBuilderService.datePickerConfig$;
 	payloads$: BehaviorSubject<ITimeLogFilters> = new BehaviorSubject(null);
@@ -66,12 +68,14 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 		private readonly timeTrackerService: TimeTrackerService,
 		protected readonly store: Store,
 		protected readonly dateRangePickerBuilderService: DateRangePickerBuilderService,
-		protected readonly timeZoneService: TimeZoneService
+		protected readonly timeZoneService: TimeZoneService,
+		protected readonly timeLogEventService: TimeLogEventService
 	) {
 		super(store, translateService, dateRangePickerBuilderService, timeZoneService);
 	}
 
 	ngOnInit() {
+		this.hasPermission = this.store.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
 		this.subject$
 			.pipe(
 				filter(() => !!this.organization),
@@ -82,12 +86,16 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 			.subscribe();
 		this.payloads$
 			.pipe(
-				distinctUntilChange(),
 				filter((payloads: ITimeLogFilters) => !!payloads),
 				tap(() => this.getWeeklyTimesheetLogs()),
 				untilDestroyed(this)
 			)
 			.subscribe();
+		this.timeLogEventService.changes$.pipe(untilDestroyed(this)).subscribe((action) => {
+			if (action === 'added' || action === 'deleted') {
+				this.subject$.next(true);
+			}
+		});
 		this.timesheetService.updateLog$
 			.pipe(
 				filter((val) => val === true),
@@ -137,8 +145,16 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 		this.weekDayList = dayRange;
 	}
 
-	getGroupDate(date: string | Date) {
-		return moment(date).tz(this.filters.timeZone).format('YYYY-MM-DD');
+	getGroupDate(date: string | Date): string | null {
+		const timeZone = this.filters?.timeZone || moment.tz.guess();
+		const parsed = moment(date);
+
+		if (!parsed.isValid()) {
+			console.warn('Invalid date passed to getGroupDate:', date);
+			return null;
+		}
+
+		return parsed.tz(timeZone).format('YYYY-MM-DD');
 	}
 
 	/**
@@ -190,16 +206,22 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 		}
 
 		const payloads = this.payloads$.getValue();
+		const timeZone = this.filters?.timeZone || moment.tz.guess();
+
 		this.loading = true;
 		try {
-			const logs = await this.timesheetService.getTimeLogs(payloads, ['project', 'employee.user']);
+			const logs = await this.timesheetService.getTimeLogs(payloads, ['project', 'employee.user', 'task']);
+
 			this.weekData = chain(logs)
 				.groupBy('projectId')
 				.map((innerLogs, _projectId) => {
 					const byDate = chain(innerLogs)
-						.groupBy((log) => moment(log.startedAt).tz(this.filters.timeZone).format('YYYY-MM-DD'))
+						.groupBy((log) => {
+							const started = moment(log.startedAt);
+							return started.isValid() ? started.tz(timeZone).format('YYYY-MM-DD') : 'invalid-date';
+						})
 						.mapObject((res) => {
-							const sum = res.reduce((iteratee, log) => iteratee + log.duration, 0);
+							const sum = res.reduce((total, log) => total + log.duration, 0);
 							return { sum, logs: res };
 						})
 						.value();
@@ -208,8 +230,11 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 					const dates = {};
 
 					this.weekDayList.forEach((date) => {
-						const tzDate = moment(date).tz(this.filters.timeZone).format('YYYY-MM-DD');
-						dates[tzDate] = byDate[tzDate] || 0;
+						const dateMoment = moment(date);
+						const tzDate = dateMoment.isValid() ? dateMoment.tz(timeZone).format('YYYY-MM-DD') : null;
+						if (tzDate) {
+							dates[tzDate] = byDate[tzDate] || 0;
+						}
 					});
 
 					return { project, dates };
@@ -228,13 +253,20 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 	 * @param timeLog
 	 */
 	openAddEdit(timeLog?: ITimeLog) {
-		if (this.limitReached) return;
+		if (this.limitReached && !this.hasPermission) return;
+		const defaultTimeLog = {
+			startedAt: moment().set({ hour: 8, minute: 0, second: 0 }).toDate(),
+			stoppedAt: moment().set({ hour: 9, minute: 0, second: 0 }).toDate(),
+			employeeId: this.request.employeeIds?.[0] || null,
+			projectId: this.request.projectIds?.[0] || null
+		};
+
 		if (!this.nbDialogService) {
 			throw new Error('NbDialogService is not available.');
 		}
 
 		const dialogRef = this.nbDialogService.open(EditTimeLogModalComponent, {
-			context: { timeLog, timezone: this.filters?.timeZone }
+			context: { timeLog: timeLog ?? defaultTimeLog }
 		});
 
 		dialogRef.onClose
@@ -255,19 +287,10 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 	 * @param project
 	 */
 	openAddByDateProject(date: string, project: IOrganizationProject): void {
-		if (this.limitReached) return;
-		// Calculate the nearest previous 10-minute mark for stoppedAt
-		const currentMoment = moment();
-		const minutes = moment().minutes();
-		const nearestTenMinutes = minutes - (minutes % 10);
-
-		const stoppedAt = new Date(
-			moment(date).format('YYYY-MM-DD') + ' ' + currentMoment.set('minutes', nearestTenMinutes).format('HH:mm')
-		);
-
-		// Calculate startedAt by subtracting one hour from stoppedAt
-		const startedAt = moment(stoppedAt).subtract('1', 'hour').toDate();
-
+		if (this.limitReached && !this.hasPermission) return;
+		const baseDate = moment(date);
+		const startedAt = baseDate.clone().set({ hour: 8, minute: 0, second: 0 }).toDate();
+		const stoppedAt = baseDate.clone().set({ hour: 9, minute: 0, second: 0 }).toDate();
 		if (!this.nbDialogService) {
 			throw new Error('NbDialogService is not available.');
 		}
@@ -282,8 +305,7 @@ export class WeeklyComponent extends BaseSelectorFilterComponent implements OnIn
 					projectId: project?.id ?? null,
 					// Adding an employeeId if available
 					employeeId: this.request.employeeIds?.[0] ?? null
-				},
-				timezone: this.filters?.timeZone
+				}
 			}
 		});
 

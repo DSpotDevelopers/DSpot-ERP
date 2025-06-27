@@ -20,9 +20,12 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 	organization: IOrganization;
 	PermissionsEnum = PermissionsEnum;
 	limitReached = false;
+	hasPermission = false;
+
 	@Input() timeLogs: ITimeLog[] = [];
-	@Input() timezone: string;
+	@Input() timeZone: string;
 	@Input() callback: CallableFunction;
+	@Input() date?: string;
 	@Output() close: CallableFunction;
 
 	private readonly workedThisWeek$: Observable<number> = this.timeTrackerService.workedThisWeek$;
@@ -34,9 +37,10 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 		private readonly timesheetService: TimesheetService,
 		private readonly store: Store,
 		private readonly timeTrackerService: TimeTrackerService
-	) { }
+	) {}
 
 	ngOnInit(): void {
+		this.hasPermission = this.store.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
 		this.store.selectedOrganization$
 			.pipe(
 				filter((organization: IOrganization) => !!organization),
@@ -53,17 +57,12 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 	}
 
 	openAddByDateProject($event: MouseEvent) {
-		if (this.limitReached) return;
+		if (this.limitReached && !this.hasPermission) return;
 		const [timeLog] = this.timeLogs;
-		const minutes = moment().minutes();
-		const stoppedAt = new Date(
-			moment(timeLog.startedAt).format('YYYY-MM-DD') +
-			' ' +
-			moment()
-				.set('minutes', minutes - (minutes % 10))
-				.format('HH:mm')
-		);
-		const startedAt = moment(stoppedAt).subtract('1', 'hour').toDate();
+		const baseDate = moment(this.date);
+		const startedAt = baseDate.clone().set({ hour: 8, minute: 0, second: 0 }).toDate();
+		const stoppedAt = baseDate.clone().set({ hour: 9, minute: 0, second: 0 }).toDate();
+
 		this.openEdit($event, {
 			startedAt,
 			stoppedAt,
@@ -79,14 +78,15 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 			stoppedAt: Date;
 			projectId: string;
 			isRunning: boolean;
-		}
+		},
+		isEdit?: boolean
 	) {
 		if (timeLog.isRunning) {
 			return;
 		}
 		$event.stopPropagation();
 		this.nbDialogService
-			.open(EditTimeLogModalComponent, { context: { timeLog: timeLog, timezone: this.timezone } })
+			.open(EditTimeLogModalComponent, { context: { timeLog: timeLog, timeZone: isEdit ? this.timeZone : null } })
 			.onClose.pipe(untilDestroyed(this))
 			.subscribe((data) => {
 				this.callback(data);
@@ -98,7 +98,7 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 			.open(ViewTimeLogModalComponent, {
 				context: {
 					timeLog: timeLog,
-					timezone: this.timezone
+					timeZone: this.timeZone
 				},
 				dialogClass: 'view-log-dialog'
 			})
@@ -114,11 +114,14 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 		}
 		const { id: organizationId } = this.organization;
 		const request = {
-			logIds: [{
-				id: timeLog.id,
-				partialStatus: timeLog.partialStatus,
-				referenceDate: timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt,
-			}],
+			logIds: [
+				{
+					id: timeLog.id,
+					partialStatus: timeLog.partialStatus,
+					referenceDate:
+						timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt
+				}
+			],
 			organizationId
 		};
 		this.timesheetService.deleteLogs(request).then((res) => {

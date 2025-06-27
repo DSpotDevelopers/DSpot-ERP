@@ -15,7 +15,8 @@ import {
 	IEmployee,
 	IEmployeeFindInput,
 	ID,
-	ITimerStatusWithWeeklyLimits
+	ITimerStatusWithWeeklyLimits,
+	TimeErrorsEnum
 } from '@gauzy/contracts';
 import { SortOrderEnum } from '@gauzy/common';
 import { environment as env } from '@gauzy/config';
@@ -47,6 +48,7 @@ import { MikroOrmEmployeeRepository } from '../../employee/repository/mikro-orm-
 import { addRelationsToQuery, buildCommonQueryParameters, buildLogQueryParameters } from './timer.helper';
 import { TimerWeeklyLimitService } from './timer-weekly-limit.service';
 import { TaskService } from '../../tasks';
+import { OrganizationProjectService } from '../../organization-project';
 
 // Get the type of the Object-Relational Mapping (ORM) used in the application.
 const ormType: MultiORM = getORMType();
@@ -64,7 +66,8 @@ export class TimerService {
 		private readonly _employeeService: EmployeeService,
 		private readonly _timerWeeklyLimitService: TimerWeeklyLimitService,
 		private readonly _commandBus: CommandBus,
-		private readonly _taskService: TaskService
+		private readonly _taskService: TaskService,
+		private readonly _organizationProjectService: OrganizationProjectService
 	) {}
 
 	/**
@@ -217,6 +220,52 @@ export class TimerService {
 
 		const now = moment();
 
+		// If the timer is running, ensure that the employee is assigned to the project/task of the running timer
+		if (lastLog?.isRunning) {
+			const projects = await this._organizationProjectService.findByEmployee(employeeId, {
+				tenantId,
+				organizationId,
+				relations: ['members']
+			});
+			const isAssignedToProject = projects.some((project) => project.id === lastLog.projectId);
+
+			if (!isAssignedToProject) {
+				await this.stopTimer({
+					tenantId,
+					organizationId,
+					startedAt: lastLog.startedAt,
+					stoppedAt: now.toDate()
+				});
+				throw new ForbiddenException(TimeErrorsEnum.INVALID_PROJECT_PERMISSIONS);
+			}
+
+			const tasks = await this._taskService.getAllTasksByEmployee(employeeId, {
+				where: {
+					id: lastLog.taskId,
+					projectId: lastLog.projectId,
+					organizationId,
+					tenantId
+				},
+				take: 1,
+				skip: 0,
+				withDeleted: false,
+				order: {
+					createdAt: SortOrderEnum.DESC
+				}
+			});
+			const isAssignedToTask = tasks.some((task) => task.id === lastLog.taskId);
+
+			if (!isAssignedToTask) {
+				await this.stopTimer({
+					tenantId,
+					organizationId,
+					startedAt: lastLog.startedAt,
+					stoppedAt: now.toDate()
+				});
+				throw new ForbiddenException(TimeErrorsEnum.INVALID_TASK_PERMISSIONS);
+			}
+		}
+
 		// Get weekly statistics
 		let weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(employee, start as Date, true);
 
@@ -337,23 +386,39 @@ export class TimerService {
 		// Get the employee ID
 		const { id: employeeId, organizationId } = employee;
 
-		// Ensure that the tasks match with the given project and its associated to the current employee
-		const tasks = await this._taskService.getAllTasksByEmployee(employeeId, {
-			where: {
-				id: taskId,
-				projectId,
-				organizationId,
-				tenantId
-			},
-			take: 1,
-			skip: 0,
-			withDeleted: false,
-			order: {
-				createdAt: SortOrderEnum.DESC
+		// Validate assigned task
+		if (taskId && projectId) {
+			const tasks = await this._taskService.getAllTasksByEmployee(employeeId, {
+				where: {
+					id: taskId,
+					projectId,
+					organizationId,
+					tenantId
+				},
+				take: 1,
+				skip: 0,
+				withDeleted: false,
+				order: {
+					createdAt: SortOrderEnum.DESC
+				}
+			});
+			const isAssignedToTask = tasks.some((task) => task.id === taskId);
+			if (!isAssignedToTask) {
+				throw new ForbiddenException(TimeErrorsEnum.INVALID_TASK_PERMISSIONS);
 			}
-		});
-		if (tasks.length === 0) {
-			throw new ForbiddenException(`invalid-task-permissions`);
+		}
+
+		// Validate assigned project
+		if (projectId) {
+			const projects = await this._organizationProjectService.findByEmployee(employeeId, {
+				tenantId,
+				organizationId,
+				relations: ['members']
+			});
+			const isAssignedToProject = projects.some((project) => project.id === projectId);
+			if (!isAssignedToProject) {
+				throw new ForbiddenException(TimeErrorsEnum.INVALID_PROJECT_PERMISSIONS);
+			}
 		}
 
 		// Stop any previous running timers

@@ -23,6 +23,7 @@ import {
 import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
 import {
 	EmployeesService,
+	emptyStringValidator,
 	OrganizationProjectModuleService,
 	OrganizationTeamsService,
 	Store,
@@ -33,10 +34,10 @@ import { FormHelpers } from '../../forms';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-add-task-dialog',
-    templateUrl: './add-task-dialog.component.html',
-    styleUrls: ['./add-task-dialog.component.scss'],
-    standalone: false
+	selector: 'ngx-add-task-dialog',
+	templateUrl: './add-task-dialog.component.html',
+	styleUrls: ['./add-task-dialog.component.scss'],
+	standalone: false
 })
 export class AddTaskDialogComponent extends TranslationBaseComponent implements OnInit {
 	FormHelpers: typeof FormHelpers = FormHelpers;
@@ -65,7 +66,7 @@ export class AddTaskDialogComponent extends TranslationBaseComponent implements 
 		private readonly employeesService: EmployeesService,
 		private readonly tasksService: TasksService,
 		private readonly organizationTeamsService: OrganizationTeamsService,
-		private organizationProjectModuleService: OrganizationProjectModuleService
+		private readonly organizationProjectModuleService: OrganizationProjectModuleService
 	) {
 		super(translateService);
 	}
@@ -73,11 +74,11 @@ export class AddTaskDialogComponent extends TranslationBaseComponent implements 
 	static buildForm(fb: UntypedFormBuilder): UntypedFormGroup {
 		return fb.group({
 			number: [{ value: '', disabled: true }],
-			title: [null, Validators.required],
+			title: [null, [Validators.required, emptyStringValidator]],
 			project: [],
 			projectId: [null, Validators.required],
 			parentId: [],
-			status: [TaskStatusEnum.OPEN, Validators.required],
+			status: [TaskStatusEnum.OPEN],
 			priority: [],
 			size: [],
 			members: [],
@@ -89,7 +90,7 @@ export class AddTaskDialogComponent extends TranslationBaseComponent implements 
 			tags: [],
 			teams: [],
 			modules: [],
-			taskStatus: [],
+			taskStatus: [null, Validators.required],
 			taskSize: [],
 			taskPriority: []
 		});

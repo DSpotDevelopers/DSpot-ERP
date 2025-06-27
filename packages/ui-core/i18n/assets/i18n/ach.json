@@ -639,12 +639,14 @@
 			"WAIT_UNTIL_RELOAD": "crwdns10541:0crwdne10541:0"
 		},
 		"ERROR": {
-			"PROJECT_NAME": "crwdns8332:0crwdne8332:0",
+			"PROJECT_NAME": "crwdnsXXXXX:0crwdneXXXXX:0",
 			"PROJECT_URL": "crwdns138:0crwdne138:0",
 			"OPEN_SOURCE_PROJECT_URL": "crwdns140:0crwdne140:0",
 			"PROJECT_EMPLOYEE": "crwdns7984:0crwdne7984:0",
 			"PROJECT_ORGANIZATION_CONTACT": "crwdns10535:0crwdne10535:0",
-			"PROJECT_OWNER": "crwdns10535:0crwdne10535:0"
+			"PROJECT_OWNER": "crwdns10535:0crwdne10535:0",
+			"TASK_TITLE": "crwdnsXXXX2:0crwdneXXXX2:0",
+			"INVALID_WHOLE_NUMBER": "ccrwdns99999:0crwdne99999:0"
 		}
 	},
 	"POP_UPS": {
@@ -967,7 +969,6 @@
 			"EXPORT_DATA": "crwdns11197:0crwdne11197:0",
 			"IMPORT_DATA": "crwdns11199:0crwdne11199:0",
 			"ALL_ENTITIES": "crwdns11203:0crwdne11203:0",
-
 			"ACTIVITY_LOG": "Kit ma gityeko",
 			"DAILY_PLAN": "Cik me nino",
 			"ENTITY_SUBSCRIPTION": "Keto nying i jami",
@@ -1181,6 +1182,34 @@
 			"HOURLY": "crwdns10004:0crwdne10004:0"
 		},
 		"COMING_SOON": "crwdns4078:0crwdne4078:0",
+		"DEFAULT_ERRORS": {
+			"TITLE": {
+				"BAD_REQUEST": "crwdns20001:0crwdne20001:0",
+				"UNAUTHORIZED": "crwdns20002:0crwdne20002:0",
+				"FORBIDDEN": "crwdns20003:0crwdne20003:0",
+				"NOT_FOUND": "crwdns20004:0crwdne20004:0",
+				"CONFLICT": "crwdns20005:0crwdne20005:0",
+				"INTERNAL_SERVER_ERROR": "crwdns20006:0crwdne20006:0",
+				"GATEWAY_TIMEOUT": "crwdns20007:0crwdne20007:0",
+				"SERVICE_UNAVAILABLE": "crwdns20008:0crwdne20008:0",
+				"NETWORK_ERROR": "crwdns20009:0crwdne20009:0",
+				"DEFAULT": "crwdns20010:0crwdne20010:0",
+				"CONNECTION_ERROR": "crwdns20011:0crwdne20011:0"
+			},
+			"MESSAGES": {
+				"BAD_REQUEST": "crwdns20012:0crwdne20012:0",
+				"UNAUTHORIZED": "crwdns20013:0crwdne20013:0",
+				"FORBIDDEN": "crwdns20014:0crwdne20014:0",
+				"NOT_FOUND": "crwdns20015:0crwdne20015:0",
+				"CONFLICT": "crwdns20016:0crwdne20016:0",
+				"INTERNAL_SERVER_ERROR": "crwdns20017:0crwdne20017:0",
+				"GATEWAY_TIMEOUT": "crwdns20018:0crwdne20018:0",
+				"SERVICE_UNAVAILABLE": "crwdns20019:0crwdne20019:0",
+				"NETWORK_ERROR": "crwdns20020:0crwdne20020:0",
+				"DEFAULT": "crwdns20021:0crwdne20021:0",
+				"CONNECTION_ERROR": "crwdns20022:0crwdne20022:0"
+			}
+		},
 		"RE_INTEGRATE": "crwdns8132:0crwdne8132:0",
 		"SETTINGS": "crwdns8134:0crwdne8134:0",
 		"SELECT_GROUPS": "crwdns8268:0crwdne8268:0",
@@ -3260,6 +3289,11 @@
 			"MAX_LIMIT_REACHED": "crwdns7528:0crwdne7528:0"
 		},
 		"MESSAGE": {
+			"HOUR": "crwdnsXXXXX:0crwdneXXXXX:0",
+			"HOURS": "crwdnsXXXXX:0crwdneXXXXX:0",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "crwdnsXXXXX:0crwdneXXXXX:0",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "crwdnsXXXX1:0crwdneXXXX1:0",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "crwdnsXXXXX:0crwdneXXXXX:0",
 			"WORKED_THIS_WEEK": "crwdnsXXXXX:0crwdneXXXXX:0",
 			"WEEKLY_LIMIT": "crwdnsXXXXX:0crwdneXXXXX:0",
 			"ERRORS": "crwdns7430:0crwdne7430:0",
@@ -3638,6 +3672,8 @@
 		"TIMER": "crwdns3230:0crwdne3230:0",
 		"MANUAL": "crwdns3232:0crwdne3232:0",
 		"MANUAL_NOT_ALLOW": "crwdns3552:0crwdne3552:0",
+		"PROJECT_TASK_PERMISSION_ERROR": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "crwdnsXXXXX:0crwdneXXXXX:0",
 		"SELECT_PROJECT": "crwdns3234:0crwdne3234:0",
 		"SELECT_TASK": "crwdns3236:0crwdne3236:0",
 		"SELECT_CLIENT": "crwdns7554:0crwdne7554:0",

@@ -33,7 +33,8 @@ import {
 	IAmountOwedReportChart,
 	IDailyReportChart,
 	TimeLogPartialStatus,
-	IDeleteTimeLogData
+	IDeleteTimeLogData,
+	TimeErrorsEnum
 } from '@gauzy/contracts';
 import { isEmpty, isNotEmpty } from '@gauzy/utils';
 import { TenantAwareCrudService } from './../../core/crud';
@@ -149,6 +150,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 					id: true,
 					isAway: true,
 					isOnline: true,
+					reWeeklyLimit: true,
 					user: {
 						id: true,
 						firstName: true,
@@ -1201,7 +1203,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		const weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(employee, startedAt, true);
 		const newTimeToAdd = moment(stoppedAt).diff(startedAt, 'seconds') - timeToRemove - previousTime;
 		if (newTimeToAdd > weeklyLimitStatus.remainWeeklyTime) {
-			throw new ConflictException('weekly-limit-reached');
+			throw new ConflictException(TimeErrorsEnum.WEEKLY_LIMIT_REACHED);
 		}
 	}
 
@@ -1286,7 +1288,11 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		} catch (error) {
 			// Handle exceptions appropriately
 			this.logger.error('Failed to add manual time log', error);
-			throw new BadRequestException('Failed to add manual time log');
+			if (error instanceof ConflictException && error.message === TimeErrorsEnum.WEEKLY_LIMIT_REACHED) {
+				throw new ConflictException(TimeErrorsEnum.WEEKLY_LIMIT_REACHED);
+			} else {
+				throw new BadRequestException('Failed to add manual time log');
+			}
 		}
 	}
 
@@ -1343,12 +1349,12 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				startedAt,
 				stoppedAt,
 				conflicts,
-				partialStatus == TimeLogPartialStatus.COMPLETE ? timeLog.duration : moment(
-					partialStatus == TimeLogPartialStatus.TO_LEFT ? referenceDate : timeLog.stoppedAt
-				).diff(
-					partialStatus == TimeLogPartialStatus.TO_LEFT ? timeLog.startedAt : referenceDate,
-					'seconds'
-				)
+				partialStatus == TimeLogPartialStatus.COMPLETE
+					? timeLog.duration
+					: moment(partialStatus == TimeLogPartialStatus.TO_LEFT ? referenceDate : timeLog.stoppedAt).diff(
+							partialStatus == TimeLogPartialStatus.TO_LEFT ? timeLog.startedAt : referenceDate,
+							'seconds'
+					  )
 			);
 
 			// Resolve conflicts by deleting conflicting time slots if the time log is complete
@@ -1377,7 +1383,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				...timeLog,
 				...request
 			};
-			const remainingTimeUpdate = {}
+			const remainingTimeUpdate = {};
 			if (partialStatus == TimeLogPartialStatus.TO_LEFT) {
 				remainingTimeUpdate['startedAt'] = moment(referenceDate).add(1, 'seconds').toDate();
 				newObject.stoppedAt = referenceDate;
@@ -1392,7 +1398,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				request = { ...remainingTimeUpdate, editedAt: request.editedAt };
 			}
 
-			console.error("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", request);
+			console.error('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', request);
 
 			// Execute the command to update the time log
 			await this.commandBus.execute(new TimeLogUpdateCommand(request, timeLog));
@@ -1423,7 +1429,11 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		} catch (error) {
 			this.logger.error('Failed to update manual time log', error);
 			// Handle exceptions appropriately
-			throw new BadRequestException('Failed to update manual time log');
+			if (error instanceof ConflictException && error.message === TimeErrorsEnum.WEEKLY_LIMIT_REACHED) {
+				throw new ConflictException(TimeErrorsEnum.WEEKLY_LIMIT_REACHED);
+			} else {
+				throw new BadRequestException('Failed to update manual time log');
+			}
 		}
 	}
 

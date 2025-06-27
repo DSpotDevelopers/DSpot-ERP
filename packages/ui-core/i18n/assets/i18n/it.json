@@ -766,13 +766,15 @@
 			"WAIT_UNTIL_RELOAD": "Attendere il riavvio dell'applicazione"
 		},
 		"ERROR": {
-			"PROJECT_NAME": "Il nome del progetto è obbligatorio.",
+			"PROJECT_NAME": "Il nome del progetto è obbligatorio e non può essere vuoto.",
 			"PROJECT_URL": "L'URL del progetto non è valido.",
 			"OPEN_SOURCE_PROJECT_URL": "L'URL del progetto open source non è valido.",
 			"INVALID_IMAGE_URL": "URL immagine non valido.",
 			"PROJECT_EMPLOYEE": "Questo campo è obbligatorio. Seleziona almeno un dipendente.",
 			"PROJECT_ORGANIZATION_CONTACT": "Questo campo è obbligatorio. Seleziona un cliente.",
-			"PROJECT_OWNER": "Il proprietario del progetto è obbligatorio."
+			"PROJECT_OWNER": "Il proprietario del progetto è obbligatorio.",
+			"TASK_TITLE": "Il titolo del compito è obbligatorio e non può essere vuoto.",
+			"INVALID_WHOLE_NUMBER": "Inserisci un numero intero valido compreso tra 1 e 100."
 		}
 	},
 	"POP_UPS": {
@@ -3610,6 +3612,11 @@
 			"MAX_LIMIT_REACHED": "Limite massimo raggiunto"
 		},
 		"MESSAGE": {
+			"HOUR": "ora",
+			"HOURS": "ore",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "Impossibile aggiungere il registro orario. Il limite settimanale di tempo lavorativo di ",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "Impossibile aggiornare il registro del tempo. Il limite settimanale di ore lavorative di ",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "è stato raggiunto. Contatta l'amministratore di sistema per modificare i limiti.",
 			"WORKED_THIS_WEEK": "Ore lavorate questa settimana",
 			"WEEKLY_LIMIT": "Limite settimanale",
 			"ERRORS": "Controlla il modulo per errori",
@@ -4166,6 +4173,8 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "L'URL del server non deve essere vuoto."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "Limite settimanale superato",
+		"PROJECT_TASK_PERMISSION_ERROR": "Timer fermato perché non hai il permesso di accedere a questo progetto/attività",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "Il timer è stato interrotto perché non hai il permesso per accedere a questo progetto",
 		"OF_HRS": "Di {{ limit }} ore",
 		"TIME_TRACKER_DISABLED": "Il time tracker è stato disabilitato",
 		"STOP_TIMER_CHANGE_CLIENT": "Ferma il timer prima di cambiare cliente",

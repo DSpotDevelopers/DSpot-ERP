@@ -766,13 +766,15 @@
 			"WAIT_UNTIL_RELOAD": "Por favor espere mientras se recarga la aplicación"
 		},
 		"ERROR": {
-			"PROJECT_NAME": "El nombre del proyecto es obligatorio.",
+			"PROJECT_NAME": "El nombre del proyecto es obligatorio y no puede estar vacío.",
 			"PROJECT_URL": "La URL del proyecto no es válida.",
 			"OPEN_SOURCE_PROJECT_URL": "La URL del proyecto de código abierto no es válida.",
 			"INVALID_IMAGE_URL": "URL de imagen no válida.",
 			"PROJECT_EMPLOYEE": "Este campo es obligatorio. Por favor seleccione al menos un empleado.",
 			"PROJECT_ORGANIZATION_CONTACT": "Este campo es obligatorio. Por favor seleccione un cliente.",
-			"PROJECT_OWNER": "El propietario del proyecto es obligatorio."
+			"PROJECT_OWNER": "El propietario del proyecto es obligatorio.",
+			"TASK_TITLE": "El título de la tarea es obligatorio y no puede estar vacío.",
+			"INVALID_WHOLE_NUMBER": "Por favor, introduzca un número entero válido entre 1 y 100."
 		}
 	},
 	"POP_UPS": {
@@ -3610,6 +3612,11 @@
 			"MAX_LIMIT_REACHED": "Límite máximo alcanzado"
 		},
 		"MESSAGE": {
+			"HOUR": "hora",
+			"HOURS": "horas",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "No se puede agregar el registro de tiempo. Se ha alcanzado el límite de tiempo de trabajo semanal de ",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "No se pudo actualizar el registro de tiempo. El límite semanal de horas laborales de ",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": ". Contacte al administrador del sistema para modificar los límites.",
 			"WORKED_THIS_WEEK": "Trabajado esta semana",
 			"WEEKLY_LIMIT": "Límite semanal",
 			"ERRORS": "Por favor revise el formulario por errores",
@@ -4166,6 +4173,8 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "La URL del servidor no debe estar vacía."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "Límite semanal excedido",
+		"PROJECT_TASK_PERMISSION_ERROR": "Temporizador detenido porque no tienes permiso para acceder a este proyecto/tarea",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "El temporizador se detuvo porque no tienes permiso para acceder a este proyecto",
 		"OF_HRS": "De {{ limit }} hrs",
 		"TIME_TRACKER_DISABLED": "El rastreador de tiempo ha sido deshabilitado",
 		"STOP_TIMER_CHANGE_CLIENT": "Por favor detenga el temporizador antes de cambiar el cliente",

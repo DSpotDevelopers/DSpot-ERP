@@ -766,13 +766,15 @@
 			"WAIT_UNTIL_RELOAD": "Por favor, aguarde até que o aplicativo recarregue"
 		},
 		"ERROR": {
-			"PROJECT_NAME": "O nome do projeto é obrigatório.",
+			"PROJECT_NAME": "O nome do projeto é obrigatório e não pode estar vazio.",
 			"PROJECT_URL": "A URL do projeto é inválida.",
 			"OPEN_SOURCE_PROJECT_URL": "A URL do projeto open source é inválida.",
 			"INVALID_IMAGE_URL": "URL de imagem inválido.",
 			"PROJECT_EMPLOYEE": "Este campo é obrigatório. Por favor, selecione pelo menos um funcionário.",
 			"PROJECT_ORGANIZATION_CONTACT": "Este campo é obrigatório. Por favor, selecione um cliente.",
-			"PROJECT_OWNER": "O proprietário do projeto é obrigatório."
+			"PROJECT_OWNER": "O proprietário do projeto é obrigatório.",
+			"TASK_TITLE": "O título da tarefa é obrigatório e não pode estar vazio.",
+			"INVALID_WHOLE_NUMBER": "Por favor, insira um número inteiro entre 1 e 100."
 		}
 	},
 	"POP_UPS": {
@@ -3610,6 +3612,11 @@
 			"MAX_LIMIT_REACHED": "Limite máximo atingido"
 		},
 		"MESSAGE": {
+			"HOUR": "hora",
+			"HOURS": "horas",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "Não foi possível adicionar o registro de tempo. O limite semanal de tempo de trabalho de ",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "Não foi possível atualizar o registro de tempo. O limite semanal de horas de trabalho de ",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "foi atingido. Contate o administrador do sistema para modificar os limites.",
 			"WORKED_THIS_WEEK": "Trabalhou esta semana",
 			"WEEKLY_LIMIT": "Limite semanal",
 			"ERRORS": "Por favor, verifique o formulário para erros",
@@ -4166,6 +4173,8 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "O URL do servidor não deve estar vazio."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "Limite semanal excedido",
+		"PROJECT_TASK_PERMISSION_ERROR": "Timer parado porque você não tem permissão para acessar este projeto/tarefa",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "O cronômetro foi parado porque você não tem permissão para acessar este projeto",
 		"OF_HRS": "De {{ limit }} hrs",
 		"TIME_TRACKER_DISABLED": "Rastreador de tempo foi desativado",
 		"STOP_TIMER_CHANGE_CLIENT": "Por favor, pare o timer antes de mudar o cliente",

@@ -766,13 +766,15 @@
 			"WAIT_UNTIL_RELOAD": "Bitte warten Sie, bis die Anwendung neu geladen wird"
 		},
 		"ERROR": {
-			"PROJECT_NAME": "Projektname ist erforderlich.",
+			"PROJECT_NAME": "Projektname ist erforderlich und darf nicht leer sein.",
 			"PROJECT_URL": "Projekt-URL ist ungültig.",
 			"OPEN_SOURCE_PROJECT_URL": "Open-Source-Projekt-URL ist ungültig.",
 			"INVALID_IMAGE_URL": "Ungültige Bild-URL.",
 			"PROJECT_EMPLOYEE": "Dieses Feld ist erforderlich. Bitte wählen Sie mindestens einen Mitarbeiter aus.",
 			"PROJECT_ORGANIZATION_CONTACT": "Dieses Feld ist erforderlich. Bitte wählen Sie einen Kunden aus.",
-			"PROJECT_OWNER": "Projektinhaber ist erforderlich."
+			"PROJECT_OWNER": "Projektinhaber ist erforderlich.",
+			"TASK_TITLE": "Der Aufgaben-Titel ist erforderlich und darf nicht leer sein.",
+			"INVALID_WHOLE_NUMBER": "Bitte geben Sie eine ganze Zahl zwischen 1 und 100 ein."
 		}
 	},
 	"POP_UPS": {
@@ -3610,6 +3612,11 @@
 			"MAX_LIMIT_REACHED": "Maximales Limit erreicht"
 		},
 		"MESSAGE": {
+			"HOUR": "Stunde",
+			"HOURS": "Stunden",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "Zeiteintrag konnte nicht hinzugefügt werden. Das wöchentliche Arbeitszeitlimit von ",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "Zeitprotokoll konnte nicht aktualisiert werden. Das wöchentliche Arbeitszeitlimit von ",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "wurde erreicht. Wenden Sie sich an den Systemadministrator, um das Limit zu ändern.",
 			"WORKED_THIS_WEEK": "Diese Woche gearbeitet",
 			"WEEKLY_LIMIT": "Wochenlimit",
 			"ERRORS": "Bitte überprüfen Sie das Formular auf Fehler",
@@ -4166,6 +4173,8 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "Die Server-URL darf nicht leer sein."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "Wochenlimit überschritten",
+		"PROJECT_TASK_PERMISSION_ERROR": "Timer wurde gestoppt, da Sie keine Berechtigung haben, auf dieses Projekt/diese Aufgabe zuzugreifen",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "Der Timer wurde gestoppt, da Sie keine Berechtigung für dieses Projekt haben",
 		"OF_HRS": "Von {{ limit }} Std.",
 		"TIME_TRACKER_DISABLED": "Zeiterfassung wurde deaktiviert",
 		"STOP_TIMER_CHANGE_CLIENT": "Bitte stoppen Sie den Timer, bevor Sie den Kunden wechseln",

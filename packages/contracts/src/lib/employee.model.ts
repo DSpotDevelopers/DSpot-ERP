@@ -161,11 +161,17 @@ export interface IEmployeeFindInput extends ITaggable {
 
 export interface IEmployeeUpdateInput extends IBasePerTenantAndOrganizationEntityModel, ITaggable {
 	payPeriod?: PayPeriodEnum;
+	organizationPositionId?: string;
+	startedWorkOn?: Date;
+	user?: IUser;
+	userId?: string;
+	contactId?: string;
 	billRateValue?: number;
 	minimumBillingRate?: number;
 	billRateCurrency?: CurrenciesEnum;
 	reWeeklyLimit?: number;
-	organizationDepartment?: IOrganizationDepartment;
+	organizationDepartments?: IOrganizationDepartment[];
+	organizationEmploymentTypes?: IOrganizationEmploymentType[];
 	organizationPosition?: IOrganizationPosition;
 	offerDate?: Date;
 	acceptDate?: Date;
@@ -216,6 +222,7 @@ export interface IEmployeeCreateInput extends IBasePerTenantAndOrganizationEntit
 	description?: string;
 	originalUrl?: string;
 	isActive?: boolean;
+	reWeeklyLimit?: number;
 	/** Upwork ID For DSpot ERP AI*/
 	upworkId?: string;
 	/** LinkedIn ID For DSpot ERP AI*/
@@ -243,6 +250,7 @@ export interface ISelectedEmployee extends ITaggable {
 	skills?: ISkill[];
 	timeZone?: string;
 	timeFormat?: TimeFormatEnum;
+	reWeeklylimit?: number;
 }
 
 export enum DEFAULT_TYPE {

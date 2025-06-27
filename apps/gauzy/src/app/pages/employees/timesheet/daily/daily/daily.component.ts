@@ -21,7 +21,15 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { TranslateService } from '@ngx-translate/core';
 import { pick } from 'underscore';
 import moment from 'moment';
-import { IGetTimeLogInput, ITimeLog, PermissionsEnum, ITimeLogFilters, TimeLogSourceEnum, TimeLogPartialStatus, IDeleteTimeLogData } from '@gauzy/contracts';
+import {
+	IGetTimeLogInput,
+	ITimeLog,
+	PermissionsEnum,
+	ITimeLogFilters,
+	TimeLogSourceEnum,
+	TimeLogPartialStatus,
+	IDeleteTimeLogData
+} from '@gauzy/contracts';
 import {
 	DateRangePickerBuilderService,
 	ErrorHandlingService,
@@ -58,6 +66,7 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 	public filters: ITimeLogFilters = this.request; // Time log filters. Assuming request is defined somewhere.
 	public contextMenus: NbMenuItem[] = [];
 	public limitReached = false;
+	public hasPermission = false;
 
 	//Reference to the GauzyFiltersComponent using @ViewChild.
 	@ViewChild(GauzyFiltersComponent) private readonly gauzyFiltersComponent: GauzyFiltersComponent;
@@ -101,6 +110,7 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 	 *
 	 */
 	ngOnInit() {
+		this.hasPermission = this.store.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
 		this._handleSubjectOperationsSubscriber();
 		this._handleUpdateLogSubscriber();
 		this._handleRefreshDailyLogs();
@@ -310,16 +320,16 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 	 * Opens the Add Time Log modal and handles the result.
 	 */
 	openAdd(): void {
-		if (this.limitReached) return;
+		if (this.limitReached && !this.hasPermission) return;
 		const defaultTimeLog = {
-			startedAt: moment().tz(this.filters.timeZone).set({ hour: 8, minute: 0, second: 0 }).toDate(),
-			stoppedAt: moment().tz(this.filters.timeZone).set({ hour: 9, minute: 0, second: 0 }).toDate(),
+			startedAt: moment().set({ hour: 8, minute: 0, second: 0 }).toDate(),
+			stoppedAt: moment().set({ hour: 9, minute: 0, second: 0 }).toDate(),
 			employeeId: this.request.employeeIds?.[0] || null,
 			projectId: this.request.projectIds?.[0] || null
 		};
 
 		this._dialogService
-			.open(EditTimeLogModalComponent, { context: { timeLog: defaultTimeLog, timezone: this.filters.timeZone } })
+			.open(EditTimeLogModalComponent, { context: { timeLog: defaultTimeLog } })
 			.onClose.pipe(
 				// Filter out falsy results
 				filter((timeLog: ITimeLog) => !!timeLog),
@@ -346,7 +356,7 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 		}
 
 		this._dialogService
-			.open(EditTimeLogModalComponent, { context: { timeLog, timezone: this.filters.timeZone } })
+			.open(EditTimeLogModalComponent, { context: { timeLog, timeZone: this.filters?.timeZone } })
 			.onClose.pipe(
 				// Filter out falsy results
 				filter((editedTimeLog: ITimeLog) => !!editedTimeLog),
@@ -370,8 +380,8 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 	openView(timeLog: ITimeLog): void {
 		this._dialogService
 			.open(ViewTimeLogModalComponent, {
-				context: { timeLog, timezone: this.filters.timeZone, timeFormat: this.filters.timeFormat },
-				dialogClass: 'view-log-dialog',
+				context: { timeLog, timeZone: this.filters?.timeZone, timeFormat: this.filters?.timeFormat },
+				dialogClass: 'view-log-dialog'
 			})
 			.onClose.pipe(
 				// Filter out falsy results
@@ -397,11 +407,16 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 			const employee = timeLog.employee;
 			const { id: organizationId } = this.organization;
 			const request = {
-				logs: [{
-					id: timeLog.id,
-					partialStatus: timeLog.partialStatus,
-					referenceDate: timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt,
-				}],
+				logs: [
+					{
+						id: timeLog.id,
+						partialStatus: timeLog.partialStatus,
+						referenceDate:
+							timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT
+								? timeLog.stoppedAt
+								: timeLog.startedAt
+					}
+				],
 				organizationId
 			};
 			// Use await to wait for the promise to resolve
@@ -449,7 +464,8 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 				return {
 					id: timeLog.id,
 					partialStatus: timeLog.partialStatus,
-					referenceDate: timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt,
+					referenceDate:
+						timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt
 				};
 			});
 	}
@@ -568,13 +584,13 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 
 		this.contextMenus = deletePermission
 			? [
-				{
-					title: this.getTranslation('TIMESHEET.DELETE'),
-					data: {
-						action: 'DELETE'
+					{
+						title: this.getTranslation('TIMESHEET.DELETE'),
+						data: {
+							action: 'DELETE'
+						}
 					}
-				}
-			]
+			  ]
 			: [];
 	}
 

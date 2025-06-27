@@ -766,13 +766,15 @@
 			"WAIT_UNTIL_RELOAD": "请等待应用程序重新加载"
 		},
 		"ERROR": {
-			"PROJECT_NAME": "项目名称为必填项。",
+			"PROJECT_NAME": "项目名称是必填项，不能为空。",
 			"PROJECT_URL": "项目网址无效。",
 			"OPEN_SOURCE_PROJECT_URL": "开源项目网址无效。",
-			"INVALID_IMAGE_URL": "无效的图片 URL。"	,
+			"INVALID_IMAGE_URL": "无效的图片 URL。",
 			"PROJECT_EMPLOYEE": "此字段为必填项。请选择至少一名员工。",
 			"PROJECT_ORGANIZATION_CONTACT": "此字段为必填项。请选择一个客户。",
-			"PROJECT_OWNER": "项目所有者为必填项。"
+			"PROJECT_OWNER": "项目所有者为必填项。",
+			"TASK_TITLE": "任务标题是必填项，不能为空。",
+			"INVALID_WHOLE_NUMBER": "请输入 1 到 100 之间的整数。"
 		}
 	},
 	"POP_UPS": {
@@ -3610,6 +3612,11 @@
 			"MAX_LIMIT_REACHED": "已达最大限制"
 		},
 		"MESSAGE": {
+			"HOUR": "小时",
+			"HOURS": "小时",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "无法添加时间记录。每周工作时间限制 ",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "无法更新时间记录。本周工作时间限制为 ",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "已达到。请联系系统管理员修改限制。",
 			"WORKED_THIS_WEEK": "本周已工作",
 			"WEEKLY_LIMIT": "每周上限",
 			"ERRORS": "请检查表单是否有错误",
@@ -4169,6 +4176,8 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "服务器URL不能为空。"
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "已超出每周上限",
+		"PROJECT_TASK_PERMISSION_ERROR": "由于您没有访问此项目/任务的权限，计时器已停止",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "计时器已停止，因为您没有访问该项目的权限",
 		"OF_HRS": "共{{ limit }}小时",
 		"TIME_TRACKER_DISABLED": "计时器已禁用",
 		"STOP_TIMER_CHANGE_CLIENT": "请在更改客户前停止计时器",

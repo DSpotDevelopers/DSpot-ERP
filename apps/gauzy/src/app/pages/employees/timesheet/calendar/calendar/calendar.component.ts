@@ -30,7 +30,14 @@ import {
 	TimeTrackerService
 } from '@gauzy/ui-core/core';
 import { isEmpty, toTimezone } from '@gauzy/ui-core/common';
-import { IGetTimeLogInput, ITimeLog, ITimeLogFilters, PermissionsEnum, TimeFormatEnum, TimeLogPartialStatus } from '@gauzy/contracts';
+import {
+	IGetTimeLogInput,
+	ITimeLog,
+	ITimeLogFilters,
+	PermissionsEnum,
+	TimeFormatEnum,
+	TimeLogPartialStatus
+} from '@gauzy/contracts';
 import {
 	BaseSelectorFilterComponent,
 	EditTimeLogModalComponent,
@@ -64,6 +71,7 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 	loading = false;
 	futureDateAllowed: boolean;
 	limitReached = false;
+	hasPermission = false;
 
 	constructor(
 		public readonly translateService: TranslateService,
@@ -106,6 +114,7 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 	}
 
 	ngOnInit() {
+		this.hasPermission = this.store.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
 		this.subject$
 			.pipe(
 				filter(() => !!this.calendar.getApi() && !!this.organization),
@@ -221,6 +230,7 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 	 * @param {Function} callback - The callback function to be called with the fetched events.
 	 * @returns {Promise<void>}
 	 */
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 	getEvents(arg: any, callback: Function): Promise<void> {
 		if (!this.organization || isEmpty(this.request)) {
 			return;
@@ -279,7 +289,7 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 	 */
 	handleEventClick({ event }: EventClickArg) {
 		this.nbDialogService.open(ViewTimeLogModalComponent, {
-			context: { timeLog: event.extendedProps.log },
+			context: { timeLog: event.extendedProps.log, timeZone: this.filters?.timeZone },
 			dialogClass: 'view-log-dialog'
 		});
 	}
@@ -343,8 +353,10 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 			startedAt: event.start,
 			stoppedAt: event.end,
 			partialStatus: event._def.extendedProps.log.partialStatus,
-			referenceDate: event._def.extendedProps.log.partialStatus == TimeLogPartialStatus.TO_LEFT ?
-				event._def.extendedProps.log.stoppedAt : event._def.extendedProps.log.startedAt,
+			referenceDate:
+				event._def.extendedProps.log.partialStatus == TimeLogPartialStatus.TO_LEFT
+					? event._def.extendedProps.log.stoppedAt
+					: event._def.extendedProps.log.startedAt
 		});
 	}
 
@@ -358,8 +370,10 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 			startedAt: event.start,
 			stoppedAt: event.end,
 			partialStatus: event._def.extendedProps.log.partialStatus,
-			referenceDate: event._def.extendedProps.log.partialStatus == TimeLogPartialStatus.TO_LEFT ?
-				event._def.extendedProps.log.stoppedAt : event._def.extendedProps.log.startedAt,
+			referenceDate:
+				event._def.extendedProps.log.partialStatus == TimeLogPartialStatus.TO_LEFT
+					? event._def.extendedProps.log.stoppedAt
+					: event._def.extendedProps.log.startedAt
 		});
 	}
 
@@ -395,9 +409,17 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 	 * @param timeLog An optional parameter representing the time log to be edited.  It can be a complete ITimeLog object or a partial one.
 	 */
 	openDialog(timeLog?: ITimeLog | Partial<ITimeLog>) {
-		if (this.limitReached) return;
+		if (this.limitReached && !this.hasPermission) return;
+		const defaultTimeLog = {
+			startedAt: moment().set({ hour: 8, minute: 0, second: 0 }).toDate(),
+			stoppedAt: moment().set({ hour: 9, minute: 0, second: 0 }).toDate(),
+			employeeId: this.request.employeeIds?.[0] || null,
+			projectId: this.request.projectIds?.[0] || null
+		};
 
-		const dialog$ = this.nbDialogService.open(EditTimeLogModalComponent, { context: { timeLog, timezone: this.filters?.timeZone } });
+		const dialog$ = this.nbDialogService.open(EditTimeLogModalComponent, {
+			context: { timeLog: timeLog ?? defaultTimeLog }
+		});
 		dialog$.onClose
 			.pipe(
 				filter((timeLog: ITimeLog) => !!timeLog),

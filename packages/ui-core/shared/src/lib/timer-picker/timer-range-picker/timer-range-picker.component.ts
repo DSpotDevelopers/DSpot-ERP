@@ -23,9 +23,8 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 function offsetToHours(offset: string): number {
 	const [hours, minutes] = offset.split(':').map(Number);
 	const multiplier = hours < 0 ? -1 : 1;
-	return hours + multiplier * minutes / 60;
+	return hours + (multiplier * minutes) / 60;
 }
-
 
 @Component({
 	selector: 'ngx-timer-range-picker',
@@ -54,7 +53,7 @@ export class TimerRangePickerComponent implements AfterViewInit {
 	@Input() fromEmployeeAppointment = false;
 	@Input() timezoneOffset: string;
 	@Input() customClass?: string = '';
-	@Input() timezone: string;
+	@Input() timeZone: string;
 	@Input('maxDate')
 	public get maxDate(): Date {
 		return this._maxDate;
@@ -99,14 +98,16 @@ export class TimerRangePickerComponent implements AfterViewInit {
 	date: Date;
 	errorMessage: string | null = null;
 
-	constructor(private cd: ChangeDetectorRef) { }
+	constructor(private cd: ChangeDetectorRef) {}
 
-	onChange: any = () => { };
-	onTouched: any = () => { };
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	onChange: any = () => {};
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	onTouched: any = () => {};
 	filter = (date) => !this._disabledDates.includes(date.getTime());
 
 	ngAfterViewInit() {
-		this.timezoneOffset = this.timezoneOffset || timezone.tz(this.timezone).format('Z');
+		this.timezoneOffset = this.timezoneOffset || timezone.tz(this.timeZone).format('Z');
 
 		// Calculate timezone offset correction to be applied for Date object
 		// Date object is always displayed in local timezone, to get the adjustment and simulate
@@ -217,13 +218,22 @@ export class TimerRangePickerComponent implements AfterViewInit {
 	 */
 	writeValue(value: IDateRange) {
 		if (value) {
-			this.date = value.start ? moment(value.start).toDate() : new Date();
-			if (this._timezoneAdjustment !== 0) {
-				// Calculate the adjusted date time if timezone adjustment is needed
+			const momentStart = moment(value.start);
+			const momentEnd = moment(value.end);
+
+			this.date = momentStart.isValid() ? momentStart.toDate() : new Date();
+
+			if (momentStart.isValid() && this._timezoneAdjustment !== 0) {
 				this.date = new Date(this.date.getTime() + this._timezoneAdjustment * 3600000);
 			}
-			this.startTime = value.start ? moment(value.start).tz(this.timezone).format('HH:mm:ss') : null;
-			this.endTime = value.end ? moment(value.end).tz(this.timezone).format('HH:mm:ss') : null;
+
+			if (this.timeZone) {
+				this.startTime = momentStart.isValid() ? momentStart.tz(this.timeZone).format('HH:mm:ss') : null;
+				this.endTime = momentEnd.isValid() ? momentEnd.tz(this.timeZone).format('HH:mm:ss') : null;
+			} else {
+				this.startTime = momentStart.isValid() ? momentStart.format('HH:mm:ss') : null;
+				this.endTime = momentEnd.isValid() ? momentEnd.format('HH:mm:ss') : null;
+			}
 		}
 	}
 

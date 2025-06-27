@@ -766,13 +766,15 @@
 			"WAIT_UNTIL_RELOAD": "Please wait till application reloads"
 		},
 		"ERROR": {
-			"PROJECT_NAME": "Project name is required.",
+			"PROJECT_NAME": "Project name is required and cannot be empty.",
 			"PROJECT_URL": "Project url is invalid.",
 			"OPEN_SOURCE_PROJECT_URL": "Open source project url is invalid.",
 			"INVALID_IMAGE_URL": "Invalid image URL.",
 			"PROJECT_EMPLOYEE": "This field is required. Please select at least one employee.",
 			"PROJECT_ORGANIZATION_CONTACT": "This field is required. Please select a client.",
-			"PROJECT_OWNER": "Project owner is required."
+			"PROJECT_OWNER": "Project owner is required.",
+			"TASK_TITLE": "Task title is required and cannot be empty.",
+			"INVALID_WHOLE_NUMBER": "Please enter a valid whole number between 1 and 100."
 		}
 	},
 	"POP_UPS": {
@@ -3612,6 +3614,11 @@
 			"MAX_LIMIT_REACHED": "Max limit reached"
 		},
 		"MESSAGE": {
+			"HOUR": "hour",
+			"HOURS": "hours",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST": "Unable to add time log. The weekly working time limit of ",
+			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "Unable to update time log. The weekly working time limit of ",
+			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "has been reached. Contact system administrator to modify limits.",
 			"WORKED_THIS_WEEK": "Worked this week",
 			"WEEKLY_LIMIT": "Weekly limit",
 			"ERRORS": "Please check the form for errors",
@@ -4174,6 +4181,8 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "The server URL mustn't be empty."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "Weekly limit exceeded",
+		"PROJECT_TASK_PERMISSION_ERROR": "Timer stopped because you don't have permission to access this task",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "Timer stopped because you don't have permission to access this project",
 		"OF_HRS": "Of {{ limit }} hrs",
 		"TIME_TRACKER_DISABLED": "Time tracker has been disabled",
 		"STOP_TIMER_CHANGE_CLIENT": "Please stop the timer before changing the client",
@@ -4955,6 +4964,34 @@
 	"SERVER_API": "API Server",
 	"SERVER_API_LOG": "API Server Log",
 	"COMING_SOON": "This page is coming soon!",
+	"DEFAULT_ERRORS": {
+		"TITLE": {
+			"BAD_REQUEST": "Bad Request",
+			"UNAUTHORIZED": "Unauthorized",
+			"FORBIDDEN": "Forbidden",
+			"NOT_FOUND": "Not Found",
+			"CONFLICT": "Conflict",
+			"INTERNAL_SERVER_ERROR": "Internal Server Error",
+			"GATEWAY_TIMEOUT": "Gateway Timeout",
+			"SERVICE_UNAVAILABLE": "Service Unavailable",
+			"NETWORK_ERROR": "Network Error",
+			"DEFAULT": "Error",
+			"CONNECTION_ERROR": "Connection Error"
+		},
+		"MESSAGES": {
+			"BAD_REQUEST": "The request could not be understood or was missing required parameters.",
+			"UNAUTHORIZED": "Authentication failed or user does not have permissions for the desired action.",
+			"FORBIDDEN": "You do not have permission to access the requested resource.",
+			"NOT_FOUND": "The requested resource could not be found.",
+			"CONFLICT": "There was a conflict with the current state of the resource.",
+			"INTERNAL_SERVER_ERROR": "An internal server error has occurred.",
+			"GATEWAY_TIMEOUT": "The server timed out waiting for the request.",
+			"SERVICE_UNAVAILABLE": "The service is temporarily unavailable. Please try again later.",
+			"NETWORK_ERROR": "Could not connect to the server. Please check your network connection.",
+			"DEFAULT": "An unexpected error occurred.",
+			"CONNECTION_ERROR": "Lost connection to the server. Please try again later."
+		}
+	},
 	"PLUGIN": {
 		"VIDEO": {
 			"SINGLE": "Video",

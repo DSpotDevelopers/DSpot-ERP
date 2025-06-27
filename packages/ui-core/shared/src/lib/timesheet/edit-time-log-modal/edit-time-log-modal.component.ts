@@ -15,10 +15,12 @@ import {
 	TimeLogType,
 	TimeLogSourceEnum,
 	ITimerStatusWithWeeklyLimits,
-	TimeLogPartialStatus
+	TimeLogPartialStatus,
+	TimeErrorsEnum,
+	IEmployee
 } from '@gauzy/contracts';
 import { toUTC, toLocal, distinctUntilChange } from '@gauzy/ui-core/common';
-import { Store, TimesheetService, TimeTrackerService, ToastrService } from '@gauzy/ui-core/core';
+import { Store, TimeLogEventService, TimesheetService, TimeTrackerService, ToastrService } from '@gauzy/ui-core/core';
 import { DurationFormatPipe } from '../../pipes';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -58,12 +60,14 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 	selectedRangeSubscription: Subscription;
 	isTimeRangeValid = true;
 	limitReached = false;
+	hasPermission = false;
 
 	// Time log state management
 	private _timeLog: ITimeLog | Partial<ITimeLog> = {};
 	private workedThisWeek: string;
 	private reWeeklyLimit: string;
 	private timerStatusWithWeeklyLimits: ITimerStatusWithWeeklyLimits;
+	private selectedEmployee: IEmployee;
 	@Input() set timeLog(value: ITimeLog | Partial<ITimeLog>) {
 		this._timeLog = { ...value }; // Shallow copy to avoid mutation
 		this.mode = this._timeLog?.id ? 'update' : 'create';
@@ -72,7 +76,7 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 		return this._timeLog;
 	}
 
-	@Input() timezone: string;
+	@Input() timeZone: string;
 
 	/*
 	 * TimeLog Mutation Form
@@ -101,8 +105,9 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 		private readonly _toastrService: ToastrService,
 		private readonly _timeTrackerService: TimeTrackerService,
 		private readonly _durationFormatPipe: DurationFormatPipe,
-		public readonly _translateService: TranslateService
-	) { }
+		public readonly _translateService: TranslateService,
+		public readonly _timeLogEventService: TimeLogEventService
+	) {}
 
 	ngOnInit() {
 		const { startedAt, stoppedAt } = this.timeLog;
@@ -110,6 +115,8 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 			start: moment(startedAt).toDate(),
 			end: moment(stoppedAt).toDate()
 		};
+
+		this.hasPermission = this._store.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
 
 		// Subscribe to subject for overlap checks
 		this.subject$
@@ -230,6 +237,10 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 
 	onValidationChange(isValid: boolean) {
 		this.isTimeRangeValid = isValid;
+	}
+
+	onSelectedEmployee(employee: IEmployee) {
+		this.selectedEmployee = employee;
 	}
 
 	/**
@@ -358,7 +369,7 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 			\n ${this._translateService.instant('TOASTR.MESSAGE.WEEKLY_LIMIT')}: ${this.reWeeklyLimit}`,
 			'TOASTR.TITLE.MAX_LIMIT_REACHED',
 			null,
-			{ duration: 2500, preventDuplicates: true, toastClass: 'custom-toast' }
+			{ duration: 3000, preventDuplicates: true, toastClass: 'custom-toast' }
 		);
 	}
 
@@ -375,8 +386,10 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 		const newWorkedTime = this.timerStatusWithWeeklyLimits.workedThisWeek - this.originalTimeDiff + this.timeDiff;
 		const isEditing = !!this.timeLog?.id;
 		if (this.loading || this.isButtonDisabled) return;
+
 		if (
 			isEditing &&
+			!this.hasPermission &&
 			this.timeDiff > this.originalTimeDiff &&
 			newWorkedTime > Math.trunc(this.timerStatusWithWeeklyLimits.reWeeklyLimit * 3600)
 		) {
@@ -386,8 +399,9 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 
 		if (
 			!isEditing &&
+			!this.hasPermission &&
 			this.timeDiff + this.timerStatusWithWeeklyLimits.workedThisWeek >
-			Math.trunc(this.timerStatusWithWeeklyLimits.reWeeklyLimit * 3600)
+				Math.trunc(this.timerStatusWithWeeklyLimits.reWeeklyLimit * 3600)
 		) {
 			this.showMaxLimitReachedToast();
 			return;
@@ -415,9 +429,36 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 				source: TimeLogSourceEnum.WEB_TIMER,
 				employeeId: this.form.value.employeeId || employee?.id, // Fallback to current employee ID,
 				partialStatus: this._timeLog?.partialStatus ?? TimeLogPartialStatus.COMPLETE,
-				referenceDate: this._timeLog?.partialStatus == TimeLogPartialStatus.TO_LEFT ?
-					this._timeLog?.stoppedAt : this._timeLog.startedAt,
+				referenceDate:
+					this._timeLog?.partialStatus == TimeLogPartialStatus.TO_LEFT
+						? this._timeLog?.stoppedAt
+						: this._timeLog.startedAt
 			};
+
+			const selectedEmployeeId = this.form.value.employeeId || employee?.id;
+			const isCurrentUser = employee.id === selectedEmployeeId;
+
+			if (
+				isCurrentUser &&
+				isEditing &&
+				this.hasPermission &&
+				this.timeDiff > this.originalTimeDiff &&
+				newWorkedTime > Math.trunc(this.timerStatusWithWeeklyLimits.reWeeklyLimit * 3600)
+			) {
+				this.showMaxLimitReachedToast();
+				return;
+			}
+
+			if (
+				isCurrentUser &&
+				!isEditing &&
+				this.hasPermission &&
+				this.timeDiff + this.timerStatusWithWeeklyLimits.workedThisWeek >
+					Math.trunc(this.timerStatusWithWeeklyLimits.reWeeklyLimit * 3600)
+			) {
+				this.showMaxLimitReachedToast();
+				return;
+			}
 
 			// Create or update the time log based on the mode
 			const timeLog =
@@ -427,6 +468,7 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 
 			// Close the dialog and reset the form
 			this._dialogRef.close(timeLog);
+			this._timeLogEventService.notifyChange('added');
 			this.form.reset();
 			this.selectedRange = { start: null, end: null };
 
@@ -434,7 +476,40 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 			this._toastrService.success('TIMER_TRACKER.ADD_TIME_SUCCESS');
 		} catch (error) {
 			// Handle errors and show error notification
-			this._toastrService.error('Error: Unable to add time');
+			if (error.error?.message === TimeErrorsEnum.WEEKLY_LIMIT_REACHED) {
+				const selectedEmployee = this.selectedEmployee ?? this.timeLog?.employee;
+				const hoursLabel =
+					selectedEmployee?.reWeeklyLimit === 1
+						? this._translateService.instant('TOASTR.MESSAGE.HOUR')
+						: this._translateService.instant('TOASTR.MESSAGE.HOURS');
+				const limit = selectedEmployee?.reWeeklyLimit ?? 0;
+				const limitText = `${limit} ${hoursLabel}`;
+				const partSecond = this._translateService.instant(
+					'TOASTR.MESSAGE.UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND'
+				);
+
+				if (isEditing) {
+					const partFirst = this._translateService.instant(
+						'TOASTR.MESSAGE.UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST'
+					);
+					this._toastrService.error(
+						`${partFirst} ${limitText} ${partSecond}`,
+						'TOASTR.TITLE.MAX_LIMIT_REACHED',
+						{ duration: 3000, preventDuplicates: true, toastClass: 'custom-toast' }
+					);
+				} else {
+					const partFirst = this._translateService.instant(
+						'TOASTR.MESSAGE.UNABLE_TO_ADD_ERROR_MESSAGE_PART_FIRST'
+					);
+					this._toastrService.error(
+						`${partFirst} ${limitText} ${partSecond}`,
+						'TOASTR.TITLE.MAX_LIMIT_REACHED',
+						{ duration: 3000, preventDuplicates: true, toastClass: 'custom-toast' }
+					);
+				}
+			} else {
+				this._toastrService.error(error?.error?.message);
+			}
 		} finally {
 			// Reset the loading state
 			this.loading = false;
@@ -459,11 +534,14 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 
 		// Prepare the request object for deleting logs.
 		const request = {
-			logs: [{
-				id: timeLog.id,
-				partialStatus: timeLog.partialStatus,
-				referenceDate: timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt,
-			}],
+			logs: [
+				{
+					id: timeLog.id,
+					partialStatus: timeLog.partialStatus,
+					referenceDate:
+						timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt
+				}
+			],
 			organizationId
 		};
 
@@ -479,6 +557,7 @@ export class EditTimeLogModalComponent implements OnInit, AfterViewInit, OnDestr
 
 			// Close the dialog after successful deletion.
 			this._dialogRef.close(res);
+			this._timeLogEventService.notifyChange('deleted');
 		} catch (error) {
 			// Optionally handle any errors (e.g., show an error message).
 			console.error('Error deleting time log:', error);
