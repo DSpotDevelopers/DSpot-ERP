@@ -102,7 +102,7 @@ export class ViewScreenshotsModalComponent implements OnInit {
 		private readonly _nbDialogService: NbDialogService,
 		private readonly _toastrService: ToastrService,
 		private readonly _timeZoneService: TimeZoneService
-	) { }
+	) {}
 
 	ngOnInit(): void {
 		// Subscribe to the timeZone$ observable
@@ -222,11 +222,16 @@ export class ViewScreenshotsModalComponent implements OnInit {
 		try {
 			const { id: organizationId, name: organizationName } = this.organization;
 			const request = {
-				logIds: [{
-					id: timeLog.id,
-					partialStatus: timeLog.partialStatus,
-					referenceDate: timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT ? timeLog.stoppedAt : timeLog.startedAt,
-				}],
+				logs: [
+					{
+						id: timeLog.id,
+						partialStatus: timeLog.partialStatus,
+						referenceDate:
+							timeLog.partialStatus === TimeLogPartialStatus.TO_LEFT
+								? timeLog.stoppedAt
+								: timeLog.startedAt
+					}
+				],
 				organizationId
 			};
 

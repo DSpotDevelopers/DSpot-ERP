@@ -114,7 +114,7 @@ export class ViewTimeLogComponent implements OnInit, OnDestroy {
 		}
 		const { id: organizationId } = this.organization;
 		const request = {
-			logIds: [
+			logs: [
 				{
 					id: timeLog.id,
 					partialStatus: timeLog.partialStatus,

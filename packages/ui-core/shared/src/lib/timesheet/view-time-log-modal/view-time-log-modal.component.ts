@@ -73,7 +73,7 @@ export class ViewTimeLogModalComponent implements OnInit {
 	onDeleteConfirm() {
 		const { id: organizationId } = this.organization;
 		const request = {
-			logIds: [
+			logs: [
 				{
 					id: this.timeLog.id,
 					partialStatus: this.timeLog.partialStatus,
