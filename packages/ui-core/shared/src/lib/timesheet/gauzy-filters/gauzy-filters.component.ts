@@ -200,7 +200,6 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 			)
 			.subscribe();
 
-		this.setAutoRefresh(true);
 		this.triggerFilterChange();
 		this.cd.detectChanges();
 	}
