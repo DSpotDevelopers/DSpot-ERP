@@ -21,8 +21,8 @@ export class TimerWeeklyLimitService {
 			organizationId: employee.organizationId,
 			tenantId: employee.tenantId,
 			employeeId: employee.id,
-			startDate: moment(refDate).startOf('week').toDate(),
-			endDate: moment(refDate).endOf('week').toDate(),
+			startDate: moment.utc(refDate).startOf('isoWeek').toDate(),
+			endDate: moment.utc(refDate).endOf('isoWeek').toDate(),
 			onlyMe: true
 		});
 
