@@ -9,6 +9,7 @@ on:
       - 'docker/**'
 
 jobs:
+
   check-e2e-dependencies:
     name: Check and Build E2E Dependencies
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'dependencies-built') }}
@@ -72,6 +73,9 @@ jobs:
             -e API_PORT=${{ env.API_PORT }} \
             -e API_BASE_URL=${{ env.API_BASE_URL }} \
             ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_DEPENDENCIES }}:latest-e2e
+
+      - name: Set up Docker Compose infra
+        run: docker-compose -f docker-compose.infra.yml up -d
 
       - name: Wait for Services
         run: |

@@ -69,7 +69,7 @@ tools
 **/dist
 **/build
 
-# Non-related apps and packages
+# API apps and packages
 apps
 !apps/api
 apps/api/public
@@ -80,7 +80,14 @@ apps/api/public
 !apps/api/public/integrations
 !apps/api/public/reports
 apps/api/report.*.json
-packages/desktop-*
-packages/ui-*
-packages/plugins/*-ui
-packages/plugins/integration-wakatime
+
+# Gauzy apps and packages
+!apps/gauzy
+packages
+!packages/contracts
+!packages/constants
+!packages/ui-*
+!packages/plugins/*-ui
+
+# e2e apps and packages
+!apps/gauzy-e2e
