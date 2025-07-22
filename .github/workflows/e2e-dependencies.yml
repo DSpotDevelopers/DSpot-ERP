@@ -1,0 +1,104 @@
+name: Generate E2E Test Environment Image
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'The branch, tag or SHA to checkout'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  check-e2e-changes:
+    name: Check for dependency changes
+    runs-on: ubuntu-latest
+    outputs:
+      changes_detected: ${{ steps.check-e2e-changes.outputs.changes_detected }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 2
+
+      - name: Check for changes in dependency files
+        id: check-e2e-changes
+        run: |
+          # For manual triggers or workflow calls, check if files have changed in the last commit
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+
+          # Define patterns for all dependency-related files
+          # API Dependencies
+          DEPENDENCY_PATTERN="^package\.json$|^yarn\.lock$|^apps\/api\/package\.json$"
+          DEPENDENCY_PATTERN="$DEPENDENCY_PATTERN|^packages\/(auth|common|config|contracts|core|plugin|utils)\/.*package\.json$"
+          DEPENDENCY_PATTERN="$DEPENDENCY_PATTERN|^packages\/plugins\/[a-z\-]+[^u][^i]\/.*package\.json$"
+
+          # WebApp Dependencies
+          DEPENDENCY_PATTERN="$DEPENDENCY_PATTERN|^apps\/gauzy\/package\.json$"
+          DEPENDENCY_PATTERN="$DEPENDENCY_PATTERN|^packages\/(contracts|ui-auth|ui-config|ui-core)\/.*package\.json$"
+          DEPENDENCY_PATTERN="$DEPENDENCY_PATTERN|^packages\/plugins\/[a-z\-]+(-ui)\/.*package\.json$"
+
+          # Infrastructure and E2E specific files
+          DEPENDENCY_PATTERN="$DEPENDENCY_PATTERN|^\.deploy\/dependencies\/(api|webapp|e2e)\/|^docker-compose\.infra\.yml$"
+          DEPENDENCY_PATTERN="$DEPENDENCY_PATTERN|^\.github\/workflows\/(api|webapp|e2e)-dependencies\.yml$"
+
+          if echo "$CHANGED_FILES" | grep -q -E "$DEPENDENCY_PATTERN"; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+            echo "Dependency changes detected"
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+            echo "No dependency changes detected"
+          fi
+
+  handle-no-changes:
+    name: Handle no changes
+    needs: check-e2e-changes
+    if: needs.check-e2e-changes.outputs.changes_detected != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: No changes required
+        run: |
+          echo "No dependency changes detected. No rebuild required."
+          exit 0
+
+  generate-e2e-image:
+    name: Generate E2E environment image
+    needs: check-e2e-changes
+    if: needs.check-e2e-changes.outputs.changes_detected == 'true'
+    runs-on: ubuntu-latest
+    environment: ${{ startsWith(github.ref, 'refs/tags/v') && 'production' || 'staging' }}
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+      ECR_REPOSITORY_DEPENDENCIES: ${{ vars.ECR_REPOSITORY_DEPENDENCIES }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build E2E environment image
+        run: |
+          docker build \
+            -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_DEPENDENCIES }}:latest-e2e \
+            -f .deploy/dependencies/e2e/Dockerfile \
+            .
+
+      - name: Push image to Amazon ECR
+        run: |
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_DEPENDENCIES }}:latest-e2e

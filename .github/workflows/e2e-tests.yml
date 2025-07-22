@@ -1,0 +1,121 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches: [dev-dspot]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'docker/**'
+
+jobs:
+  check-e2e-dependencies:
+    name: Check and Build E2E Dependencies
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'dependencies-built') }}
+    uses: ./.github/workflows/e2e-dependencies.yml
+    secrets: inherit
+
+  e2e-environment:
+    name: Setup E2E Environment
+    needs: [check-e2e-dependencies]
+    if: ${{ always() && (needs.check-e2e-dependencies.result == 'success' || needs.check-e2e-dependencies.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+      ECR_REPOSITORY_DEPENDENCIES: ${{ vars.ECR_REPOSITORY_DEPENDENCIES }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      DB_NAME: gauzy
+      DB_USER: postgres
+      DB_PASS: gauzy_password
+      DB_PORT: 5432
+      DB_HOST: localhost
+      API_HOST: 0.0.0.0
+      API_PORT: 3000
+      API_BASE_URL: http://localhost:3000
+      WEBAPP_URL: http://localhost:4200
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Start E2E Environment
+        run: |
+          # Pull the latest e2e image
+          docker pull ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_DEPENDENCIES }}:latest-e2e
+
+          # Start the e2e container with all services
+          docker run -d \
+            --name e2e-env \
+            -p 3000:3000 \
+            -p 4200:4200 \
+            -p 5432:5432 \
+            -e NODE_ENV=production \
+            -e DB_HOST=${{ env.DB_HOST }} \
+            -e DB_PORT=${{ env.DB_PORT }} \
+            -e DB_NAME=${{ env.DB_NAME }} \
+            -e DB_USER=${{ env.DB_USER }} \
+            -e DB_PASS=${{ env.DB_PASS }} \
+            -e API_HOST=${{ env.API_HOST }} \
+            -e API_PORT=${{ env.API_PORT }} \
+            -e API_BASE_URL=${{ env.API_BASE_URL }} \
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_DEPENDENCIES }}:latest-e2e
+
+      - name: Wait for Services
+        run: |
+          echo "Waiting for PostgreSQL..."
+          timeout 30s bash -c 'until pg_isready -h localhost -p 5432; do sleep 2; done'
+
+          echo "Waiting for API..."
+          timeout 30s bash -c 'until curl -s http://localhost:3000/api; do sleep 2; done'
+
+          echo "Waiting for WebApp..."
+          timeout 30s bash -c 'until curl -s http://localhost:4200; do sleep 2; done'
+
+      - name: Clean and Seed Database
+        run: |
+          # The seed:all command will:
+          # 1. Clean the database (TRUNCATE all tables)
+          # 2. Reset sequences
+          # 3. Seed fresh test data
+          docker exec e2e-env yarn --cwd /app/apps/api seed:all
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+          cache: 'yarn'
+
+      - name: Install Dependencies
+        run: |
+          yarn config set network-timeout 300000
+          yarn install --frozen-lockfile --cache-folder ~/.cache/yarn
+
+      - name: Run E2E Tests
+        run: yarn e2e:ci
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            dist/cypress
+            cypress/screenshots
+            cypress/videos
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f e2e-env

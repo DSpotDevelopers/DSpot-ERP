@@ -7,7 +7,7 @@ import { OrganizationTagsPageData } from '../support/Base/pagedata/OrganizationT
 import * as dashboardPage from '../support/Base/pages/Dashboard.po';
 import { CustomCommands } from '../support/commands';
 
-// OK
+// OK (no issues detected)
 describe('Add employee level test', () => {
 	beforeEach(() => {
 		cy.session('login', () => {
