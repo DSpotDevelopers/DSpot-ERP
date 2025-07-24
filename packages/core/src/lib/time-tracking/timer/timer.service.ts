@@ -534,7 +534,7 @@ export class TimerService {
 		const durationInSeconds = moment.utc(stoppedAt).diff(moment.utc(lastLog.startedAt), 'seconds');
 
 		if (durationInSeconds < 1) {
-			this.logger.warn(`Pominięto zapis time loga: różnica czasu < 1s`);
+			this.logger.warn(`Skipped saving time log: time difference < 1s`);
 			return null;
 		}
 
