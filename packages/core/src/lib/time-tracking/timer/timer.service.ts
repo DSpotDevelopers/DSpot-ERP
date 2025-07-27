@@ -129,7 +129,7 @@ export class TimerService {
 			...(source ? { source } : {}),
 			startedAt: LessThanOrEqual(end as Date), // Include logs that started before or during the selected day
 			stoppedAt: And(MoreThanOrEqual(start as Date), Not(IsNull())), // Include logs that ended on or after the selected day and are completed
-
+			employeeId,
 			tenantId,
 			organizationId
 		};
@@ -433,7 +433,6 @@ export class TimerService {
 
 		// Stop any previous running timers
 		await this.stopPreviousRunningTimers(employeeId, organizationId, tenantId);
-		const stoppedAt = moment.utc(startedAt).add(1, 'second').toDate();
 
 		// Check if the employee has reached the weekly limit
 		await this._timerWeeklyLimitService.checkWeeklyLimit(employee, startedAt);
@@ -445,7 +444,7 @@ export class TimerService {
 				tenantId,
 				employeeId,
 				startedAt,
-				stoppedAt,
+				stoppedAt: startedAt,
 				duration: 0,
 				source: source || TimeLogSourceEnum.WEB_TIMER,
 				logType: logType || TimeLogType.TRACKED,
@@ -529,13 +528,6 @@ export class TimerService {
 			this.logger.warn(
 				`stoppedAt (${stoppedAt}) is less than startedAt (${lastLog.startedAt}), skipping stoppedAt update.`
 			);
-		}
-
-		const durationInSeconds = moment.utc(stoppedAt).diff(moment.utc(lastLog.startedAt), 'seconds');
-
-		if (durationInSeconds < 1) {
-			this.logger.warn(`Skipped saving time log: time difference < 1s`);
-			return null;
 		}
 
 		// Construct the update payload, conditionally excluding stoppedAt if it shouldn't be updated
