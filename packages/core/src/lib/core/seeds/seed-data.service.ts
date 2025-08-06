@@ -22,6 +22,8 @@ import {
 	createRandomSuperAdminUsers,
 	createRandomUsers
 } from '../../user/user.seed';
+import { createE2EAdminUsers, createE2EEmployeesUsers } from '../../user/e2e-user.seed';
+import { E2E_EMPLOYEES } from '../../user/e2e-users';
 import { createDefaultEmployees, createRandomEmployees } from '../../employee/employee.seed';
 import {
 	createDefaultOrganizations,
@@ -224,7 +226,8 @@ import { createRandomOrganizationTagTypes, createTagTypes } from '../../tag-type
 export enum SeederTypeEnum {
 	ALL = 'all',
 	EVER = 'ever',
-	DEFAULT = 'default'
+	DEFAULT = 'default',
+	E2E = 'e2e'
 }
 
 @Injectable()
@@ -355,6 +358,29 @@ export class SeedDataService {
 			await this.closeConnection();
 
 			console.log('Database DSpot ERP Seed Completed');
+		} catch (error) {
+			this.handleError(error);
+		}
+	}
+
+	/**
+	 * Seed E2E Testing Data
+	 * Seeds only an organization within an existing database for e2e testing
+	 */
+	public async runE2ESeed(fromAPI: boolean) {
+		try {
+			this.seedType = SeederTypeEnum.E2E;
+
+			// Connect to database (don't reset, use existing)
+			await this.createConnection();
+
+			// Seed minimal organization data for e2e testing
+			await this.seedE2EOrganizationData();
+
+			// Disconnect to database
+			await this.closeConnection();
+
+			console.log('E2E Organization Seed Completed');
 		} catch (error) {
 			this.handleError(error);
 		}
@@ -569,6 +595,124 @@ export class SeedDataService {
 		});
 
 		this.log(chalk.magenta(`✅ SEEDED BASIC ${env.production ? 'PRODUCTION' : ''} DATABASE`));
+	}
+
+	/**
+	 * Populate Database with E2E Testing Organization Data
+	 * Seeds only organization-specific data within an existing database
+	 */
+	private async seedE2EOrganizationData() {
+		this.log(chalk.magenta(`🌱 SEEDING E2E TESTING ORGANIZATION...`));
+
+		// Get or create E2E tenant
+		this.tenant = await this.getOrCreateE2ETenant();
+
+		// Get or create E2E organization
+		this.defaultOrganization = await this.getOrCreateE2EOrganization();
+
+		// Create E2E-specific users with different emails to avoid conflicts
+		await this.createE2EUsers();
+
+		// Create essential tags for e2e testing
+		const defaultTagTypes = await this.tryExecute(
+			'E2E Tag Types',
+			createTagTypes(this.dataSource, this.tenant, [this.defaultOrganization])
+		);
+
+		await this.tryExecute(
+			'E2E Tags',
+			createDefaultTags(this.dataSource, this.tenant, [this.defaultOrganization], defaultTagTypes || [])
+		);
+
+		// Create employee levels for e2e testing
+		await this.tryExecute(
+			'E2E Employee Levels',
+			createEmployeeLevels(this.dataSource, this.tenant, [this.defaultOrganization])
+		);
+
+		this.log(chalk.magenta(`✅ SEEDED E2E TESTING ORGANIZATION`));
+	}
+
+	/**
+	 * Create E2E-specific users with different emails to avoid conflicts
+	 */
+	private async createE2EUsers() {
+		// Create E2E admin users with different emails
+		const { e2eSuperAdminUsers, e2eAdminUsers } = await createE2EAdminUsers(this.dataSource, this.tenant);
+
+		// Create E2E employee users
+		const { e2eEmployeeUsers } = await createE2EEmployeesUsers(this.dataSource, this.tenant);
+
+		// Create user-organization relationships
+		const e2eUsers = [...e2eSuperAdminUsers, ...e2eAdminUsers, ...e2eEmployeeUsers];
+		await this.tryExecute(
+			'E2E Users',
+			createDefaultUsersOrganizations(this.dataSource, this.tenant, [this.defaultOrganization], e2eUsers)
+		);
+
+		// Create employees
+		this.defaultEmployees = await createDefaultEmployees(
+			this.dataSource,
+			this.tenant,
+			this.defaultOrganization,
+			e2eEmployeeUsers,
+			E2E_EMPLOYEES
+		);
+	}
+
+	/**
+	 * Get or create E2E tenant
+	 */
+	private async getOrCreateE2ETenant(): Promise<ITenant> {
+		// Try to find existing E2E tenant
+		const existingTenant = await this.dataSource.getRepository('Tenant').findOne({
+			where: { name: 'E2E Testing Tenant' }
+		});
+
+		if (existingTenant) {
+			this.log(chalk.blue(`Found existing E2E tenant: ${existingTenant.name}`));
+			return existingTenant;
+		}
+
+		// Create new E2E tenant
+		this.log(chalk.blue(`Creating new E2E tenant...`));
+		return (await this.tryExecute(
+			'E2E Tenant',
+			createDefaultTenant(this.dataSource, 'E2E Testing Tenant')
+		)) as ITenant;
+	}
+
+	/**
+	 * Get or create E2E organization
+	 */
+	private async getOrCreateE2EOrganization(): Promise<IOrganization> {
+		// Try to find existing E2E organization
+		const existingOrg = (await this.dataSource.getRepository('Organization').findOne({
+			where: { name: 'E2E Testing Organization' }
+		})) as IOrganization;
+
+		if (existingOrg) {
+			this.log(chalk.blue(`Found existing E2E organization: ${existingOrg.name}`));
+			return existingOrg;
+		}
+
+		// Create new E2E organization
+		this.log(chalk.blue(`Creating new E2E organization...`));
+		const organizations = (await this.tryExecute(
+			'E2E Organization',
+			createDefaultOrganizations(this.dataSource, this.tenant, [
+				{
+					name: 'E2E Testing Organization',
+					currency: 'USD',
+					defaultValueDateType: 'TODAY',
+					imageUrl: 'assets/images/logos/dspot_erp_light.svg',
+					isDefault: true,
+					totalEmployees: 1
+				}
+			])
+		)) as IOrganization[];
+
+		return organizations.find((org) => org.name === 'E2E Testing Organization');
 	}
 
 	/**

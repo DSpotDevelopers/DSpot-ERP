@@ -27,7 +27,38 @@ export async function seedDefault(devConfig: Partial<ApplicationPluginConfig>) {
 			const seeder = app.get(SeedDataService);
 			seeder
 				.runDefaultSeed(false)
-				.then(() => {})
+				.then(() => {
+					// Seed completed successfully
+				})
+				.catch((error) => {
+					throw error;
+				})
+				.finally(() => app.close());
+		})
+		.catch((error) => {
+			throw error;
+		});
+}
+
+/**
+ * Seeds organization-specific data for e2e testing within an existing database.
+ * Creates E2E Testing Tenant and Organization with essential data for testing.
+ * Does not reset the database, only adds organization-specific data.
+ *
+ */
+export async function seedE2E(devConfig: Partial<ApplicationPluginConfig>) {
+	await registerPluginConfig(devConfig);
+
+	NestFactory.createApplicationContext(SeederModule.forPlugins(), {
+		logger: ['log', 'error', 'warn', 'debug', 'verbose']
+	})
+		.then((app) => {
+			const seeder = app.get(SeedDataService);
+			seeder
+				.runE2ESeed(false)
+				.then(() => {
+					// E2E seed completed successfully
+				})
 				.catch((error) => {
 					throw error;
 				})
