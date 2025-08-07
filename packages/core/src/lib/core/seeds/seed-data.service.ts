@@ -28,8 +28,9 @@ import { createDefaultEmployees, createRandomEmployees } from '../../employee/em
 import {
 	createDefaultOrganizations,
 	createRandomOrganizations,
+	DEFAULT_ORGANIZATIONS,
 	DEFAULT_EVER_ORGANIZATIONS,
-	DEFAULT_ORGANIZATIONS
+	DEFAULT_E2E_ORGANIZATIONS
 } from '../../organization';
 import { createDefaultEmployeeDashboards, createRandomEmployeeDashboards } from '../../dashboard/dashboard.seed';
 import { createDefaultIncomes, createRandomIncomes } from '../../income/income.seed';
@@ -40,8 +41,15 @@ import {
 } from '../../user-organization/user-organization.seed';
 import { createCountries } from '../../country/country.seed';
 import { createDefaultTeams, createRandomTeam } from '../../organization-team/organization-team.seed';
+import { E2E_ORGANIZATION_TEAMS } from '../../organization-team/e2e-organization-teams';
 import { createRolePermissions } from '../../role-permission/role-permission.seed';
-import { createDefaultTenant, createRandomTenants, DEFAULT_EVER_TENANT, DEFAULT_TENANT } from '../../tenant';
+import {
+	createDefaultTenant,
+	createRandomTenants,
+	DEFAULT_EVER_TENANT,
+	DEFAULT_TENANT,
+	DEFAULT_E2E_TENANT
+} from '../../tenant';
 import { createDefaultTenantSetting } from './../../tenant/tenant-setting/tenant-setting.seed';
 import { createDefaultEmailTemplates } from '../../email-template/email-template.seed';
 import {
@@ -321,6 +329,9 @@ export class SeedDataService {
 			// Seed basic default data for default tenant
 			await this.seedBasicDefaultData();
 
+			// Seed default data including contacts, projects, teams, etc.
+			await this.seedDefaultData();
+
 			// Seed reports related data
 			await this.seedReportsData();
 
@@ -351,6 +362,9 @@ export class SeedDataService {
 			// Seed basic default data for default tenant
 			await this.seedBasicDefaultData();
 
+			// Seed default data including contacts, projects, teams, etc.
+			await this.seedDefaultData();
+
 			// Seed reports related data
 			await this.seedReportsData();
 
@@ -371,11 +385,22 @@ export class SeedDataService {
 		try {
 			this.seedType = SeederTypeEnum.E2E;
 
-			// Connect to database (don't reset, use existing)
+			await this.cleanUpPreviousRuns();
+
+			// Connect to database
 			await this.createConnection();
 
-			// Seed minimal organization data for e2e testing
-			await this.seedE2EOrganizationData();
+			// Reset database to start with new, fresh data
+			await this.resetDatabase();
+
+			// Seed basic default data for e2e tenant
+			await this.seedBasicDefaultData();
+
+			// Seed default data including contacts, projects, teams, etc.
+			await this.seedDefaultData();
+
+			// Seed reports related data
+			await this.seedReportsData();
 
 			// Disconnect to database
 			await this.closeConnection();
@@ -486,7 +511,12 @@ export class SeedDataService {
 		await this.tryExecute('Issue Types', createDefaultIssueTypes(this.dataSource));
 
 		// default and internal tenant
-		const tenantName = this.seedType !== SeederTypeEnum.DEFAULT ? DEFAULT_EVER_TENANT : DEFAULT_TENANT;
+		const tenantName =
+			this.seedType === SeederTypeEnum.E2E
+				? DEFAULT_E2E_TENANT
+				: this.seedType !== SeederTypeEnum.DEFAULT
+				? DEFAULT_EVER_TENANT
+				: DEFAULT_TENANT;
 		this.tenant = (await this.tryExecute('Tenant', createDefaultTenant(this.dataSource, tenantName))) as ITenant;
 
 		this.roles = await createRoles(this.dataSource, [this.tenant]);
@@ -497,7 +527,11 @@ export class SeedDataService {
 
 		// Tenant level inserts which only need connection, tenant, roles
 		const organizations =
-			this.seedType !== SeederTypeEnum.DEFAULT ? DEFAULT_EVER_ORGANIZATIONS : DEFAULT_ORGANIZATIONS;
+			this.seedType === SeederTypeEnum.E2E
+				? DEFAULT_E2E_ORGANIZATIONS
+				: this.seedType !== SeederTypeEnum.DEFAULT
+				? DEFAULT_EVER_ORGANIZATIONS
+				: DEFAULT_ORGANIZATIONS;
 		this.organizations = (await this.tryExecute(
 			'Organizations',
 			createDefaultOrganizations(this.dataSource, this.tenant, organizations)
@@ -517,15 +551,35 @@ export class SeedDataService {
 
 		await this.tryExecute('Skills', createDefaultSkills(this.dataSource, this.tenant, this.defaultOrganization));
 
-		const { defaultSuperAdminUsers, defaultAdminUsers } = await createDefaultAdminUsers(
-			this.dataSource,
-			this.tenant
-		);
-		this.superAdminUsers.push(...(defaultSuperAdminUsers as IUser[]));
+		// Create users based on seed type
+		let defaultSuperAdminUsers: IUser[] = [];
+		let defaultAdminUsers: IUser[] = [];
+		let defaultEmployeeUsers: IUser[] = [];
 
-		const { defaultEmployeeUsers } = await createDefaultEmployeesUsers(this.dataSource, this.tenant);
+		if (this.seedType === SeederTypeEnum.E2E) {
+			// Use E2E-specific user creation
+			const { e2eSuperAdminUsers, e2eAdminUsers } = await createE2EAdminUsers(this.dataSource, this.tenant);
+			const { e2eEmployeeUsers } = await createE2EEmployeesUsers(this.dataSource, this.tenant);
 
-		if (this.seedType !== SeederTypeEnum.DEFAULT) {
+			defaultSuperAdminUsers = e2eSuperAdminUsers;
+			defaultAdminUsers = e2eAdminUsers;
+			defaultEmployeeUsers = e2eEmployeeUsers;
+		} else {
+			// Use default user creation
+			const { defaultSuperAdminUsers: superAdmins, defaultAdminUsers: admins } = await createDefaultAdminUsers(
+				this.dataSource,
+				this.tenant
+			);
+			const { defaultEmployeeUsers: employees } = await createDefaultEmployeesUsers(this.dataSource, this.tenant);
+
+			defaultSuperAdminUsers = superAdmins as IUser[];
+			defaultAdminUsers = admins;
+			defaultEmployeeUsers = employees;
+		}
+
+		this.superAdminUsers.push(...defaultSuperAdminUsers);
+
+		if (this.seedType !== SeederTypeEnum.DEFAULT && this.seedType !== SeederTypeEnum.E2E) {
 			const { defaultEverEmployeeUsers, defaultCandidateUsers } = await createDefaultUsers(
 				this.dataSource,
 				this.tenant
@@ -540,7 +594,8 @@ export class SeedDataService {
 			createDefaultUsersOrganizations(this.dataSource, this.tenant, this.organizations, defaultUsers)
 		);
 
-		const allDefaultEmployees = DEFAULT_EMPLOYEES.concat(DEFAULT_EVER_EMPLOYEES);
+		const allDefaultEmployees =
+			this.seedType === SeederTypeEnum.E2E ? E2E_EMPLOYEES : DEFAULT_EMPLOYEES.concat(DEFAULT_EVER_EMPLOYEES);
 		//User level data that needs dataSource, tenant, organization, role, users
 		this.defaultEmployees = await createDefaultEmployees(
 			this.dataSource,
@@ -613,22 +668,50 @@ export class SeedDataService {
 		// Create E2E-specific users with different emails to avoid conflicts
 		await this.createE2EUsers();
 
-		// Create essential tags for e2e testing
-		const defaultTagTypes = await this.tryExecute(
-			'E2E Tag Types',
-			createTagTypes(this.dataSource, this.tenant, [this.defaultOrganization])
-		);
+		// Check if tag types already exist before creating them
+		const existingTagTypes = await this.dataSource.getRepository('TagType').find({
+			where: { tenantId: this.tenant.id }
+		});
 
-		await this.tryExecute(
-			'E2E Tags',
-			createDefaultTags(this.dataSource, this.tenant, [this.defaultOrganization], defaultTagTypes || [])
-		);
+		if (existingTagTypes.length === 0) {
+			await this.tryExecute(
+				'E2E Tag Types',
+				createTagTypes(this.dataSource, this.tenant, [this.defaultOrganization])
+			);
+		} else {
+			this.log(chalk.blue(`Tag types already exist for E2E tenant, skipping...`));
+		}
 
-		// Create employee levels for e2e testing
-		await this.tryExecute(
-			'E2E Employee Levels',
-			createEmployeeLevels(this.dataSource, this.tenant, [this.defaultOrganization])
-		);
+		// Check if tags already exist before creating them
+		const existingTags = await this.dataSource.getRepository('Tag').find({
+			where: { tenantId: this.tenant.id }
+		});
+
+		if (existingTags.length === 0) {
+			const defaultTagTypes = (await this.dataSource.getRepository('TagType').find({
+				where: { tenantId: this.tenant.id }
+			})) as any[];
+			await this.tryExecute(
+				'E2E Tags',
+				createDefaultTags(this.dataSource, this.tenant, [this.defaultOrganization], defaultTagTypes)
+			);
+		} else {
+			this.log(chalk.blue(`Tags already exist for E2E tenant, skipping...`));
+		}
+
+		// Check if employee levels already exist before creating them
+		const existingEmployeeLevels = await this.dataSource.getRepository('EmployeeLevel').find({
+			where: { tenantId: this.tenant.id }
+		});
+
+		if (existingEmployeeLevels.length === 0) {
+			await this.tryExecute(
+				'E2E Employee Levels',
+				createEmployeeLevels(this.dataSource, this.tenant, [this.defaultOrganization])
+			);
+		} else {
+			this.log(chalk.blue(`Employee levels already exist for E2E tenant, skipping...`));
+		}
 
 		this.log(chalk.magenta(`✅ SEEDED E2E TESTING ORGANIZATION`));
 	}
@@ -776,7 +859,13 @@ export class SeedDataService {
 		// Employee level data that need connection, tenant, organization, role, users, employee
 		await this.tryExecute(
 			'Default Teams',
-			createDefaultTeams(this.dataSource, this.defaultOrganization, this.defaultEmployees, this.roles)
+			createDefaultTeams(
+				this.dataSource,
+				this.defaultOrganization,
+				this.defaultEmployees,
+				this.roles,
+				this.seedType === SeederTypeEnum.E2E ? E2E_ORGANIZATION_TEAMS : undefined
+			)
 		);
 
 		this.defaultProjects = await this.tryExecute(

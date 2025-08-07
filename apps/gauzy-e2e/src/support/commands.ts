@@ -153,6 +153,10 @@ export const CustomCommands = {
 		organizationProjectsPage.clickRequestProjectButton();
 		organizationProjectsPage.nameInputVisible();
 		organizationProjectsPage.enterNameInputData(OrganizationProjectsPageData.name);
+		organizationProjectsPage.clickOwnerDropdown();
+		organizationProjectsPage.selectOwnerDropdownOption(0);
+		organizationProjectsPage.clickClientsDropdown();
+		organizationProjectsPage.selectClientsDropdownOption(0);
 		organizationProjectsPage.selectEmployeeDropdownVisible();
 		organizationProjectsPage.clickSelectEmployeeDropdown();
 		if (!employeeFullName) {
@@ -169,6 +173,7 @@ export const CustomCommands = {
 		organizationProjectsPage.enterColorInputData(OrganizationProjectsPageData.color);
 		organizationProjectsPage.saveProjectButtonVisible();
 		organizationProjectsPage.clickSaveProjectButton();
+		organizationProjectsPage.waitMessageToShowAndHide();
 	},
 	addTask: (addTaskPage: any, AddTasksPageData: any, employeeFullName?: string) => {
 		cy.visit('/#/pages/tasks/dashboard', { timeout: pageLoadTimeout });

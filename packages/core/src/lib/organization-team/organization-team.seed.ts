@@ -5,14 +5,19 @@ import { IEmployee, IOrganization, IRole, ITenant, RolesEnum } from '@gauzy/cont
 import * as _ from 'underscore';
 import { faker } from '@faker-js/faker';
 import { DEFAULT_ORGANIZATION_TEAMS } from './default-organization-teams';
+import { E2E_ORGANIZATION_TEAMS } from './e2e-organization-teams';
 
 export const createDefaultTeams = async (
 	dataSource: DataSource,
 	organization: IOrganization,
 	employees: IEmployee[],
-	roles: IRole[]
+	roles: IRole[],
+	teamsConfig?: any
 ): Promise<OrganizationTeam[]> => {
-	const teams = DEFAULT_ORGANIZATION_TEAMS;
+	// Use provided teams config or default to DEFAULT_ORGANIZATION_TEAMS
+	// Note: DEFAULT_ORGANIZATION_TEAMS contains hardcoded emails like 'ruslan@example-dspot.com.pl'
+	// For E2E, we use E2E_ORGANIZATION_TEAMS with E2E-specific emails
+	const teams = teamsConfig || DEFAULT_ORGANIZATION_TEAMS;
 
 	const organizationTeams: OrganizationTeam[] = [];
 	for (let i = 0; i < teams.length; i++) {
@@ -21,9 +26,7 @@ export const createDefaultTeams = async (
 		team.organizationId = organization.id;
 		team.tenant = organization.tenant;
 
-		const filteredEmployees = employees.filter(
-			(e) => (teams[i].defaultMembers || []).indexOf(e.user.email) > -1
-		);
+		const filteredEmployees = employees.filter((e) => (teams[i].defaultMembers || []).indexOf(e.user.email) > -1);
 
 		const teamEmployees: OrganizationTeamEmployee[] = [];
 
@@ -33,16 +36,12 @@ export const createDefaultTeams = async (
 			teamEmployees.push(teamEmployee);
 		});
 
-		const managers = employees.filter(
-			(e) => (teams[i].manager || []).indexOf(e.user.email) > -1
-		);
+		const managers = employees.filter((e) => (teams[i].manager || []).indexOf(e.user.email) > -1);
 
 		managers.forEach((emp) => {
 			const teamEmployee = new OrganizationTeamEmployee();
 			teamEmployee.employeeId = emp.id;
-			teamEmployee.role = roles.filter(
-				(x) => x.name === RolesEnum.MANAGER
-			)[0];
+			teamEmployee.role = roles.filter((x) => x.name === RolesEnum.MANAGER)[0];
 			teamEmployees.push(teamEmployee);
 		});
 
