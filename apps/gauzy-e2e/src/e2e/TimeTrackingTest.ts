@@ -6,13 +6,13 @@ import * as dashboardPage from '../support/Base/pages/Dashboard.po';
 import { CustomCommands } from '../support/commands';
 
 //!  Expected to find element: nb-card-header > h4, but never found it.
-describe.skip('Time tracking page test', () => {
+describe('Time tracking page test', () => {
 	before(() => {
 		CustomCommands.login(loginPage, LoginPageData, dashboardPage);
+		timeTrackingPage.visit();
 	});
 
 	it('Should be able to verify time tracking page', () => {
-		cy.visit('/#/pages/dashboard/time-tracking');
 		timeTrackingPage.headerTextExist(TimeTrackingPageData.header);
 		timeTrackingPage.topCardTextExist(TimeTrackingPageData.membersWorked);
 		timeTrackingPage.topCardTextExist(TimeTrackingPageData.projectsWorked);
@@ -20,9 +20,7 @@ describe.skip('Time tracking page test', () => {
 		timeTrackingPage.topCardTextExist(TimeTrackingPageData.workedThisWeek);
 		timeTrackingPage.topCardTextExist(TimeTrackingPageData.todayActivity);
 		timeTrackingPage.topCardTextExist(TimeTrackingPageData.workedToday);
-		timeTrackingPage.bottomCardTextExist(
-			TimeTrackingPageData.recentActivities
-		);
+		timeTrackingPage.bottomCardTextExist(TimeTrackingPageData.recentActivities);
 		timeTrackingPage.bottomCardTextExist(TimeTrackingPageData.projects);
 		timeTrackingPage.bottomCardTextExist(TimeTrackingPageData.tasks);
 		timeTrackingPage.bottomCardTextExist(TimeTrackingPageData.appsUrls);
