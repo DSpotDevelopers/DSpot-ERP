@@ -62,6 +62,8 @@
 		"seed:all": "yarn seed:base ./apps/api/src/seed-all.ts",
 		"seed:jobs": "yarn seed:base ./apps/api/src/seed-jobs.ts",
 		"seed:e2e": "yarn seed:base ./apps/api/src/seed-e2e.ts",
+		"cleanup:e2e": "yarn seed:base ./apps/api/src/cleanup-e2e.ts",
+		"reset:e2e": "yarn seed:base ./apps/api/src/reset-e2e.ts",
 		"seed:module": "yarn seed:base ./apps/api/src/seed-module.ts --name",
 		"seed:prod": "cross-env NODE_ENV=production NODE_OPTIONS=--max-old-space-size=12288 yarn run build:package:api:prod && yarn run config:prod && yarn ts-node -r tsconfig-paths/register --project apps/api/tsconfig.app.json ./apps/api/src/seed.ts",
 		"prebuild": "rimraf dist coverage",

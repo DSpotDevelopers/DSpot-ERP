@@ -418,6 +418,188 @@ export class SeedDataService {
 	}
 
 	/**
+	 * Cleanup E2E Testing Data
+	 * Removes all E2E testing data from the database
+	 */
+	public async runE2ECleanup() {
+		try {
+			this.log(chalk.yellow('🧹 STARTING E2E CLEANUP...'));
+
+			// Connect to database
+			await this.createConnection();
+
+			// Find E2E organization
+			const e2eOrganization = await this.dataSource.getRepository('Organization').findOne({
+				where: { name: 'E2E Testing Organization' }
+			});
+
+			if (!e2eOrganization) {
+				this.log(chalk.blue('No E2E Testing Organization found. Nothing to cleanup.'));
+				return;
+			}
+
+			this.log(chalk.magenta(`Found E2E Testing Organization: ${e2eOrganization.id}`));
+
+			// Find E2E tenant
+			const e2eTenant = await this.dataSource.getRepository('Tenant').findOne({
+				where: { name: 'E2E Testing Tenant' }
+			});
+
+			if (!e2eTenant) {
+				this.log(chalk.blue('No E2E Testing Tenant found.'));
+				return;
+			}
+
+			this.log(chalk.magenta(`Found E2E Testing Tenant: ${e2eTenant.id}`));
+
+			// List of entities that extend TenantOrganizationBaseEntity (organization-scoped)
+			const organizationScopedEntities = [
+				'Activity',
+				'ApprovalPolicy',
+				'Changelog',
+				'DailyPlan',
+				'EmployeeNotificationSetting',
+				'EquipmentSharingPolicy',
+				'HelpCenter',
+				'HelpCenterArticle',
+				'HelpCenterAuthor',
+				'IntegrationTenant',
+				'Invite',
+				'InvoiceItem',
+				'IssueType',
+				'JobPreset',
+				'JobSearchCategory',
+				'JobSearchOccupation',
+				'Merchant',
+				'OrganizationAward',
+				'OrganizationEmploymentType',
+				'OrganizationLanguage',
+				'OrganizationPosition',
+				'OrganizationProject',
+				'OrganizationProjectEmployee',
+				'OrganizationProjectModule',
+				'OrganizationProjectModuleEmployee',
+				'OrganizationRecurringExpense',
+				'OrganizationSprint',
+				'OrganizationTaskSetting',
+				'OrganizationTeam',
+				'OrganizationTeamEmployee',
+				'OrganizationTeamJoinRequest',
+				'OrganizationVendor',
+				'Payment',
+				'Pipeline',
+				'PipelineStage',
+				'Plugin',
+				'PluginInstallation',
+				'PluginSource',
+				'PluginVersion',
+				'ProductOption',
+				'ProductOptionGroup',
+				'ProductOptionGroupTranslation',
+				'ProductOptionTranslation',
+				'ProductReview',
+				'ProductVariant',
+				'ProductVariantPrice',
+				'ProductVariantSetting',
+				'Proposal',
+				'Reaction',
+				'ReportOrganization',
+				'RequestApproval',
+				'RequestApprovalEmployee',
+				'RequestApprovalTeam',
+				'Screenshot',
+				'ScreeningTask',
+				'Skill',
+				'Task',
+				'TaskEstimation',
+				'TaskLinkedIssue',
+				'TaskPriority',
+				'TaskRelatedIssueType',
+				'TaskSize',
+				'TaskStatus',
+				'TaskVersion',
+				'TaskView',
+				'TimeLog',
+				'TimeOffPolicy',
+				'TimeOffRequest',
+				'TimeSlot',
+				'TimeSlotMinute',
+				'Timesheet',
+				'UserOrganization',
+				'Video',
+				'Warehouse',
+				'WarehouseProduct',
+				'WarehouseProductVariant',
+				'ZapierWebhookSubscription'
+			];
+
+			// Delete organization-scoped entities
+			this.log(chalk.yellow('Deleting organization-scoped entities...'));
+			for (const entityName of organizationScopedEntities) {
+				try {
+					const count = await this.dataSource.getRepository(entityName).delete({
+						organizationId: e2eOrganization.id
+					});
+					if (count.affected > 0) {
+						this.log(chalk.green(`Deleted ${count.affected} records from ${entityName}`));
+					}
+				} catch (error) {
+					this.log(chalk.yellow(`Could not delete from ${entityName}: ${error.message}`));
+				}
+			}
+
+			// Delete E2E-specific users
+			this.log(chalk.yellow('Deleting E2E-specific users...'));
+			const e2eUserEmails = [
+				'e2e.admin@dspot.com.pl',
+				'e2e.local.admin@dspot.com.pl',
+				'e2e.employee@dspot.com.pl'
+			];
+
+			for (const email of e2eUserEmails) {
+				try {
+					const user = await this.dataSource.getRepository('User').findOne({
+						where: { email }
+					});
+					if (user) {
+						await this.dataSource.getRepository('User').delete(user.id);
+						this.log(chalk.green(`Deleted user: ${email}`));
+					}
+				} catch (error) {
+					this.log(chalk.yellow(`Could not delete user ${email}: ${error.message}`));
+				}
+			}
+
+			// Delete the E2E organization
+			this.log(chalk.yellow('Deleting E2E Testing Organization...'));
+			await this.dataSource.getRepository('Organization').delete(e2eOrganization.id);
+			this.log(chalk.green('E2E Testing Organization deleted'));
+
+			// Check if E2E tenant has any other organizations
+			const remainingOrganizations = await this.dataSource.getRepository('Organization').count({
+				where: { tenantId: e2eTenant.id }
+			});
+
+			if (remainingOrganizations === 0) {
+				this.log(chalk.yellow('No other organizations found for E2E tenant. Deleting E2E Testing Tenant...'));
+				await this.dataSource.getRepository('Tenant').delete(e2eTenant.id);
+				this.log(chalk.green('E2E Testing Tenant deleted'));
+			} else {
+				this.log(
+					chalk.blue(`E2E Testing Tenant has ${remainingOrganizations} other organizations. Keeping tenant.`)
+				);
+			}
+
+			// Disconnect to database
+			await this.closeConnection();
+
+			this.log(chalk.green('✅ E2E CLEANUP COMPLETED SUCCESSFULLY'));
+		} catch (error) {
+			this.handleError(error);
+		}
+	}
+
+	/**
 	 * Seed Default Report Data
 	 */
 	public async runReportsSeed() {
