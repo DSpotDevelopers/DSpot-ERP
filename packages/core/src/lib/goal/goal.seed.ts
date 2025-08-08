@@ -10,18 +10,18 @@ export const createDefaultGoals = async (
 	dataSource: DataSource,
 	tenant: ITenant,
 	organizations: IOrganization[],
-	employees: IEmployee[]
+	employees: IEmployee[],
+	count?: number
 ): Promise<Goal[]> => {
 	const defaultGoals = [];
-	const goalTimeFrames: GoalTimeFrame[] = await dataSource.manager.find(
-		GoalTimeFrame
-	);
-	const orgTeams: OrganizationTeam[] = await dataSource.manager.find(
-		OrganizationTeam
-	);
+	const goalTimeFrames: GoalTimeFrame[] = await dataSource.manager.find(GoalTimeFrame);
+	const orgTeams: OrganizationTeam[] = await dataSource.manager.find(OrganizationTeam);
 
 	for await (const organization of organizations) {
-		DEFAULT_GOALS.forEach((goalData) => {
+		// Use count if provided, otherwise use all DEFAULT_GOALS
+		const goalsToCreate = count ? DEFAULT_GOALS.slice(0, count) : DEFAULT_GOALS;
+
+		goalsToCreate.forEach((goalData) => {
 			const goal = new Goal();
 			goal.name = goalData.name;
 			goal.progress = 0;

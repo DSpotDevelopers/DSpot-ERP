@@ -92,7 +92,7 @@ describe('Manage employees test', { testIsolation: false }, () => {
 	it('Should be able to edit employee', () => {
 		manageEmployeesPage.filterByTag(tagName);
 		manageEmployeesPage.tableRowVisible();
-		manageEmployeesPage.selectTableRow(0);
+		manageEmployeesPage.selectLastTableRow();
 		manageEmployeesPage.editButtonVisible();
 		manageEmployeesPage.clickEditButton();
 		manageEmployeesPage.usernameEditInputVisible();
@@ -114,7 +114,7 @@ describe('Manage employees test', { testIsolation: false }, () => {
 	it('Should be able to end work', () => {
 		manageEmployeesPage.waitMessageToHide();
 		manageEmployeesPage.filterByTag(tagName);
-		manageEmployeesPage.selectTableRow(0);
+		manageEmployeesPage.selectLastTableRow();
 		manageEmployeesPage.endWorkButtonVisible();
 		manageEmployeesPage.clickEndWorkButton();
 		manageEmployeesPage.confirmEndWorkButtonVisible();
@@ -123,7 +123,7 @@ describe('Manage employees test', { testIsolation: false }, () => {
 	});
 	it('Should be able to delete employee', () => {
 		manageEmployeesPage.filterByTag(tagName);
-		manageEmployeesPage.selectTableRow(0);
+		manageEmployeesPage.selectLastTableRow();
 		manageEmployeesPage.deleteButtonVisible();
 		manageEmployeesPage.clickDeleteButton();
 		manageEmployeesPage.confirmDeleteButtonVisible();
@@ -134,15 +134,15 @@ describe('Manage employees test', { testIsolation: false }, () => {
 	});
 	it('Should be able to copy invite link', () => {
 		manageEmployeesPage.clickManageInviteButton();
-		manageEmployeesPage.selectTableRow(0);
+		manageEmployeesPage.selectTableRowsWithProject(ManageEmployeesPageData.defaultProject);
 		manageEmployeesPage.copyLinkButtonVisible();
 		manageEmployeesPage.clickCopyLinkButton();
 		manageEmployeesPage.waitMessageToHide();
-		manageEmployeesPage.selectTableRow(0); //unselect
+		manageEmployeesPage.selectLastTableRow(); //unselect
 	});
 	it('Should be able to resend invite', () => {
 		manageEmployeesPage.clickManageInviteButton();
-		manageEmployeesPage.selectTableRow(0);
+		manageEmployeesPage.selectTableRowsWithProject(ManageEmployeesPageData.defaultProject);
 		manageEmployeesPage.resendInviteButtonVisible();
 		manageEmployeesPage.clickResendInviteButton();
 		manageEmployeesPage.confirmResendInviteButtonVisible();
@@ -151,10 +151,11 @@ describe('Manage employees test', { testIsolation: false }, () => {
 	});
 	it('Should be able to delete invite', () => {
 		manageEmployeesPage.clickManageInviteButton();
-		manageEmployeesPage.selectTableRow(0);
-		manageEmployeesPage.deleteInviteButtonVisible();
-		manageEmployeesPage.clickDeleteInviteButton();
-		manageEmployeesPage.confirmDeleteInviteButtonVisible();
-		manageEmployeesPage.clickConfirmDeleteInviteButton();
+			manageEmployeesPage.selectTableRowsWithProject(ManageEmployeesPageData.defaultProject);
+			manageEmployeesPage.deleteInviteButtonVisible();
+			manageEmployeesPage.clickDeleteInviteButton();
+			manageEmployeesPage.confirmDeleteInviteButtonVisible();
+			manageEmployeesPage.clickConfirmDeleteInviteButton();
+			manageEmployeesPage.waitMessageToHide();
 	});
 });

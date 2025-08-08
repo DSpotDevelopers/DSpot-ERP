@@ -2,20 +2,22 @@
 
 ## Overview
 
-The E2E seeding approach has been modified to seed only organization-specific data within an existing database, rather than creating a separate database. This provides better isolation and efficiency for e2e testing.
+This is the first implementation of dedicated E2E testing seeding. Previously, E2E tests were running against the default organization, which caused conflicts with manual testing and introduced noise depending on the environment.
 
 ## What Changed
 
-### Before
-- Created a separate database file (`gauzy-e2e.sqlite3`)
-- Reset entire database and seeded all data
-- Required separate database setup
+### Before (No Dedicated E2E Setup)
+- E2E tests ran against the default organization
+- Constant conflicts with manual testing setup
+- Manually induced noise depending on the environment
+- No isolation between E2E tests and development data
 
-### After
-- Uses existing database
-- Seeds only organization-specific data
-- Creates E2E Testing Tenant and Organization
+### After (First E2E Implementation)
+- Dedicated E2E Testing Tenant and Organization
+- Seeds only organization-specific data within existing database
+- Creates E2E-specific users with different emails to avoid conflicts
 - Adds essential tags and employee levels for testing
+- Complete isolation from development data
 
 ## How It Works
 

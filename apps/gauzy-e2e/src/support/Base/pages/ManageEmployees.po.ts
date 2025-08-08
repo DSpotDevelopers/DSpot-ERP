@@ -11,7 +11,8 @@ import {
 	waitElementToHide,
 	verifyText,
 	verifyTextNotExisting,
-	clickButtonWithForce
+	clickButtonWithForce,
+	clickLastButton
 } from '../utils/util';
 import { ManageEmployeesPage } from '../pageobjects/ManageEmployeesPageObject';
 
@@ -189,6 +190,14 @@ export const tableRowVisible = () => {
 
 export const selectTableRow = (index) => {
 	clickButtonByIndex(ManageEmployeesPage.selectTableRowCss, index);
+};
+
+export const selectLastTableRow = () => {
+	clickLastButton(ManageEmployeesPage.selectTableRowCss);
+};
+
+export const selectTableRowsWithProject = (projectName, index = 0) => {
+	cy.get(ManageEmployeesPage.selectTableRowCss).contains(projectName).eq(index).click();
 };
 
 export const editButtonVisible = () => {

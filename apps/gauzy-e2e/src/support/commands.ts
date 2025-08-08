@@ -46,7 +46,7 @@ export const CustomCommands = {
 		dashboardPage.verifyCreateButton();
 	},
 	addTag: (organizationTagsUserPage: any, OrganizationTagsPageData: any) => {
-		cy.visit('/#/pages/organization/tags', { timeout: pageLoadTimeout });
+		cy.visitAndWait('/#/pages/organization/tags', { timeout: pageLoadTimeout });
 		organizationTagsUserPage.gridButtonVisible();
 		organizationTagsUserPage.clickGridButton(1);
 		organizationTagsUserPage.addTagButtonVisible();

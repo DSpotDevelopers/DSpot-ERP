@@ -238,6 +238,12 @@ export enum SeederTypeEnum {
 	E2E = 'e2e'
 }
 
+export interface SeedConfig {
+	tasks?: number;
+	goals?: number;
+	[key: string]: any;
+}
+
 @Injectable()
 export class SeedDataService {
 	dataSource: DataSource;
@@ -397,7 +403,7 @@ export class SeedDataService {
 			await this.seedBasicDefaultData();
 
 			// Seed default data including contacts, projects, teams, etc.
-			await this.seedDefaultData();
+			await this.seedDefaultData({ tasks: 0, goals: 0 });
 
 			// Seed reports related data
 			await this.seedReportsData();
@@ -801,7 +807,7 @@ export class SeedDataService {
 	/**
 	 * Populate default data for default tenant
 	 */
-	private async seedDefaultData() {
+	private async seedDefaultData(config?: SeedConfig) {
 		this.log(chalk.magenta(`🌱 SEEDING DEFAULT ${env.production ? 'PRODUCTION' : ''} DATABASE...`));
 
 		await this.tryExecute(
@@ -873,10 +879,14 @@ export class SeedDataService {
 			createDefaultOrganizationProjects(this.dataSource, this.tenant, this.defaultOrganization)
 		);
 
-		await this.tryExecute(
-			'Default Projects Task',
-			createDefaultTask(this.dataSource, this.tenant, this.defaultOrganization)
-		);
+		// Create tasks based on config
+		const taskCount = config?.tasks;
+		if (taskCount !== 0) {
+			await this.tryExecute(
+				'Default Projects Task',
+				createDefaultTask(this.dataSource, this.tenant, this.defaultOrganization, taskCount)
+			);
+		}
 
 		await this.tryExecute(
 			'Default Organization Departments',
@@ -1006,29 +1016,33 @@ export class SeedDataService {
 			)
 		);
 
-		await this.tryExecute(
-			'Default Goal KPIs',
-			createDefaultGoalKpi(this.dataSource, this.tenant, this.organizations, this.defaultEmployees)
-		);
+		// Create goals based on config
+		const goalCount = config?.goals;
+		if (goalCount !== 0) {
+			await this.tryExecute(
+				'Default Goal KPIs',
+				createDefaultGoalKpi(this.dataSource, this.tenant, this.organizations, this.defaultEmployees)
+			);
 
-		const goals = await this.tryExecute(
-			'Default Goals',
-			createDefaultGoals(this.dataSource, this.tenant, this.organizations, this.defaultEmployees)
-		);
+			const goals = await this.tryExecute(
+				'Default Goals',
+				createDefaultGoals(this.dataSource, this.tenant, this.organizations, this.defaultEmployees, goalCount)
+			);
 
-		const keyResults = await this.tryExecute(
-			'Default Key Results',
-			createDefaultKeyResults(this.dataSource, this.tenant, this.defaultEmployees, goals)
-		);
+			const keyResults = await this.tryExecute(
+				'Default Key Results',
+				createDefaultKeyResults(this.dataSource, this.tenant, this.defaultEmployees, goals)
+			);
 
-		await this.tryExecute(
-			'Default Key Result Updates',
-			createDefaultKeyResultUpdates(this.dataSource, this.tenant, this.defaultOrganization, keyResults)
-		);
+			await this.tryExecute(
+				'Default Key Result Updates',
+				createDefaultKeyResultUpdates(this.dataSource, this.tenant, this.defaultOrganization, keyResults)
+			);
 
-		await this.tryExecute('Default Key Result Progress', updateDefaultKeyResultProgress(this.dataSource));
+			await this.tryExecute('Default Key Result Progress', updateDefaultKeyResultProgress(this.dataSource));
 
-		await this.tryExecute('Default Goal Progress', updateDefaultGoalProgress(this.dataSource));
+			await this.tryExecute('Default Goal Progress', updateDefaultGoalProgress(this.dataSource));
+		}
 
 		const approvalPolicies = await this.tryExecute(
 			'Default Approval Policies',
@@ -1945,12 +1959,13 @@ export class SeedDataService {
 			const databaseType = getDBType(this.configService.dbConnectionOptions);
 
 			switch (databaseType) {
-				case DatabaseTypeEnum.postgres:
+				case DatabaseTypeEnum.postgres: {
 					const tables = entities.map((entity) => '"' + entity.tableName + '"');
 					const truncateSql = `TRUNCATE TABLE ${tables.join(',')} RESTART IDENTITY CASCADE;`;
 					await manager.query(truncateSql);
 					break;
-				case DatabaseTypeEnum.mysql:
+				}
+				case DatabaseTypeEnum.mysql: {
 					// -- disable foreign_key_checks to avoid query failing when there is a foreign key in the table
 					await manager.query(`SET foreign_key_checks = 0;`);
 					for (const entity of entities) {
@@ -1958,13 +1973,15 @@ export class SeedDataService {
 					}
 					await manager.query(`SET foreign_key_checks = 1;`);
 					break;
+				}
 				case DatabaseTypeEnum.sqlite:
-				case DatabaseTypeEnum.betterSqlite3:
+				case DatabaseTypeEnum.betterSqlite3: {
 					await manager.query(`PRAGMA foreign_keys = OFF;`);
 					for (const entity of entities) {
 						await manager.query(`DELETE FROM "${entity.tableName}";`);
 					}
 					break;
+				}
 				default:
 					throw Error(`Unsupported database type: ${databaseType}`);
 			}
