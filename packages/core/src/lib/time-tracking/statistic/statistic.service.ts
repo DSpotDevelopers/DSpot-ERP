@@ -317,7 +317,15 @@ export class StatisticService {
 			.leftJoinAndSelect('time_log.timeSlots', 'time_slot')
 			.where('time_log.tenantId = :tenantId', { tenantId })
 			.andWhere('time_log.organizationId = :organizationId', { organizationId })
-			.andWhere('time_log.startedAt BETWEEN :startDate AND :endDate', { startDate: start, endDate: end })
+			.andWhere(
+				new Brackets((qb) => {
+					qb.where('time_log.startedAt BETWEEN :startDate AND :endDate', { startDate: start, endDate: end });
+					qb.orWhere('time_log.stoppedAt BETWEEN :startDate AND :endDate', {
+						startDate: start,
+						endDate: end
+					});
+				})
+			)
 			.andWhere('time_log.stoppedAt >= time_log.startedAt')
 			.andWhere(isNotEmpty(employeeIds) ? 'time_log.employeeId IN (:...employeeIds)' : '1=1', { employeeIds })
 			.andWhere(isNotEmpty(projectIds) ? 'time_log.projectId IN (:...projectIds)' : '1=1', { projectIds })
