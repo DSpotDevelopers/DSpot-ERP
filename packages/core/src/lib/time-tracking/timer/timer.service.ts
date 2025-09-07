@@ -551,7 +551,7 @@ export class TimerService {
 		}
 
 		// Get weekly statistics
-		const weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(
+		let weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(
 			employee,
 			start as Date,
 			request?.timeZone,
@@ -586,6 +586,13 @@ export class TimerService {
 					clearTimeout(existingTimeout);
 					runningWeeklyLimitTimeouts.delete(employeeId);
 				}
+				// Recalculate the weekly limit status
+				weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(
+					employee,
+					start as Date,
+					request?.timeZone,
+					true
+				);
 			} else if (remainingWeeklyLimit <= 21 * 60) {
 				// Less than 21 minutes remaining → schedule a single socket event
 				const existingTimeout = runningWeeklyLimitTimeouts.get(employeeId);
