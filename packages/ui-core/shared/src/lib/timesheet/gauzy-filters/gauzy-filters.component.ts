@@ -1,13 +1,4 @@
-import {
-	AfterViewInit,
-	ChangeDetectorRef,
-	Component,
-	EventEmitter,
-	Input,
-	OnDestroy,
-	OnInit,
-	Output
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as moment from 'moment';
 import { BehaviorSubject, combineLatest, from, of, Subject, Subscription, timer } from 'rxjs';
 import { debounceTime, filter, switchMap, take, tap } from 'rxjs/operators';
@@ -50,7 +41,7 @@ import { NgxPermissionsService } from 'ngx-permissions';
 	styleUrls: ['./gauzy-filters.component.scss'],
 	standalone: false
 })
-export class GauzyFiltersComponent extends TranslationBaseComponent implements AfterViewInit, OnInit, OnDestroy {
+export class GauzyFiltersComponent extends TranslationBaseComponent implements AfterViewInit, OnInit {
 	// declaration of variables
 	public PermissionsEnum = PermissionsEnum;
 	public TimeLogType = TimeLogType;
@@ -140,7 +131,7 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 		super(translateService);
 	}
 
-	async ngOnInit() {
+	ngOnInit() {
 		if (this.saveFilters) {
 			this.timesheetFilterService.filter$
 				.pipe(
@@ -431,6 +422,4 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 			}
 		];
 	}
-
-	ngOnDestroy(): void {}
 }

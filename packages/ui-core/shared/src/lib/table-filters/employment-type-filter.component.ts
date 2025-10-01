@@ -19,6 +19,13 @@ import { OrganizationEmploymentTypesService, Store } from '@gauzy/ui-core/core';
 		>
 		</ng-select>
 	`,
+	styles: [
+		`
+			::ng-deep angular2-smart-table table .angular2-smart-filter .ng-select .ng-select-container {
+				height: auto;
+			}
+		`
+	],
 	standalone: false
 })
 @UntilDestroy({ checkProperties: true })
