@@ -9,7 +9,7 @@ import {
 	Output
 } from '@angular/core';
 import * as moment from 'moment';
-import { BehaviorSubject, combineLatest, of, Subject, Subscription, timer } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, of, Subject, Subscription, timer } from 'rxjs';
 import { debounceTime, filter, switchMap, take, tap } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { TranslateService } from '@ngx-translate/core';
@@ -20,6 +20,7 @@ import {
 	IDateRangePicker,
 	IGetCountsStatistics,
 	IOrganization,
+	IOrganizationEmploymentType,
 	ITimeLogFilters,
 	ITimeLogTodayFilters,
 	PermissionsEnum,
@@ -31,6 +32,7 @@ import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
 import {
 	ActivityLevel,
 	DateRangePickerBuilderService,
+	OrganizationEmploymentTypesService,
 	Store,
 	TimesheetFilterService,
 	TimesheetStatisticsService,
@@ -39,6 +41,7 @@ import {
 import { distinctUntilChange, isNotEmpty, toUtcOffset } from '@gauzy/ui-core/common';
 import { TimeZoneService } from './timezone-filter';
 import { getAdjustDateRangeFutureAllowed } from '../../selectors';
+import { NgxPermissionsService } from 'ngx-permissions';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
@@ -64,6 +67,7 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 		ceil: 100,
 		step: 5
 	};
+	public employmentTypes: IOrganizationEmploymentType[] = [];
 	public readonly timeLogSourceSelectors = this.getTimeLogSourceSelectors();
 
 	public payloads$: BehaviorSubject<ITimeLogFilters> = new BehaviorSubject(null);
@@ -89,6 +93,7 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 	@Input() hasWorkedPerDay = false;
 	@Input() hasWorkedPerWeek = false;
 	@Input() isTimeFormat = false;
+	@Input() hasEmploymentTypes = false;
 
 	/*
 	 * Getter & Setter for dynamic enabled/disabled element
@@ -98,7 +103,8 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 		timeFormat: TimeFormatEnum.FORMAT_12_HOURS,
 		source: [],
 		logType: [],
-		activityLevel: ActivityLevel
+		activityLevel: ActivityLevel,
+		employmentTypes: []
 	};
 	get filters(): ITimeLogFilters {
 		return this._filters;
@@ -127,18 +133,23 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 		private readonly timesheetStatisticsService: TimesheetStatisticsService,
 		private readonly toastrService: ToastrService,
 		private readonly dateRangePickerBuilderService: DateRangePickerBuilderService,
-		private readonly timeZoneService: TimeZoneService
+		private readonly timeZoneService: TimeZoneService,
+		private readonly organizationEmploymentTypesService: OrganizationEmploymentTypesService,
+		private readonly ngxPermissionsService: NgxPermissionsService
 	) {
 		super(translateService);
 	}
 
-	ngOnInit() {
+	async ngOnInit() {
 		if (this.saveFilters) {
 			this.timesheetFilterService.filter$
 				.pipe(
 					take(1),
 					tap((filters: ITimeLogFilters) => {
-						this.filters = Object.assign({}, pick(filters, 'source', 'activityLevel', 'logType'));
+						this.filters = Object.assign(
+							{},
+							pick(filters, 'source', 'employmentTypes', 'activityLevel', 'logType')
+						);
 					}),
 					untilDestroyed(this)
 				)
@@ -168,6 +179,21 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 				untilDestroyed(this)
 			)
 			.subscribe();
+
+		if (this.hasEmploymentTypes) {
+			from(this.hasPermissionEmploymentTypes())
+				.pipe(
+					filter((canChange) => canChange),
+					switchMap(() => {
+						const { id: organizationId, tenantId } = this.store.selectedOrganization;
+						return this.organizationEmploymentTypesService.getAll([], { tenantId, organizationId });
+					}),
+					untilDestroyed(this)
+				)
+				.subscribe((types) => {
+					this.employmentTypes = types.items;
+				});
+		}
 	}
 
 	ngAfterViewInit() {
@@ -268,6 +294,11 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 		this.payloads$.next(request);
 	}
 
+	async hasPermissionEmploymentTypes(): Promise<boolean> {
+		const hasPermission = await this.ngxPermissionsService.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
+		return hasPermission;
+	}
+
 	/**
 	 * Sets the auto refresh functionality.
 	 *
@@ -326,6 +357,7 @@ export class GauzyFiltersComponent extends TranslationBaseComponent implements A
 		return (
 			(this._filters.source && this._filters.source.length >= 1) ||
 			(this._filters.logType && this._filters.logType.length >= 1) ||
+			(this._filters.employmentTypes && this._filters.employmentTypes.length >= 1) ||
 			(this.activityLevel && this.activityLevel.end < 100) ||
 			(this.activityLevel && this.activityLevel.start > 0)
 		);
