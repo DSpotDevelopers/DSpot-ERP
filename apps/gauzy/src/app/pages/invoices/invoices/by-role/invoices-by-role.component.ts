@@ -93,7 +93,6 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 	invoices$: Subject<IInvoice[]> = this.subject$;
 	nbTab$: Subject<string> = new BehaviorSubject(InvoiceTabsEnum.ACTIONS);
 	currentUser: IUser;
-	isShouldShowPagination = false;
 	private readonly _refresh$: Subject<void> = new Subject();
 
 	/*
@@ -429,7 +428,6 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 
 			const { activePage, itemsPerPage } = this.getPagination();
 			this.smartTableSource.setPaging(activePage, itemsPerPage, false);
-			this.isShouldShowPagination = this.smartTableSource?.getPaging()?.perPage < this.pagination?.totalItems;
 		} catch (error) {
 			this.toastrService.danger(
 				this.getTranslation('NOTES.INVOICE.INVOICE_ERROR', {
@@ -734,7 +732,6 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 				...this.getPagination(),
 				itemsPerPage: this.perPage
 			});
-			this.isShouldShowPagination = this.pagination.itemsPerPage < this.pagination.totalItems;
 			this._loadSmartTableSettings();
 			this.toggleTableSettingsPopover();
 		}
