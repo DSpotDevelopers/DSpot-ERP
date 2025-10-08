@@ -381,7 +381,7 @@
 				<ng-container *ngIf="smartTableSource && perPage">
 					<ngx-pagination
 						[source]="smartTableSource"
-						[isShouldShow]="true"
+						[isShouldShow]="isShouldShowPagination"
 						[perPageSelect]="[perPage]"
 					></ngx-pagination>
 				</ng-container>
