@@ -390,7 +390,6 @@ export class DailyComponent extends BaseSelectorFilterComponent implements After
 		};
 
 		this.pagination.activePage = 1;
-		console.log(request);
 
 		// Update the payloads$ BehaviorSubject with the new request
 		this.payloads$.next(request);
