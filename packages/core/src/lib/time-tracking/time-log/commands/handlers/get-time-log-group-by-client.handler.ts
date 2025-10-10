@@ -3,7 +3,7 @@ import { chain, pluck } from 'underscore';
 import * as moment from 'moment';
 import { IOrganizationContact, IReportDayGroupByClient, IReportEmployeeLogs, ITimeLog } from '@gauzy/contracts';
 import { GetTimeLogGroupByClientCommand } from '../get-time-log-group-by-client.command';
-import { calculateAverage, calculateAverageActivity } from './../../time-log.utils';
+import { calculateAverage, calculateAverageActivity, expandTimeLogsAcrossDays } from './../../time-log.utils';
 
 @CommandHandler(GetTimeLogGroupByClientCommand)
 export class GetTimeLogGroupByClientHandler implements ICommandHandler<GetTimeLogGroupByClientCommand> {
@@ -15,8 +15,11 @@ export class GetTimeLogGroupByClientHandler implements ICommandHandler<GetTimeLo
 	public async execute(command: GetTimeLogGroupByClientCommand): Promise<IReportDayGroupByClient[]> {
 		const { timeLogs, logActivity, timeZone = moment.tz.guess() } = command;
 
+		// Expand multi-day time logs into separate entries per day
+		const expandedLogs = expandTimeLogsAcrossDays(timeLogs, timeZone);
+
 		// Group timeLogs by organizationContactId
-		const dailyLogs = chain(timeLogs)
+		const dailyLogs = chain(expandedLogs)
 			.groupBy((log: ITimeLog) => log.organizationContactId)
 			.map((logs: ITimeLog[]) => {
 				// Calculate average duration for specific client.

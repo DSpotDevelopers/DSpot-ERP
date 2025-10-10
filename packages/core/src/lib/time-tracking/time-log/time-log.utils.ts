@@ -190,3 +190,68 @@ export function calculateTotalDuration(
 	// Sum the clipped durations of all logs in the array
 	return logs.reduce((sum, log) => sum + calculateTimeLogDurationInRange(log, startDate, endDate, tz), 0);
 }
+
+/**
+ * Splits a time log that spans multiple days into separate log entries for each day.
+ * Each resulting log will have the correct duration for that specific day in the given timezone.
+ *
+ * @param log - The original time log to split.
+ * @param timeZone - The timezone to use for determining day boundaries (e.g., 'Europe/Minsk', 'America/New_York').
+ * @returns An array of time logs, one for each day the original log spans. If the log fits within a single day, returns an array with just the original log.
+ */
+export function splitTimeLogAcrossDays(log: ITimeLog, timeZone: string = moment.tz.guess()): ITimeLog[] {
+	if (!log.startedAt || !log.stoppedAt) {
+		return [log];
+	}
+
+	// Convert to timezone-aware moments
+	const startMoment = moment.utc(log.startedAt).tz(timeZone);
+	const stopMoment = moment.utc(log.stoppedAt).tz(timeZone);
+
+	// Check if log fits within a single day
+	if (startMoment.format('YYYY-MM-DD') === stopMoment.format('YYYY-MM-DD')) {
+		return [log];
+	}
+
+	// Split the log across multiple days
+	const result: ITimeLog[] = [];
+	let currentStart = startMoment.clone();
+
+	while (currentStart.isBefore(stopMoment)) {
+		// Calculate the end of the current day
+		const currentEnd = currentStart.clone().endOf('day');
+
+		// Determine the actual end time for this segment
+		const segmentEnd = moment.min(currentEnd, stopMoment);
+
+		// Calculate duration for this segment in seconds
+		const segmentDuration = segmentEnd.diff(currentStart, 'seconds');
+
+		// Create a new log entry for this day
+		const segmentLog: ITimeLog = {
+			...log,
+			startedAt: currentStart.toDate(),
+			stoppedAt: segmentEnd.toDate(),
+			duration: segmentDuration
+		};
+
+		result.push(segmentLog);
+
+		// Move to the start of the next day
+		currentStart = currentEnd.clone().add(1, 'second').startOf('day');
+	}
+
+	return result;
+}
+
+/**
+ * Expands an array of time logs by splitting any multi-day logs into separate entries per day.
+ * This ensures that time logs are correctly attributed to each day they span.
+ *
+ * @param logs - Array of time logs to expand.
+ * @param timeZone - The timezone to use for determining day boundaries.
+ * @returns A new array with all multi-day logs split into daily segments.
+ */
+export function expandTimeLogsAcrossDays(logs: ITimeLog[], timeZone: string = moment.tz.guess()): ITimeLog[] {
+	return logs.flatMap((log) => splitTimeLogAcrossDays(log, timeZone));
+}

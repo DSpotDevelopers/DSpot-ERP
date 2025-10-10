@@ -3,7 +3,7 @@ import { chain, pluck } from 'underscore';
 import * as moment from 'moment';
 import { IReportDayGroupByDate, IReportEmployeeLogs, ITimeLog } from '@gauzy/contracts';
 import { GetTimeLogGroupByDateCommand } from '../get-time-log-group-by-date.command';
-import { calculateAverage, calculateAverageActivity } from './../../time-log.utils';
+import { calculateAverage, calculateAverageActivity, expandTimeLogsAcrossDays } from './../../time-log.utils';
 
 @CommandHandler(GetTimeLogGroupByDateCommand)
 export class GetTimeLogGroupByDateHandler implements ICommandHandler<GetTimeLogGroupByDateCommand> {
@@ -15,7 +15,10 @@ export class GetTimeLogGroupByDateHandler implements ICommandHandler<GetTimeLogG
 	public async execute(command: GetTimeLogGroupByDateCommand): Promise<IReportDayGroupByDate[]> {
 		const { timeLogs, logActivity, timeZone = moment.tz.guess() } = command;
 
-		const dailyLogs = chain(timeLogs)
+		// Expand multi-day time logs into separate entries per day
+		const expandedLogs = expandTimeLogsAcrossDays(timeLogs, timeZone);
+
+		const dailyLogs = chain(expandedLogs)
 			.groupBy((log: ITimeLog) => moment.utc(log.startedAt).tz(timeZone).format('YYYY-MM-DD'))
 			.map((byDateLogs: ITimeLog[], date: string) => {
 				// Calculate average duration for specific date range.
