@@ -337,8 +337,12 @@ export class ProjectSelectorComponent implements OnInit, AfterViewInit {
 
 		const { id: organizationId, tenantId } = this.organization;
 
-		const isAdmin = this._store.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT);
-		const isManager = this._store.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE) && !isAdmin;
+		const isAdmin =
+			this._store.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+			!this._store.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
+		const isManager =
+			this._store.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY) &&
+			this._store.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT);
 
 		const queryOptions: IOrganizationProjectsFindInput = {
 			...(this.organizationContactId && { organizationContactId: this.organizationContactId }),

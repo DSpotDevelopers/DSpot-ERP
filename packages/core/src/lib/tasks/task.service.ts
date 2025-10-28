@@ -472,8 +472,12 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			const { where } = options;
 			const { members } = where;
 
-			const hasPermission = RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT);
-			const isManager = RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE) && !hasPermission;
+			const hasPermission =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				!RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
+			const isManager =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
 
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
 			query.innerJoin(`${query.alias}.members`, 'members');
@@ -648,8 +652,12 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			const { teams = [] } = where;
 			const { members } = where;
 
-			const hasPermission = RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT);
-			const isManager = RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE) && !hasPermission;
+			const hasPermission =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				!RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
+			const isManager =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
 			query.leftJoin(`${query.alias}.teams`, 'teams');
 
@@ -820,8 +828,12 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			const employeeId = RequestContext.currentEmployeeId();
 			const tenantId = RequestContext.currentTenantId();
 			const organizationId = where.organizationId as string;
-			const hasPermission = RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT);
-			const isManager = RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE) && !hasPermission;
+			const hasPermission =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				!RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
+			const isManager =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
 			const userProvidedProjectId = !!options.where?.projectId;
 
 			if (!userProvidedProjectId && (isManager || !hasPermission)) {
