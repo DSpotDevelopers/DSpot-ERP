@@ -6,7 +6,7 @@ import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AppService {
-	public count: number = 0;
+	public count = 0;
 
 	constructor(
 		@Inject(forwardRef(() => SeedDataService))
@@ -24,6 +24,12 @@ export class AppService {
 	 * TODO: this should actually include more checks, e.g. if schema migrated and many other things
 	 */
 	async seedDBIfEmpty() {
+		// Skip automatic seeding if E2E_TESTING environment variable is set
+		if (process.env.E2E_TESTING === 'true') {
+			console.log(chalk.yellow('Skipping automatic seeding for E2E testing'));
+			return;
+		}
+
 		this.count = await this.userService.countFast();
 		console.log(chalk.magenta(`Found ${this.count} users in DB`));
 		if (this.count === 0) {

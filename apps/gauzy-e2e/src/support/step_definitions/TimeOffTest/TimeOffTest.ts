@@ -323,7 +323,7 @@ And('User can see add holiday button', () => {
 });
 
 When('User click on add holiday button', () => {
-	timeOffPage.clickAddHolidayButton();
+	timeOffPage.clickAddHolidaysButton();
 });
 
 Then('User can see holiday name select', () => {

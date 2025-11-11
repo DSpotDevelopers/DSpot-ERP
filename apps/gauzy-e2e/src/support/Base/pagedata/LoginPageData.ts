@@ -1,7 +1,7 @@
 export const LoginPageData = {
 	TitleText: 'DSpot ERP',
-	email: 'admin@dspot.com.pl',
+	email: 'e2e.admin@dspot.com.pl',
 	password: 'admin',
-	empEmail: 'employee@dspot.com.pl',
+	empEmail: 'e2e.employee@dspot.com.pl',
 	empPassword: '123456'
 };

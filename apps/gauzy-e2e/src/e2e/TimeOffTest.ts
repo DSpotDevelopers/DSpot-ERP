@@ -15,7 +15,7 @@ let employeeEmail = ' ';
 let imgUrl = ' ';
 
 //! Expected to find element: div.col-4 > button[status="primary"], but never found it.
-describe.skip('Time Off test', () => {
+describe('Time Off test', { testIsolation: false }, () => {
 	before(() => {
 		firstName = faker.person.firstName();
 		lastName = faker.person.lastName();
@@ -25,18 +25,10 @@ describe.skip('Time Off test', () => {
 		imgUrl = faker.image.avatar();
 
 		CustomCommands.login(loginPage, LoginPageData, dashboardPage);
+		CustomCommands.addEmployee(manageEmployeesPage, firstName, lastName, username, employeeEmail, password, imgUrl);
+		timeOffPage.visit();
 	});
 	it('Should be able to create new time off request', () => {
-		CustomCommands.addEmployee(
-			manageEmployeesPage,
-			firstName,
-			lastName,
-			username,
-			employeeEmail,
-			password,
-			imgUrl
-		);
-		cy.visit('/#/pages/employees/time-off');
 		timeOffPage.requestButtonVisible();
 		timeOffPage.clickRequestButton();
 		timeOffPage.employeeSelectorVisible();
@@ -52,9 +44,7 @@ describe.skip('Time Off test', () => {
 		timeOffPage.endDateInputVisible();
 		timeOffPage.enterEndDateData();
 		timeOffPage.descriptionInputVisible();
-		timeOffPage.enterDescriptionInputData(
-			TimeOffPageData.defaultDescription
-		);
+		timeOffPage.enterDescriptionInputData(TimeOffPageData.defaultDescription);
 		timeOffPage.saveRequestButtonVisible();
 		timeOffPage.clickSaveRequestButton();
 		timeOffPage.waitMessageToHide();
@@ -63,47 +53,35 @@ describe.skip('Time Off test', () => {
 	it('Should be able to DENY time off request', () => {
 		timeOffPage.timeOffTableRowVisible();
 		timeOffPage.selectTimeOffTableRow(0);
+		timeOffPage.clickSeeMoreButtonIfVisible();
 		timeOffPage.denyTimeOffButtonVisible();
 		timeOffPage.clickDenyTimeOffButton();
 		timeOffPage.clickDenyTimeOffButton();
+		timeOffPage.waitMessageToHide();
+		timeOffPage.verifyRowIsDenied(0);
 	});
 	it('Should be able to APPROVE time off request', () => {
-		timeOffPage.waitMessageToHide();
+		timeOffPage.timeOffTableRowVisible();
+		timeOffPage.selectTimeOffTableRow(0);
+		timeOffPage.clickSeeMoreButtonIfVisible();
 		timeOffPage.approveTimeOffButtonVisible();
 		timeOffPage.clickApproveTimeOffButton();
-		timeOffPage.clickApproveTimeOffButton();
-		timeOffPage.requestButtonVisible();
-		timeOffPage.clickRequestButton();
-		timeOffPage.employeeSelectorVisible();
-		timeOffPage.clickEmployeeSelector();
-		timeOffPage.employeeDropdownVisible();
-		timeOffPage.selectEmployeeFromDropdown(1);
-		timeOffPage.selectTimeOffPolicyVisible();
-		timeOffPage.clickTimeOffPolicyDropdown();
-		timeOffPage.timeOffPolicyDropdownOptionVisible();
-		timeOffPage.selectTimeOffPolicy(TimeOffPageData.defaultPolicy);
-		timeOffPage.startDateInputVisible();
-		timeOffPage.enterStartDateData();
-		timeOffPage.endDateInputVisible();
-		timeOffPage.enterEndDateData();
-		timeOffPage.descriptionInputVisible();
-		timeOffPage.enterDescriptionInputData(
-			TimeOffPageData.defaultDescription
-		);
-		timeOffPage.saveRequestButtonVisible();
-		timeOffPage.clickSaveRequestButton();
+		timeOffPage.waitMessageToHide();
+		timeOffPage.verifyRowIsApproved(0);
 	});
 	it('Should be able to delete time off request', () => {
-		timeOffPage.waitMessageToHide();
+		timeOffPage.countRows();
 		timeOffPage.selectTimeOffTableRow(0);
 		timeOffPage.deleteTimeOffBtnVisible();
 		timeOffPage.clickDeleteTimeOffButton();
 		timeOffPage.confirmDeleteTimeOffBtnVisible();
 		timeOffPage.clickConfirmDeleteTimeOffButton();
+		timeOffPage.waitMessageToHide();
+		timeOffPage.verifyARowWasDeleted();
 	});
 	it('Should be able to add holiday', () => {
-		timeOffPage.addHolidayButtonVisible();
-		timeOffPage.clickAddHolidayButton();
+		timeOffPage.addHolidaysButtonVisible();
+		timeOffPage.clickAddHolidaysButton();
 		timeOffPage.selectHolidayNameVisible();
 		timeOffPage.clickSelectHolidayName();
 		timeOffPage.selectHolidayOption(TimeOffPageData.defaultHoliday);
@@ -122,10 +100,11 @@ describe.skip('Time Off test', () => {
 		timeOffPage.clickKeyboardButtonByKeyCode(9);
 		timeOffPage.saveButtonVisible();
 		timeOffPage.clickSaveButton();
+		timeOffPage.waitMessageToHide();
 	});
 	it('Should be able to add new policy', () => {
 		timeOffPage.timeOffSettingsButtonVisible();
-		timeOffPage.clickTimeOffSettingsButton(1);
+		timeOffPage.clickTimeOffSettingsButton();
 		timeOffPage.addNewPolicyButtonVisible();
 		timeOffPage.clickAddNewPolicyButton();
 		timeOffPage.policyInputFieldVisible();

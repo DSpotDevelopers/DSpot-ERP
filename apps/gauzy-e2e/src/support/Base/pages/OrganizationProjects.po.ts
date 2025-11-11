@@ -9,7 +9,8 @@ import {
 	verifyTextNotExisting,
 	waitElementToHide,
 	clickElementByText,
-	clickLastButton
+	clickLastButton,
+	waitElementToShowAndHide
 } from '../utils/util';
 import { OrganizationProjectsPage } from '../pageobjects/OrganizationProjectsPageObject';
 
@@ -215,6 +216,10 @@ export const verifyProjectIsDeleted = (text) => {
 
 export const waitMessageToHide = () => {
 	waitElementToHide(OrganizationProjectsPage.toastrMessageCss);
+};
+
+export const waitMessageToShowAndHide = () => {
+	waitElementToShowAndHide(OrganizationProjectsPage.toastrMessageCss);
 };
 
 export const clickSaveProjectButtonWithIndex = (index: number) => {

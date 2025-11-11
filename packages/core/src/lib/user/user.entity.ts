@@ -4,7 +4,7 @@
 
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { JoinColumn, RelationId, JoinTable } from 'typeorm';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 import { EntityRepositoryType } from '@mikro-orm/core';
 import { Exclude } from 'class-transformer';
 import { IsEmail, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
@@ -74,7 +74,7 @@ export class User extends TenantBaseEntity implements IUser {
 	@IsOptional()
 	@IsEmail()
 	@ColumnIndex()
-	@MultiORMColumn({ nullable: true })
+	@MultiORMColumn({ nullable: true, unique: true })
 	email?: string;
 
 	@ApiPropertyOptional({ type: () => String, minLength: 4, maxLength: 12 })

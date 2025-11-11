@@ -19,7 +19,12 @@ import {
 // GITHUB API URL
 export const GITHUB_API_URL = 'https://api.github.com';
 
-export const createDefaultTask = async (dataSource: DataSource, tenant: ITenant, organization: IOrganization) => {
+export const createDefaultTask = async (
+	dataSource: DataSource,
+	tenant: ITenant,
+	organization: IOrganization,
+	count?: number
+) => {
 	const httpService = new HttpService();
 
 	console.log(`${GITHUB_API_URL}/repos/ever-co/ever-gauzy/issues`);
@@ -46,8 +51,10 @@ export const createDefaultTask = async (dataSource: DataSource, tenant: ITenant,
 	const users = await dataSource.manager.find(User);
 	const employees = await dataSource.manager.find(Employee);
 
-	let count = 0;
-	for (const issue of issues) {
+	let taskCount = 0;
+	// Limit the number of issues to process based on count parameter
+	const issuesToProcess = count ? issues.slice(0, count) : issues;
+	for (const issue of issuesToProcess) {
 		const project = faker.helpers.arrayElement(defaultProjects);
 		const taskNumber = await getTaskNumber(dataSource, project.id);
 
@@ -66,13 +73,13 @@ export const createDefaultTask = async (dataSource: DataSource, tenant: ITenant,
 		task.number = taskNumber;
 		task.createdByUser = faker.helpers.arrayElement(users);
 
-		if (count % 2 === 0) {
+		if (taskCount % 2 === 0) {
 			task.members = faker.helpers.arrayElements(employees, 5);
 		} else {
 			task.teams = [faker.helpers.arrayElement(teams)];
 		}
 		await dataSource.manager.save(task);
-		count++;
+		taskCount++;
 	}
 };
 

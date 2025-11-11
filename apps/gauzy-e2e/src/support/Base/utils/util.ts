@@ -144,7 +144,7 @@ export const getNotEqualElement = (loc, text) => {
 	);
 };
 
-export const waitElementToHide = (loc, waitBefore = 10000) => {
+export const waitElementToHide = (loc, waitBefore = 3000) => {
 	cy.wait(waitBefore);
 	cy.get(loc, { timeout: defaultCommandTimeout }).should('not.exist');
 };

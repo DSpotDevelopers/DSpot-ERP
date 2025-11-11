@@ -12,6 +12,10 @@ import {
 } from '../utils/util';
 import { TimeTrackingPage } from '../pageobjects/TimeTrackingPageObject';
 
+export const visit = (options = {}) => {
+	cy.visit('/pages/dashboard/time-tracking', options);
+};
+
 export const headerTextExist = (text) => {
 	verifyText(TimeTrackingPage.headerTextCss, text);
 };

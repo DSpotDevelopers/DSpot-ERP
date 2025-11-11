@@ -1,7 +1,7 @@
 export const TimeTrackingPage = {
-	headerTextCss: 'nb-card-header > h4',
-	topCardHeaderTextCss: 'div.col-sm-4 > nb-card > nb-card-body > p',
-	bottomCardHeaderTextCss: 'div.col-sm-6 > nb-card > nb-card-header',
+	headerTextCss: 'nb-card-header  h4',
+	topCardHeaderTextCss: 'nb-card-body .title',
+	bottomCardHeaderTextCss: 'nb-card nb-card-header',
 	recentActivitiesEmployeeCss: 'div.hour-lable > ngx-avatar > div.row > div.col > div.ng-star-inserted',
 	projectsCss: 'nb-list > nb-lit-item > div.w-100 > div.row > div[class="col text-left"]',
 	membersInfoCss: 'div.col > ngx-avatar > div[class="row align-items-center"] > div.col > div.ng-star-inserted',
@@ -24,7 +24,8 @@ export const TimeTrackingPage = {
 	addTimeBtnCss: 'div.time-manual > button[class="btn btn-success"]',
 	todaySessionCss: 'div.time-count > span[class="today-time mt-2"]',
 	tabBtnCss: 'li.route-tab > a.tab-link',
-	verifyWorkCss: 'nb-list[role="list"] > nb-list-item[role="listitem"] > div.w-100 > div[class="row align-items-center"] > div[class="col text-left"]',
+	verifyWorkCss:
+		'nb-list[role="list"] > nb-list-item[role="listitem"] > div.w-100 > div[class="row align-items-center"] > div[class="col text-left"]',
 	verifyTimeCss: 'div[class="col"] > nb-card > nb-card-body > div.h1',
 	toastrMessageCss: 'nb-toast.ng-trigger',
 	verifyManualTimeCss: 'div[class="row border-bottom py-3 align-items-center ng-star-inserted"] > div.col',
