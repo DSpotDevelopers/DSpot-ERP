@@ -20,6 +20,7 @@
 			<ngx-gauzy-filters
 				[saveFilters]="(datePickerConfig$ | async).isSaveDatePicker"
 				[hasWorkedPerWeek]="true"
+				[hasEmploymentTypes]="true"
 				(filtersChange)="filtersChange($event)"
 			></ngx-gauzy-filters>
 		</div>
@@ -32,7 +33,7 @@
 					{{ 'TIMESHEET.TODO' | translate }}
 				</div>
 				<div class="col text-center day-col" *ngFor="let date of weekDayList">
-					{{ date | dateFormat }}
+					{{ date | utcToLocal | dateFormat }}
 				</div>
 			</div>
 		</div>

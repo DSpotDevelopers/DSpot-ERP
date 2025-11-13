@@ -730,7 +730,8 @@
 			"ONLY_FUTURE": "Alleen toekomst"
 		},
 		"NOTIFICATIONS": {
-			"STARTED_WORK_ON": "Het is vereist om de datum in te voeren waarop de werknemer is begonnen met werken om de loonlijst van de werknemer te genereren, de werknemer in staat te stellen deel te nemen aan gedeelde uitgaven, werknemersstatistieken te bekijken"
+			"STARTED_WORK_ON": "Het is vereist om de datum in te voeren waarop de werknemer is begonnen met werken om de loonlijst van de werknemer te genereren, de werknemer in staat te stellen deel te nemen aan gedeelde uitgaven, werknemersstatistieken te bekijken",
+			"RATE_EFFECTIVE_VALUE_CONFIRM": "\nDeze wijzigingen worden van kracht vanaf het moment van acceptatie en beïnvloeden het factureringsproces en andere processen in de applicatie.\nVraag de werknemer vóór bevestiging om een factuur uit te geven voor de periode die nog niet is gefactureerd.\nControleer daarna of de factuur is aangemaakt en ga dan verder met de wijzigingen.\nHoud er rekening mee dat de nieuwe factuur met de bijgewerkte gegevens de periode vanaf vandaag moet dekken.\nHet wordt ook aanbevolen om de werknemer te informeren over de periode voor het genereren van factuuritems."
 		},
 		"ARCHIVE_CONFIRMATION": {
 			"SURE": "Weet u zeker dat u wilt archiveren",
@@ -2164,6 +2165,8 @@
 			}
 		},
 		"PERMISSIONS": {
+			"VIEW_ASSIGNED_PROJECTS_ONLY": "Toon alleen toegewezen projecten (voor managementrollen)",
+			"PROFILE_EDIT": "Profiel bewerken",
 			"ADMIN_DASHBOARD_VIEW": "Bekijk admin-dashboard",
 			"TEAM_DASHBOARD": "Bekijk team-dashboard",
 			"PROJECT_MANAGEMENT_DASHBOARD": "Bekijk projectmanagement-dashboard",
@@ -3064,6 +3067,7 @@
 		"ESTIMATE_DATE": "Schattingdatum",
 		"DUE_DATE": "Vervaldatum",
 		"CURRENCY": "Valuta",
+		"CURRENCIES": "Valuta's",
 		"DISCOUNT": "Korting",
 		"CONTACT": "Contact",
 		"TOTAL_VALUE": "Totale waarde",
@@ -3619,6 +3623,8 @@
 			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "is bereikt. Neem contact op met de systeembeheerder om limieten aan te passen.",
 			"WORKED_THIS_WEEK": "Deze week gewerkt",
 			"WEEKLY_LIMIT": "Wekelijkse limiet",
+			"WARNING_RELOAD_TIMER_SOON": "Waarschuwing: Timer wordt binnenkort opnieuw geladen voor de nieuwe dag...",
+			"WARNING_TIMER_RELOADING": "Waarschuwing: De timer wordt opnieuw geladen voor de nieuwe dag. Wacht alstublieft een paar seconden...",
 			"ERRORS": "Controleer het formulier op fouten",
 			"PROJECT_LOAD": "Kan projecten niet laden",
 			"COPIED": "Link gekopieerd naar klembord",

@@ -34,10 +34,11 @@ import {
 	IDailyReportChart,
 	TimeLogPartialStatus,
 	IDeleteTimeLogData,
-	TimeErrorsEnum
+	TimeErrorsEnum,
+	IPagination
 } from '@gauzy/contracts';
 import { isEmpty, isNotEmpty } from '@gauzy/utils';
-import { TenantAwareCrudService } from './../../core/crud';
+import { PaginationParams, TenantAwareCrudService } from './../../core/crud';
 import {
 	DeleteTimeSpanCommand,
 	GetTimeLogGroupByClientCommand,
@@ -62,6 +63,7 @@ import { TypeOrmOrganizationContactRepository } from '../../organization-contact
 import { TimeLog } from './time-log.entity';
 import { ActivityLogService } from '../../activity-log/activity-log.service';
 import { TimerWeeklyLimitService } from '../timer/timer-weekly-limit.service';
+import { SocketService } from '../../socket/socket.service';
 
 @Injectable()
 export class TimeLogService extends TenantAwareCrudService<TimeLog> {
@@ -74,7 +76,8 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		readonly typeOrmOrganizationContactRepository: TypeOrmOrganizationContactRepository,
 		private readonly _timerWeeklyLimitService: TimerWeeklyLimitService,
 		private readonly commandBus: CommandBus,
-		private readonly activityLogService: ActivityLogService
+		private readonly _activityLogService: ActivityLogService,
+		private readonly _socketService: SocketService
 	) {
 		super(typeOrmTimeLogRepository, mikroOrmTimeLogRepository);
 	}
@@ -96,6 +99,12 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 
 		// Inner join with related entities (timeSlots)
 		query.innerJoin(`${query.alias}.timeSlots`, 'timeSlots');
+
+		// Inner join with employee
+		query.innerJoin('time_log.employee', 'employee');
+
+		// Left join z employment types
+		query.leftJoin('employee.organizationEmploymentTypes', 'organizationEmploymentTypes');
 
 		// Apply additional conditions to the query based on request filters
 		query.where((qb: SelectQueryBuilder<TimeLog>) => {
@@ -183,6 +192,149 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 	}
 
 	/**
+	 * Retrieves all time logs based on the provided input in chunks.
+	 * This method prevents loading too many records into memory at once
+	 * by fetching them in smaller batches and concatenating the results.
+	 *
+	 * @param request The input parameters for fetching time logs.
+	 * @returns A Promise that resolves to an array of time logs.
+	 */
+	async getAllTimeLogsInChunks(request: IGetTimeLogReportInput): Promise<ITimeLog[]> {
+		const limit = 100; // number of records per query batch
+		let page = 0;
+		let results: ITimeLog[] = [];
+		let hasMore = true;
+
+		while (hasMore) {
+			// Create a new query builder for the current batch
+			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
+
+			// Join with related entities (employee, etc.)
+			query.innerJoin(`${query.alias}.employee`, 'employee');
+			query.leftJoinAndSelect('employee.organizationEmploymentTypes', 'organizationEmploymentTypes');
+
+			// Define select fields, relations, and pagination options
+			query.setFindOptions({
+				select: {
+					project: {
+						id: true,
+						name: true,
+						imageUrl: true,
+						membersCount: true
+					},
+					task: TimeLogService.TASK_SELECT_FIELDS,
+					organizationContact: {
+						id: true,
+						name: true,
+						imageUrl: true
+					},
+					employee: {
+						id: true,
+						isAway: true,
+						isOnline: true,
+						reWeeklyLimit: true,
+						organizationEmploymentTypes: { id: true, name: true },
+						user: {
+							id: true,
+							firstName: true,
+							lastName: true,
+							imageUrl: true
+						}
+					}
+				},
+				relations: [...(request.relations ? request.relations : [])],
+				order: {
+					startedAt: 'ASC'
+				},
+				skip: page * limit,
+				take: limit
+			});
+
+			// Apply filters using the provided query builder helper
+			query.where((qb: SelectQueryBuilder<TimeLog>) => {
+				this.getFilterTimeLogQuery(qb, request, true);
+			});
+
+			// Fetch a batch of time logs
+			let chunk = await query.getMany();
+
+			// Adjust boundaries (startedAt, stoppedAt) and recalculate duration
+			chunk = fixTimeLogsBoundary(chunk, request.startDate, request.endDate, request.timeZone);
+
+			// Append the batch to the overall result set
+			results = results.concat(chunk);
+
+			// Determine if there are more records to fetch
+			hasMore = chunk.length === limit;
+			page++;
+		}
+
+		return results;
+	}
+
+	/**
+	 * Retrieves paginated time logs with optional filters.
+	 *
+	 * This method queries the database for time logs using pagination
+	 * and filtering criteria provided in the `options` parameter.
+	 *
+	 * @param options Pagination and filtering options.
+	 * @returns A paginated list of time logs with total count.
+	 *
+	 * @throws {BadRequestException} If query execution fails or parameters are invalid.
+	 */
+	async getTimeLogsPaginated(
+		options: PaginationParams<TimeLog> & IGetTimeLogReportInput
+	): Promise<IPagination<ITimeLog>> {
+		try {
+			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
+
+			// Inner join with employee
+			query.innerJoin(`${query.alias}.employee`, 'employee');
+
+			// Join employment types
+			query.leftJoinAndSelect('employee.organizationEmploymentTypes', 'organizationEmploymentTypes');
+
+			// Set select, relations, order
+			query.setFindOptions({
+				select: {
+					project: { id: true, name: true, imageUrl: true, membersCount: true },
+					task: TimeLogService.TASK_SELECT_FIELDS,
+					organizationContact: { id: true, name: true, imageUrl: true },
+					employee: {
+						id: true,
+						isAway: true,
+						isOnline: true,
+						reWeeklyLimit: true,
+						user: { id: true, firstName: true, lastName: true, imageUrl: true },
+						organizationEmploymentTypes: { id: true, name: true }
+					}
+				},
+				relations: [...(options.relations || [])],
+				order: { startedAt: 'ASC' },
+				skip: options.skip,
+				take: options.take
+			});
+
+			// Apply filter
+			query.where((qb: SelectQueryBuilder<TimeLog>) => {
+				this.getFilterTimeLogQuery(qb, options, true);
+			});
+
+			// Execute paginated query
+			const [items, total] = await query.getManyAndCount();
+
+			// Adjust boundaries
+			const adjustedItems = fixTimeLogsBoundary(items, options.startDate, options.endDate, options.timeZone);
+
+			return { items: adjustedItems, total };
+		} catch (error) {
+			this.logger.error('Error while getting paginated time logs', error);
+			throw new BadRequestException(error);
+		}
+	}
+
+	/**
 	 * Retrieves time logs for invoice based on the provided input.
 	 * @param request The input parameters for fetching time logs.
 	 * @returns A Promise that resolves to an array of time logs.
@@ -226,6 +378,12 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		// Create a query builder for the TimeLog entity
 		const query = this.typeOrmRepository.createQueryBuilder('time_log');
 
+		// Inner join with employee
+		query.innerJoin('time_log.employee', 'employee');
+
+		// Left join z employment types
+		query.leftJoin('employee.organizationEmploymentTypes', 'organizationEmploymentTypes');
+
 		// Set find options for the query
 		query.setFindOptions({
 			select: {
@@ -239,6 +397,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 					userId: true,
 					isAway: true,
 					isOnline: true,
+					organizationEmploymentTypes: { id: true, name: true },
 					user: {
 						id: true,
 						firstName: true,
@@ -250,7 +409,8 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			relations: {
 				// Related entities to be included in the result
 				employee: {
-					user: true
+					user: true,
+					organizationEmploymentTypes: true
 				}
 			},
 			order: {
@@ -325,6 +485,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		// Inner join with related entities (employee, timeSlots)
 		query.innerJoin(`${query.alias}.employee`, 'employee');
 		query.innerJoin(`${query.alias}.timeSlots`, 'timeSlots');
+		query.leftJoinAndSelect('employee.organizationEmploymentTypes', 'organizationEmploymentTypes');
 
 		// Set find options for the query
 		query.setFindOptions({
@@ -397,6 +558,9 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		// Create a query builder for the TimeLog entity
 		const query = this.typeOrmRepository.createQueryBuilder('time_log');
 
+		query.innerJoin(`${query.alias}.employee`, 'employee');
+		query.leftJoinAndSelect('employee.organizationEmploymentTypes', 'organizationEmploymentTypes');
+
 		// Set find options for the query
 		query.setFindOptions({
 			select: {
@@ -431,6 +595,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 					userId: true,
 					isAway: true,
 					isOnline: true,
+					organizationEmploymentTypes: { id: true, name: true },
 					user: {
 						id: true,
 						firstName: true,
@@ -444,7 +609,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				project: { organizationContact: true },
 				task: { taskStatus: true },
 				organizationContact: true,
-				employee: { user: true }
+				employee: { user: true, organizationEmploymentTypes: true }
 			},
 			order: {
 				// Order results by the 'startedAt' field in ascending order
@@ -1128,6 +1293,25 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			query.andWhere(condition, { logType });
 		}
 
+		// Employment Types filter
+		if (isNotEmpty(request.employmentTypes)) {
+			query.andWhere(
+				new Brackets((subQb) => {
+					request.employmentTypes.forEach((et, index) => {
+						if (typeof et === 'string') {
+							subQb.orWhere(`organizationEmploymentTypes.name ILIKE :etName${index}`, {
+								[`etName${index}`]: `%${et}%`
+							});
+						} else if (et?.id) {
+							subQb.orWhere(`organizationEmploymentTypes.id = :etId${index}`, {
+								[`etId${index}`]: et.id
+							});
+						}
+					});
+				})
+			);
+		}
+
 		/**
 		 * Apply a condition to the TypeORM query based on the 'isEdited' property in the request.
 		 * If 'isEdited' is true, filter rows where the 'editedAt' column is not null.
@@ -1164,6 +1348,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		employee: IEmployee,
 		startedAt: Date,
 		stoppedAt: Date,
+		timeZone: string,
 		conflicts: ITimeLog[],
 		previousTime = 0
 	) {
@@ -1200,7 +1385,12 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		}
 
 		// Check if the time log will fit the weekly limit taking into account the items that will be removed by conflicts
-		const weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(employee, startedAt, true);
+		const weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(
+			employee,
+			startedAt,
+			timeZone,
+			true
+		);
 		const newTimeToAdd = moment(stoppedAt).diff(startedAt, 'seconds') - timeToRemove - previousTime;
 		if (newTimeToAdd > weeklyLimitStatus.remainWeeklyTime) {
 			throw new ConflictException(TimeErrorsEnum.WEEKLY_LIMIT_REACHED);
@@ -1251,7 +1441,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			);
 
 			// Check if the time log will fit the weekly limit
-			await this.checkWeeklyLimitWithConflicts(employee, startedAt, stoppedAt, conflicts);
+			await this.checkWeeklyLimitWithConflicts(employee, startedAt, stoppedAt, request?.timeZone, conflicts);
 
 			// Resolve conflicts by deleting conflicting time slots
 			if (conflicts?.length) {
@@ -1273,7 +1463,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			const timeLog = await this.commandBus.execute(new TimeLogCreateCommand(request));
 
 			// Generate the activity log
-			this.activityLogService.logActivity<TimeLog>(
+			this._activityLogService.logActivity<TimeLog>(
 				BaseEntityEnum.TimeLog,
 				ActionTypeEnum.Created,
 				ActorTypeEnum.User,
@@ -1283,6 +1473,10 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				organizationId,
 				tenantId
 			);
+
+			// Send a real-time event to the specified user via socket.
+			// No error is thrown if the user is not currently connected.
+			this._socketService.sendTimerChanged(employeeId);
 
 			return timeLog;
 		} catch (error) {
@@ -1304,6 +1498,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 	 * @returns The updated time log entry.
 	 */
 	async updateManualTime(id: ID, request: IManualTimeInput): Promise<ITimeLog> {
+		const originalTimeZone = request.timeZone;
 		try {
 			const tenantId = RequestContext.currentTenantId() ?? request.tenantId;
 			const { startedAt, stoppedAt, employeeId, organizationId, partialStatus, referenceDate } = request;
@@ -1348,6 +1543,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				employee,
 				startedAt,
 				stoppedAt,
+				request?.timeZone,
 				conflicts,
 				partialStatus == TimeLogPartialStatus.COMPLETE
 					? timeLog.duration
@@ -1377,18 +1573,20 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			// Remove non valid fields from the request
 			delete request.partialStatus;
 			delete request.referenceDate;
+			delete request.timeZone;
 
 			// Adjust the time log for the remaining time
 			const newObject = {
 				...timeLog,
 				...request
 			};
-			const remainingTimeUpdate = {};
+
+			const remainingTimeUpdate: Partial<IManualTimeInput> = {};
 			if (partialStatus == TimeLogPartialStatus.TO_LEFT) {
-				remainingTimeUpdate['startedAt'] = moment(referenceDate).add(1, 'seconds').toDate();
+				remainingTimeUpdate.startedAt = moment(referenceDate).add(1, 'seconds').toDate();
 				newObject.stoppedAt = referenceDate;
 			} else if (partialStatus == TimeLogPartialStatus.TO_RIGHT) {
-				remainingTimeUpdate['stoppedAt'] = moment(referenceDate).subtract(1, 'seconds').toDate();
+				remainingTimeUpdate.stoppedAt = moment(referenceDate).subtract(1, 'seconds').toDate();
 				newObject.startedAt = referenceDate;
 			}
 
@@ -1407,7 +1605,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			let newTimeLog = await this.typeOrmRepository.findOneBy({ id });
 
 			// Generate the activity log
-			this.activityLogService.logActivity<TimeLog>(
+			this._activityLogService.logActivity<TimeLog>(
 				BaseEntityEnum.TimeLog,
 				ActionTypeEnum.Updated,
 				ActorTypeEnum.User,
@@ -1422,17 +1620,25 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 
 			if (partialStatus != TimeLogPartialStatus.COMPLETE) {
 				// If the time log is not complete, we need to create new time log entry
-				newTimeLog = await this.addManualTime(newObject);
+				newTimeLog = await this.addManualTime({ ...newObject, timeZone: originalTimeZone });
 			}
+
+			// Send a real-time event to the specified user via socket.
+			// No error is thrown if the user is not currently connected.
+			this._socketService.sendTimerChanged(employeeId);
 
 			return newTimeLog;
 		} catch (error) {
-			this.logger.error('Failed to update manual time log', error);
+			this.logger.error('Failed to update manual time log', {
+				message: error?.message,
+				stack: error?.stack,
+				error
+			});
 			// Handle exceptions appropriately
 			if (error instanceof ConflictException && error.message === TimeErrorsEnum.WEEKLY_LIMIT_REACHED) {
 				throw new ConflictException(TimeErrorsEnum.WEEKLY_LIMIT_REACHED);
 			} else {
-				throw new BadRequestException('Failed to update manual time log');
+				throw new BadRequestException(error.message || 'Failed to update manual time log');
 			}
 		}
 	}
@@ -1483,12 +1689,19 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		// Get the time logs from the database
 		const timeLogs = await query.getMany();
 
+		for (const log of timeLogs) {
+			if (!log.timeSlots || log.timeSlots.length === 0) {
+				this.logger.warn(`Time log ${log?.id} has no timeSlots — continue slot deletion`);
+				continue;
+			}
+		}
+
 		// Invoke the command bus to delete the time logs
 		const deleted = await this.commandBus.execute(new TimeLogDeleteCommand(timeLogs, timeLogMap, forceDelete));
 
 		// Generate the activity log
 		for (const timeLog of timeLogs) {
-			this.activityLogService.logActivity<TimeLog>(
+			this._activityLogService.logActivity<TimeLog>(
 				BaseEntityEnum.TimeLog,
 				ActionTypeEnum.Deleted,
 				ActorTypeEnum.User,
@@ -1498,6 +1711,9 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 				organizationId,
 				tenantId
 			);
+			// Send a real-time event to the specified user via socket.
+			// No error is thrown if the user is not currently connected.
+			this._socketService.sendTimerChanged(timeLog?.employeeId);
 		}
 
 		return deleted;

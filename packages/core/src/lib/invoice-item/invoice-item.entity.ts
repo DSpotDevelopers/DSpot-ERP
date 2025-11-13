@@ -46,13 +46,15 @@ export class InvoiceItem extends TenantOrganizationBaseEntity implements IInvoic
 	})
 	quantity: number;
 
-	@ApiProperty({ type: () => Number })
+	@ApiPropertyOptional({ type: () => Number })
 	@IsNumber()
+	@IsOptional()
 	@MultiORMColumn({
+		nullable: true,
 		type: 'numeric',
 		transformer: new ColumnNumericTransformerPipe()
 	})
-	totalValue: number;
+	totalValue?: number;
 
 	@ApiPropertyOptional({ type: () => Boolean })
 	@IsBoolean()

@@ -47,6 +47,7 @@ import { TypeOrmEmployeeRepository } from '../../employee/repository/type-orm-em
 import { TypeOrmActivityRepository } from '../activity/repository/type-orm-activity.repository';
 import { MikroOrmTimeLogRepository } from '../time-log/repository/mikro-orm-time-log.repository';
 import { TypeOrmTimeLogRepository } from '../time-log/repository/type-orm-time-log.repository';
+import { calculateTotalDuration, fixTimeLogsBoundary } from '../time-log/time-log.utils';
 
 // Get the type of the Object-Relational Mapping (ORM) used in the application.
 const ormType: MultiORM = getORMType();
@@ -118,7 +119,7 @@ export class StatisticService {
 		const [employeesCount, projectsCount, weekActivities, todayActivities] = await Promise.all([
 			this.getEmployeeWorkedCounts(request),
 			this.getProjectWorkedCounts(request),
-			this.getWeeklyStatisticsActivities(request),
+			this.getPeriodStatisticsActivities(request),
 			this.getTodayStatisticsActivities(request)
 		]);
 
@@ -269,6 +270,212 @@ export class StatisticService {
 	}
 
 	/**
+	 * Get average activity and total work duration for a given period (week),
+	 * adjusted for timezone and split across midnight boundaries.
+	 *
+	 * @param request - object containing filters like organization, dates, projects, teams, employees, etc.
+	 * @returns an object with total duration and average activity percentage for the period
+	 */
+	async getPeriodStatisticsActivities(request: IGetCountsStatistics): Promise<IWeeklyStatisticsActivities> {
+		const {
+			organizationId,
+			startDate,
+			endDate,
+			projectIds = [],
+			teamIds = [],
+			logType,
+			source,
+			employmentTypes = [],
+			onlyMe: isOnlyMeSelected
+		} = request;
+
+		// Initialize employeeIds filter (use passed list or empty)
+		let employeeIds = request.employeeIds || [];
+
+		// Get current user and tenant info from context
+		const user = RequestContext.currentUser();
+		const tenantId = RequestContext.currentTenantId() ?? request.tenantId;
+
+		// Check if user has permission to change selected employee filter
+		const hasChangeSelectedEmployeePermission: boolean = RequestContext.hasPermission(
+			PermissionsEnum.CHANGE_SELECTED_EMPLOYEE
+		);
+
+		// If user restricted to "only me" or no permission to change employees, filter to current employee only
+		if (user.employeeId && (isOnlyMeSelected || !hasChangeSelectedEmployeePermission)) {
+			employeeIds = [user.employeeId];
+		}
+
+		// Get start and end of date range formatted as UTC moments
+		const { start, end } = getDateRangeFormat(
+			moment.utc(startDate || moment().startOf('isoWeek')),
+			moment.utc(endDate || moment().endOf('isoWeek'))
+		);
+
+		// Query time logs with related time slots applying all filters
+		const logs = this.typeOrmTimeLogRepository
+			.createQueryBuilder('time_log')
+			.leftJoinAndSelect('time_log.timeSlots', 'time_slot')
+			.leftJoin('time_log.employee', 'employee')
+			.leftJoin('employee.organizationEmploymentTypes', 'organizationEmploymentTypes')
+			.where('time_log.tenantId = :tenantId', { tenantId })
+			.andWhere('time_log.organizationId = :organizationId', { organizationId })
+			.andWhere(
+				new Brackets((qb) => {
+					qb.where('time_log.startedAt BETWEEN :startDate AND :endDate', { startDate: start, endDate: end });
+					qb.orWhere('time_log.stoppedAt BETWEEN :startDate AND :endDate', {
+						startDate: start,
+						endDate: end
+					});
+				})
+			)
+			.andWhere('time_log.stoppedAt >= time_log.startedAt')
+			.andWhere(isNotEmpty(employeeIds) ? 'time_log.employeeId IN (:...employeeIds)' : '1=1', { employeeIds })
+			.andWhere(isNotEmpty(projectIds) ? 'time_log.projectId IN (:...projectIds)' : '1=1', { projectIds })
+			.andWhere(isNotEmpty(teamIds) ? 'time_log.organizationTeamId IN (:...teamIds)' : '1=1', { teamIds })
+			.andWhere(isNotEmpty(logType) ? 'time_log.logType IN (:...logType)' : '1=1', { logType })
+			.andWhere(isNotEmpty(source) ? 'time_log.source IN (:...source)' : '1=1', { source });
+
+		// Apply employmentTypes filter if provided
+		if (isNotEmpty(employmentTypes)) {
+			logs.andWhere(
+				new Brackets((qb) => {
+					employmentTypes.forEach((et, index) => {
+						if (typeof et === 'string') {
+							qb.orWhere(`organizationEmploymentTypes.name ILIKE :etName${index}`, {
+								[`etName${index}`]: `%${et}%`
+							});
+						} else if (et?.id) {
+							qb.orWhere(`organizationEmploymentTypes.id = :etId${index}`, {
+								[`etId${index}`]: et.id
+							});
+						}
+					});
+				})
+			);
+		}
+
+		const timeLogs = await logs.getMany();
+
+		// Adjust logs that cross midnight boundaries according to timezone
+		const fixedTimeLogs = fixTimeLogsBoundary(timeLogs, start, end, request?.timeZone);
+
+		let totalDuration = 0;
+		let totalOverall = 0;
+
+		// Sum total duration and overall activity from the fixed logs and their time slots
+		for (const log of fixedTimeLogs) {
+			totalDuration += log.duration ?? 0;
+
+			if (Array.isArray(log.timeSlots)) {
+				for (const slot of log.timeSlots) {
+					totalOverall += slot.overall ?? 0;
+				}
+			}
+		}
+
+		// Calculate average activity as percentage of overall time vs total duration
+		const weekPercentage = totalDuration > 0 ? (totalOverall * 100) / totalDuration : 0;
+
+		const weekActivities = {
+			duration: totalDuration,
+			overall: weekPercentage
+		};
+
+		return weekActivities;
+	}
+
+	/**
+	 * Get total work duration for the given period.
+	 *
+	 * @param request - Filters and options (organization, employees, projects, teams, date range, timezone, etc.)
+	 * @returns An object with the total duration (in seconds) for the selected period.
+	 */
+	async getPeriodStatisticsDuration(request: IGetCountsStatistics): Promise<{ duration: number }> {
+		const {
+			organizationId,
+			startDate,
+			endDate,
+			projectIds = [],
+			teamIds = [],
+			logType,
+			source,
+			onlyMe: isOnlyMeSelected
+		} = request;
+
+		let employeeIds = request.employeeIds || [];
+
+		const user = RequestContext.currentUser();
+		const tenantId = RequestContext.currentTenantId() ?? request.tenantId;
+
+		// Check if the user has permission to view/change other employees
+		const hasChangeSelectedEmployeePermission: boolean = RequestContext.hasPermission(
+			PermissionsEnum.CHANGE_SELECTED_EMPLOYEE
+		);
+
+		// If the user does not have permission (or selected "only me"), restrict to their own employeeId
+		if (user.employeeId && (isOnlyMeSelected || !hasChangeSelectedEmployeePermission)) {
+			employeeIds = [user.employeeId];
+		}
+
+		// Format the date range (default: current ISO week)
+		const { start, end } = getDateRangeFormat(
+			moment.utc(startDate || moment().startOf('isoWeek')),
+			moment.utc(endDate || moment().endOf('isoWeek'))
+		);
+
+		// Create a query builder for the TimeLog entity
+		const query = this.typeOrmTimeLogRepository.createQueryBuilder('time_log');
+
+		// Base conditions
+		query
+			.where('time_log.tenantId = :tenantId', { tenantId })
+			.andWhere('time_log.organizationId = :organizationId', { organizationId })
+			.andWhere('time_log.stoppedAt >= time_log.startedAt')
+			.andWhere(
+				new Brackets((qb) => {
+					// Include logs where start OR stop falls inside the selected date range
+					qb.where('time_log.startedAt BETWEEN :startDate AND :endDate', { startDate: start, endDate: end });
+					qb.orWhere('time_log.stoppedAt BETWEEN :startDate AND :endDate', {
+						startDate: start,
+						endDate: end
+					});
+				})
+			);
+
+		// Apply filters conditionally
+		if (isNotEmpty(employeeIds)) {
+			query.andWhere('time_log.employeeId IN (:...employeeIds)', { employeeIds });
+		}
+
+		if (isNotEmpty(projectIds)) {
+			query.andWhere('time_log.projectId IN (:...projectIds)', { projectIds });
+		}
+
+		if (isNotEmpty(teamIds)) {
+			query.andWhere('time_log.organizationTeamId IN (:...teamIds)', { teamIds });
+		}
+
+		if (isNotEmpty(logType)) {
+			query.andWhere('time_log.logType IN (:...logType)', { logType });
+		}
+
+		if (isNotEmpty(source)) {
+			query.andWhere('time_log.source IN (:...source)', { source });
+		}
+
+		// Execute query
+		const timeLogs = await query.getMany();
+
+		this.logger.verbose(`Period Time Logs: ${JSON.stringify(timeLogs.map((t) => t.id))}`);
+
+		// Calculate total duration using helper
+		const totalDuration = calculateTotalDuration(timeLogs, start, end, request?.timeZone);
+
+		return { duration: totalDuration };
+	}
+
+	/**
 	 * Get average activity and total duration of the work for today.
 	 *
 	 * @param request - The request object containing filters and parameters
@@ -324,6 +531,8 @@ export class StatisticService {
 		// Define the base select statements and joins
 		query
 			.innerJoin(`${query.alias}.timeLogs`, 'time_log')
+			.innerJoin('time_log.employee', 'employee')
+			.innerJoin('employee.organizationEmploymentTypes', 'organizationEmploymentTypes')
 			.select([
 				getDurationQueryString(dbType, 'time_log', query.alias) + ' AS today_duration',
 				p(`COALESCE(SUM("${query.alias}"."overall"), 0)`) + ' AS overall',
@@ -1919,6 +2128,7 @@ export class StatisticService {
 		query
 			.select('COUNT(DISTINCT time_log.employeeId)', 'count')
 			.innerJoin('time_log.employee', 'employee')
+			.innerJoin('employee.organizationEmploymentTypes', 'organizationEmploymentTypes')
 			.innerJoin('time_log.timeSlots', 'time_slot')
 			.andWhere(
 				new Brackets((where: WhereExpressionBuilder) => {
@@ -1941,6 +2151,7 @@ export class StatisticService {
 		query
 			.select('COUNT(DISTINCT time_log.projectId)', 'count')
 			.innerJoin('time_log.employee', 'employee')
+			.innerJoin('employee.organizationEmploymentTypes', 'organizationEmploymentTypes')
 			.innerJoin('time_log.project', 'project')
 			.innerJoin('time_log.timeSlots', 'time_slot')
 			.andWhere(
@@ -1975,6 +2186,7 @@ export class StatisticService {
 			activityLevel,
 			logType,
 			source,
+			employmentTypes = [],
 			onlyMe: isOnlyMeSelected // Determine if the request specifies to retrieve data for the current user only
 		} = request;
 		let employeeIds = request.employeeIds || [];
@@ -2037,6 +2249,26 @@ export class StatisticService {
 		// Apply team filter
 		if (isNotEmpty(teamIds)) {
 			qb.andWhere(`${query.alias}.organizationTeamId IN (:...teamIds)`, { teamIds });
+		}
+
+		if (isNotEmpty(employmentTypes)) {
+			qb.andWhere(
+				new Brackets((subQb) => {
+					employmentTypes.forEach((et, index) => {
+						if (typeof et === 'string') {
+							// filter by name
+							subQb.orWhere(`organizationEmploymentTypes.name ILIKE :etName${index}`, {
+								[`etName${index}`]: `%${et}%`
+							});
+						} else if (et?.id) {
+							// filter by id
+							subQb.orWhere(`organizationEmploymentTypes.id = :etId${index}`, {
+								[`etId${index}`]: et.id
+							});
+						}
+					});
+				})
+			);
 		}
 
 		return qb;

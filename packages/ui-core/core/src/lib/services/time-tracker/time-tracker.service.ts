@@ -3,10 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Observable, timer } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 import { StoreConfig, Store, Query } from '@datorama/akita';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { environment } from '@gauzy/ui-config';
 import {
 	ITimeLog,
 	ITimerToggleInput,
@@ -24,6 +23,8 @@ import {
 import { API_PREFIX, BACKGROUND_SYNC_INTERVAL, toLocal, toParams, toUTC } from '@gauzy/ui-core/common';
 import { Store as AppStore } from '../store/store.service';
 import { ITimerSynced } from './interfaces';
+import { ToastrService } from '../notification';
+import { environment } from '@gauzy/ui-config';
 
 /**
  * Creates and returns the initial state for the timer.
@@ -105,16 +106,37 @@ export class TimeTrackerService implements OnDestroy {
 	private readonly _trackType$: BehaviorSubject<string> = new BehaviorSubject(this.timeType);
 	private _worker: Worker;
 	private _timerSynced: ITimerSynced;
+	// Indicates whether the timer was started automatically after midnight
+	private startedAfterMidnight = false;
+	private isToggleInProgress = false;
 	private readonly channel: BroadcastChannel;
 	private readonly timerStoreSubject = new BehaviorSubject(this.timerStore.getValue());
 	public timer$: Observable<number> = timer(BACKGROUND_SYNC_INTERVAL);
 	public trackType$: Observable<string> = this._trackType$.asObservable();
+	// Observable to allow components to react when the rollover occurs
+	public hasRolledOverToday$ = new BehaviorSubject<boolean>(false);
+	// Observable to notify components that rollover is about to happen (e.g., within 5 seconds)
+	public willRollOverSoon$ = new BehaviorSubject<boolean>(false);
+
+	// Internal flag indicating if the rollover has already occurred today
+	private _hasRolledOverToday = false;
+
+	// Getter and setter for the rollover flag, ensures the observable is updated on change
+	public get hasRolledOverToday() {
+		return this._hasRolledOverToday;
+	}
+
+	private set hasRolledOverToday(value: boolean) {
+		this._hasRolledOverToday = value;
+		this.hasRolledOverToday$.next(value); // emit the change to subscribers
+	}
 
 	constructor(
 		protected readonly timerStore: TimerStore,
 		protected readonly timerQuery: TimerQuery,
 		protected readonly store: AppStore,
-		private readonly http: HttpClient
+		private readonly http: HttpClient,
+		private readonly toastrService: ToastrService
 	) {
 		this._runWorker();
 
@@ -193,25 +215,113 @@ export class TimeTrackerService implements OnDestroy {
 				}
 
 				// On refresh/delete TimeLog, we need to clear interval to prevent duplicate interval
-				this.turnOffTimer();
-				if (status.running) {
+				if (status.running && !this.isToggleInProgress) {
 					this.turnOnTimer();
+				} else if (!status.running) {
+					this.turnOffTimer();
 				}
 
 				return status;
 			})
 			.catch((error) => {
-				if (
-					error.status == 403 &&
-					(error.error?.message === TimeErrorsEnum.INVALID_TASK_PERMISSIONS ||
-						error.error?.message === TimeErrorsEnum.INVALID_PROJECT_PERMISSIONS)
-				) {
+				if (error.status == 403 && error.error?.message === TimeErrorsEnum.INVALID_TASK_PERMISSIONS) {
 					this.turnOffTimer();
+					this.toastrService.danger('TIMER_TRACKER.PROJECT_TASK_PERMISSION_ERROR');
+				} else if (error.status == 403 && error.error?.message === TimeErrorsEnum.INVALID_PROJECT_PERMISSIONS) {
+					this.turnOffTimer();
+					this.toastrService.danger('TIMER_TRACKER.PROJECT_PROJECT_PERMISSION_ERROR');
 				} else {
 					console.error(error);
 				}
 				throw error;
 			});
+	}
+
+	/**
+	 * Checks whether the current time is near or past midnight and,
+	 * if necessary, stops the timer before midnight and starts a new session just after.
+	 * This prevents a timer from running across two calendar days.
+	 */
+	public async isMidnight(): Promise<void> {
+		const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+		const now = moment.tz();
+		const endOfDay = moment.tz(timeZone).endOf('day');
+		const secondsToMidnight = endOfDay.diff(now, 'seconds');
+
+		// Notify that the timer is about to roll over (within 10 seconds before midnight)
+		if (secondsToMidnight <= 10 && !this.hasRolledOverToday) {
+			this.willRollOverSoon$.next(true);
+		} else {
+			this.willRollOverSoon$.next(false);
+		}
+
+		// Perform timer stop + restart 1 second before midnight (if not done already)
+		if (this.running && secondsToMidnight <= 4 && !this.hasRolledOverToday) {
+			this.hasRolledOverToday = true;
+			this.willRollOverSoon$.next(false);
+
+			try {
+				// Stop the current timer just before midnight
+				this.turnOffTimer();
+				delete this.timerConfig.source;
+
+				this.timerConfig = {
+					...this.timerConfig,
+					timeZone,
+					stoppedAt: toUTC(moment()).toDate()
+				};
+
+				this.currentSessionDuration = 0;
+
+				const stopResult = await firstValueFrom(
+					this.http.post<ITimeLog>(`${API_PREFIX}/timesheet/timer/stop`, this.timerConfig)
+				);
+
+				if (!stopResult || !stopResult.id) {
+					throw new Error('Stop timer failed, response empty.');
+				}
+
+				this._broadcastState('STOP_TIMER');
+				this._saveStateToLocalStorage();
+
+				// Start a new timer session just after midnight
+				if (!this.running && stopResult) {
+					await this.sleep(5000); // wait 5s to ensure new day begins
+					this.turnOnTimer();
+					this.timerConfig = {
+						...this.timerConfig,
+						timeZone,
+						startedAt: toUTC(moment()).toDate(),
+						source: TimeLogSourceEnum.WEB_TIMER
+					};
+
+					const startResult = await firstValueFrom(
+						this.http.post<ITimeLog>(`${API_PREFIX}/timesheet/timer/start`, this.timerConfig)
+					);
+
+					if (!startResult || !startResult.id) {
+						throw new Error('Start timer failed, response empty.');
+					}
+
+					this._broadcastState('START_TIMER');
+					this._saveStateToLocalStorage();
+					this.startedAfterMidnight = true;
+				}
+				// Reset the rollover flags shortly after midnight (e.g., at 00:00:15)
+				await this.sleep(10000);
+				this.hasRolledOverToday = false;
+				this.startedAfterMidnight = false;
+			} catch (error) {
+				console.error('[isMidnight] Timer rollover error:', error);
+				this.hasRolledOverToday = false;
+				this.startedAfterMidnight = false;
+			}
+		}
+	}
+
+	// Utility function to pause execution for the given time (in milliseconds)
+	private sleep(ms: number): Promise<void> {
+		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
 	/**
@@ -330,18 +440,15 @@ export class TimeTrackerService implements OnDestroy {
 	 */
 	getTimerStatus(params: ITimerStatusInput): Promise<ITimerStatusWithWeeklyLimits> {
 		const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const localStart = moment.tz(timeZone).startOf('day');
-		const offsetMinutes = localStart.utcOffset();
-		const todayStart = localStart.clone().utc().add(offsetMinutes, 'minutes').toISOString();
-		const localEnd = moment.tz(timeZone).endOf('day');
-		const offsetMinutesEnd = localEnd.utcOffset();
-		const todayEnd = localEnd.clone().utc().add(offsetMinutesEnd, 'minutes').toISOString();
+		const todayStart = moment.tz(timeZone).startOf('day').utc().toISOString();
+		const todayEnd = moment.tz(timeZone).endOf('day').utc().toISOString();
 		return firstValueFrom(
 			this.http.get<ITimerStatusWithWeeklyLimits>(`${API_PREFIX}/timesheet/timer/status`, {
 				params: toParams({
 					...params,
 					todayStart,
-					todayEnd
+					todayEnd,
+					timeZone
 				})
 			})
 		);
@@ -380,37 +487,92 @@ export class TimeTrackerService implements OnDestroy {
 		return selected.isoWeek() === now.isoWeek() && selected.isoWeekYear() === now.isoWeekYear();
 	}
 
-	async toggle(): Promise<ITimeLog> {
+	async toggle(): Promise<ITimeLog | void> {
+		// Check if a toggle is already in progress (prevents multiple clicks)
+		if (this.isToggleInProgress) return;
+
+		// Check if the weekly tracking limit has been reached
 		if (this.hasReachedWeeklyLimit()) return;
 
-		if (this.running) {
-			this.turnOffTimer();
-			delete this.timerConfig.source;
-			this.timerConfig = {
-				...this.timerConfig,
-				stoppedAt: toUTC(moment()).toDate()
-			};
-			this.currentSessionDuration = 0;
-			const log = await firstValueFrom(
-				this.http.post<ITimeLog>(`${API_PREFIX}/timesheet/timer/stop`, this.timerConfig)
-			);
-			this._broadcastState('STOP_TIMER');
-			this._saveStateToLocalStorage();
-			return log;
-		} else {
-			this.currentSessionDuration = 0;
-			this.turnOnTimer();
-			this.timerConfig = {
-				...this.timerConfig,
-				startedAt: toUTC(moment()).toDate(),
-				source: TimeLogSourceEnum.WEB_TIMER
-			};
-			const log = await firstValueFrom(
-				this.http.post<ITimeLog>(`${API_PREFIX}/timesheet/timer/start`, this.timerConfig)
-			);
-			this._broadcastState('START_TIMER');
-			this._saveStateToLocalStorage();
-			return log;
+		this.isToggleInProgress = true; // lock to avoid concurrent toggles
+		const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+		try {
+			if (this.running) {
+				// --- STOP TIMER ---
+				const stopConfig = {
+					...this.timerConfig,
+					timeZone,
+					stoppedAt: toUTC(moment()).toDate()
+				};
+
+				// Remove the "source" property when stopping the timer
+				delete this.timerConfig.source;
+
+				// Send stop request to backend
+				const log = await firstValueFrom(
+					this.http.post<ITimeLog>(`${API_PREFIX}/timesheet/timer/stop`, stopConfig)
+				);
+
+				// Validate backend response
+				if (!log || !log.id) {
+					throw new Error('Stop timer failed, response invalid.');
+				}
+
+				// Update local state only after successful response
+				this.turnOffTimer();
+				this.currentSessionDuration = 0;
+				this._broadcastState('STOP_TIMER');
+				this._saveStateToLocalStorage();
+
+				return log;
+			} else {
+				// --- START TIMER ---
+				const startConfig = {
+					...this.timerConfig,
+					timeZone,
+					startedAt: toUTC(moment()).toDate(),
+					source: TimeLogSourceEnum.WEB_TIMER
+				};
+
+				// Send start request to backend
+				const log = await firstValueFrom(
+					this.http.post<ITimeLog>(`${API_PREFIX}/timesheet/timer/start`, startConfig)
+				);
+
+				// Validate backend response
+				if (!log || !log.id) {
+					throw new Error('Start timer failed, response invalid.');
+				}
+
+				// Update config with startedAt
+				this.timerConfig = {
+					...this.timerConfig,
+					startedAt: startConfig.startedAt,
+					source: TimeLogSourceEnum.WEB_TIMER
+				};
+
+				// Update local state only after successful response
+				this.currentSessionDuration = 0;
+				this.turnOnTimer();
+				this._broadcastState('START_TIMER');
+				this._saveStateToLocalStorage();
+
+				return log;
+			}
+		} catch (error) {
+			// Handle any errors from the toggle request
+			console.error('[toggle] Timer request failed:', error);
+			if (error.status == 403 && error.error?.message === TimeErrorsEnum.INVALID_TASK_PERMISSIONS) {
+				this.toastrService.danger('TIMER_TRACKER.PROJECT_TASK_PERMISSION_ERROR');
+			} else if (error.status == 403 && error.error?.message === TimeErrorsEnum.INVALID_PROJECT_PERMISSIONS) {
+				this.toastrService.danger('TIMER_TRACKER.PROJECT_PROJECT_PERMISSION_ERROR');
+			} else {
+				throw error; // can be shown as a toast/alert in the UI
+			}
+		} finally {
+			// Always release the toggle lock
+			this.isToggleInProgress = false;
 		}
 	}
 
@@ -432,9 +594,16 @@ export class TimeTrackerService implements OnDestroy {
 	turnOffTimer() {
 		this.running = false;
 		// post running state to worker on turning off
+		this.currentSessionDuration = 0;
+
 		this._worker.postMessage({
-			isRunning: this.running
+			isRunning: false,
+			session: this.currentSessionDuration,
+			duration: this.duration,
+			workedThisWeek: this.timerQuery.getValue().workedThisWeek,
+			reWeeklyLimit: this.timerQuery.getValue().reWeeklyLimit
 		});
+
 		this._broadcastState('SYNC_TIMER');
 	}
 
@@ -514,15 +683,25 @@ export class TimeTrackerService implements OnDestroy {
 		const currentState = this.timerQuery.getValue();
 		this._saveStateToLocalStorage();
 
+		const { projectId, taskId, description, taskTitle } = currentState.timerConfig;
+
 		if (type === 'SYNC_TIMER_CONFIG') {
 			this.channel.postMessage({
 				type: 'SYNC_TIMER_CONFIG',
-				data: currentState.timerConfig
+				data: currentState.timerConfig,
+				projectId,
+				taskId,
+				taskTitle,
+				description
 			});
 		} else {
 			this.channel.postMessage({
 				type,
-				data: currentState
+				data: currentState,
+				projectId,
+				taskId,
+				taskTitle,
+				description
 			});
 		}
 	}
@@ -543,6 +722,13 @@ export class TimeTrackerService implements OnDestroy {
 			switch (type) {
 				case 'SYNC_TIMER':
 					this.timerStore.update(data);
+					this._worker.postMessage({
+						isRunning: data.running,
+						session: data.currentSessionDuration,
+						duration: data.duration,
+						workedThisWeek: data.workedThisWeek,
+						reWeeklyLimit: data.reWeeklyLimit
+					});
 					break;
 
 				case 'SYNC_TIMER_CONFIG':

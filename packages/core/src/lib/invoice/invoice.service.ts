@@ -1,7 +1,7 @@
 import { PaginationParams, TenantAwareCrudService } from './../core/crud';
 import { Invoice } from './invoice.entity';
 import { Between, In, Not, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EmailService } from './../email-send/email.service';
 import {
 	IInvoice,
@@ -24,9 +24,11 @@ import { OrganizationService } from './../organization';
 import { TypeOrmInvoiceRepository } from './repository/type-orm-invoice.repository';
 import { MikroOrmInvoiceRepository } from './repository/mikro-orm-invoice.repository';
 import { RequestContext } from '../core/context';
+import { CountryService } from '../country/country.service';
 
 @Injectable()
 export class InvoiceService extends TenantAwareCrudService<Invoice> {
+	private readonly logger = new Logger(`GZY - ${InvoiceService.name}`);
 	constructor(
 		readonly typeOrmInvoiceRepository: TypeOrmInvoiceRepository,
 		readonly mikroOrmInvoiceRepository: MikroOrmInvoiceRepository,
@@ -34,7 +36,8 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 		private readonly estimateEmailService: EstimateEmailService,
 		private readonly pdfmakerService: PdfmakerService,
 		private readonly i18n: I18nService,
-		private readonly organizationService: OrganizationService
+		private readonly organizationService: OrganizationService,
+		private readonly countryService: CountryService
 	) {
 		super(typeOrmInvoiceRepository, mikroOrmInvoiceRepository);
 	}
@@ -262,6 +265,7 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 		const invoice: IInvoice = await this.findOneByIdString(invoiceId, {
 			relations: [
 				'fromOrganization',
+				'fromOrganization.contact',
 				'fromUser',
 				'invoiceItems.employee',
 				'invoiceItems.employee.user',
@@ -310,14 +314,34 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 			yes: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.YES', { lang: language }),
 			no: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.NO', { lang: language }),
 			alreadyPaid: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ALREADY_PAID', { lang: language }),
-			amountDue: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.AMOUNT_DUE', { lang: language })
+			amountDue: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.AMOUNT_DUE', { lang: language }),
+			taxId: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.TAX_ID', { lang: language }),
+			address: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ADDRESS', { lang: language }),
+			address2: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ADDRESS_2', { lang: language }),
+			postcode: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.POSTCODE', { lang: language })
 		};
+		let countryName: string | null = null;
+
+		try {
+			const country = await this.countryService.findByIsoCode(
+				invoice.toOrganization?.contact?.country ??
+					invoice.toContact?.contact?.country ??
+					invoice.toOrganization.contact?.country ??
+					invoice.fromOrganization.contact?.country
+			);
+
+			countryName = country?.country ?? null;
+		} catch (error) {
+			this.logger.warn('Failed to fetch country by ISO code', error);
+			countryName = null; // fallback
+		}
 		const docDefinition = await generateInvoicePdfDefinition(
 			invoice,
 			invoice.toOrganization ?? invoice.fromOrganization,
 			invoice.toContact,
 			translatedText,
-			language
+			language,
+			countryName
 		);
 		return await this.pdfmakerService.generatePdf(docDefinition);
 	}
@@ -389,19 +413,27 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 	 * @param filter
 	 * @returns
 	 */
-	public pagination(filter?: PaginationParams<any>) {
+	public async pagination(filter?: PaginationParams<any>) {
 		if ('where' in filter) {
 			const { where } = filter;
-			if (where.tags) {
-				filter.where.tags = {
-					id: In(where.tags)
-				};
+
+			if (where.tags?.length) {
+				const subQuery = this.typeOrmInvoiceRepository
+					.createQueryBuilder('invoice')
+					.select('invoice.id')
+					.leftJoin('invoice.tags', 'tag')
+					.where('tag.id IN (:...tags)', { tags: where.tags });
+
+				filter.where.id = In(await subQuery.getRawMany().then((rows) => rows.map((r) => r.invoice_id)));
+				delete filter.where.tags;
 			}
+
 			if (where.toContact) {
 				filter.where.toContact = {
 					id: In(where.toContact)
 				};
 			}
+
 			if ('invoiceDate' in where) {
 				const { invoiceDate } = where;
 				const { startDate, endDate } = invoiceDate;
@@ -418,14 +450,15 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 					);
 				}
 			}
+
 			if ('dueDate' in where) {
 				const { dueDate } = where;
 				const { startDate, endDate } = dueDate;
 
 				if (startDate && endDate) {
 					filter.where.dueDate = Between(
-						moment.utc(startDate).format('YYYY-MM-DD HH:mm:ss'),
-						moment.utc(endDate).format('YYYY-MM-DD HH:mm:ss')
+						moment.utc(startDate).startOf('day').toDate(),
+						moment.utc(endDate).endOf('day').toDate()
 					);
 				} else {
 					filter.where.dueDate = Between(
@@ -437,11 +470,9 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 
 			if ('totalValue' in where && where.totalValue) {
 				const { min, max } = where.totalValue as { min?: number; max?: number };
-
 				if (min !== undefined && max !== undefined && min > max) {
 					throw new BadRequestException('Minimum value cannot be greater than maximum value');
 				}
-
 				if (min !== undefined && max !== undefined) {
 					filter.where.totalValue = Between(min, max);
 				} else if (min !== undefined) {
@@ -451,6 +482,7 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 				}
 			}
 		}
+
 		return super.paginate(filter);
 	}
 }

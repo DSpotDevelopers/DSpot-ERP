@@ -4,14 +4,21 @@ import { NgxDraggableDomMoveEvent, NgxDraggablePoint } from 'ngx-draggable-dom';
 import { NbThemeService } from '@nebular/theme';
 import * as moment from 'moment';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
-import { filter, takeUntil, tap } from 'rxjs/operators';
+import { combineLatest, fromEvent, Observable, Subject, Subscription } from 'rxjs';
+import { debounceTime, filter, takeUntil, tap } from 'rxjs/operators';
 import { faStopwatch, faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
-import { Environment, environment } from '@gauzy/ui-config';
 import { IOrganization, IUser, TimeLogType, IEmployee, ITimerToggleInput, ITask } from '@gauzy/contracts';
 import { distinctUntilChange, toLocal } from '@gauzy/ui-core/common';
-import { ErrorHandlingService, ITimerSynced, Store, TimeTrackerService } from '@gauzy/ui-core/core';
+import {
+	ErrorHandlingService,
+	ITimerSynced,
+	SocketConnectionService,
+	Store,
+	TimeTrackerService,
+	TimeTrackerSocketService
+} from '@gauzy/ui-core/core';
 import { TimeTrackerStatusService } from '../components/time-tracker-status/time-tracker-status.service';
+import { Environment, environment } from '@gauzy/ui-config';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
@@ -45,6 +52,8 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 	@ViewChild(NgForm) form: NgForm;
 
 	trackType$: Observable<string> = this.timeTrackerService.trackType$;
+	hasRolledOverToday$ = this.timeTrackerService.hasRolledOverToday$;
+	willRollOverSoon$ = this.timeTrackerService.willRollOverSoon$;
 	private runningSubscription: Subscription;
 	private readonly workedThisWeek$: Observable<number> = this.timeTrackerService.workedThisWeek$;
 	private readonly reWeeklyLimit$: Observable<number> = this.timeTrackerService.reWeeklyLimit$;
@@ -55,7 +64,9 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 		private readonly store: Store,
 		private readonly _errorHandlingService: ErrorHandlingService,
 		private readonly themeService: NbThemeService,
-		private readonly _timeTrackerStatusService: TimeTrackerStatusService
+		private readonly _timeTrackerStatusService: TimeTrackerStatusService,
+		private readonly _socketService: TimeTrackerSocketService,
+		private readonly _socketConnectionService: SocketConnectionService
 	) {
 		this._timeTrackerStatusService.external$
 			.pipe(
@@ -65,7 +76,6 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 						toLocal(timerSynced.startedAt),
 						'seconds'
 					);
-					if (!this.limitReached) await this.toggleTimer(false);
 				}),
 				untilDestroyed(this)
 			)
@@ -224,24 +234,29 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 				untilDestroyed(this)
 			)
 			.subscribe();
-		this.timeTrackerService.duration$
-			.pipe(
-				tap((time) => (this.todaySessionTime = moment.utc(time * 1000).format('HH:mm:ss'))),
-				untilDestroyed(this)
-			)
-			.subscribe();
 		this.timeTrackerService.showTimerWindow$
 			.pipe(
 				tap((isOpen) => (this.isOpen = isOpen)),
 				untilDestroyed(this)
 			)
 			.subscribe();
-		this.timeTrackerService.currentSessionDuration$
+		combineLatest([this.timeTrackerService.currentSessionDuration$, this.timeTrackerService.duration$])
 			.pipe(
-				tap((time) => (this.currentSessionTime = moment.utc(time * 1000).format('HH:mm:ss'))),
+				tap(([currentSessionDuration, duration]) => {
+					this.currentSessionTime = moment.utc(currentSessionDuration * 1000).format('HH:mm:ss');
+
+					this.todaySessionTime = moment.utc(duration * 1000).format('HH:mm:ss');
+				}),
 				untilDestroyed(this)
 			)
-			.subscribe();
+			.subscribe(() => {
+				if (this.running) {
+					// Periodically check if it's midnight (when the timer is running).
+					// If so, attempt a safe rollover: stop the current timer before midnight
+					// and start a new session just after midnight to avoid crossing date boundaries.
+					this.timeTrackerService.isMidnight();
+				}
+			});
 		this.runningSubscription = this.timeTrackerService.running$
 			.pipe(
 				tap((isRunning) => (this.running = isRunning)),
@@ -261,8 +276,60 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 			.subscribe(async () => {
 				this.limitReached = this.timeTrackerService.hasReachedWeeklyLimit();
 				if (this.limitReached) {
-					await this.toggleTimer(true);
+					this.timeTrackerService.turnOffTimer();
+					this.isDisable = true;
+					this.triggerCheckStatus();
+				} else {
+					this.isDisable = false;
 				}
+			});
+
+		/**
+		 * Perform the initial status check after user login or service initialization.
+		 * Ensures that the current timer status is loaded immediately,
+		 * before any "timer:changed" events are received from the socket.
+		 */
+		this.triggerCheckStatus();
+		this._socketService.timerSocketStatus$.pipe(untilDestroyed(this)).subscribe();
+
+		/**
+		 * Event listeners for browser state changes:
+		 *
+		 * 1. `visibilitychange` (document):
+		 *    - Fires when the user switches tabs, minimizes the browser, or returns to the page.
+		 *    - We only care about the `visible` state, because when the user comes back,
+		 *      we want to ensure the socket connection is alive and the timer status is refreshed.
+		 *
+		 * 2. `online` (window):
+		 *    - Fires when the network connection is restored after being offline.
+		 *    - On reconnect, we re-establish the socket connection and refresh the timer status.
+		 *
+		 * Both event streams use `debounceTime(500)`:
+		 *    - This prevents multiple rapid triggers from causing redundant socket reconnects
+		 *      or excessive `checkTimerStatus` calls.
+		 *    - Ensures that reconnection/status-check logic runs at most once
+		 *      if events fire in quick succession.
+		 */
+		fromEvent(document, 'visibilitychange')
+			.pipe(
+				filter(() => document.visibilityState === 'visible'),
+				debounceTime(500),
+				untilDestroyed(this)
+			)
+			.subscribe(() => {
+				if (!this._socketConnectionService.socket?.connected) {
+					this._socketConnectionService.connect();
+				}
+				this.triggerCheckStatus();
+			});
+
+		fromEvent(window, 'online')
+			.pipe(debounceTime(500), untilDestroyed(this))
+			.subscribe(() => {
+				if (!this._socketConnectionService.socket?.connected) {
+					this._socketConnectionService.connect();
+				}
+				this.triggerCheckStatus();
 			});
 	}
 
@@ -304,16 +371,10 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 				this.running = this.timeTrackerService.timerSynced.running;
 				this.timeTrackerService.remoteToggle();
 			} else {
-				await this._timeTrackerStatusService.status();
 				if (this.limitReached) return;
 				await this.timeTrackerService.toggle();
 			}
 		} catch (error) {
-			if (this.timeTrackerService.interval) {
-				this.timeTrackerService.turnOffTimer();
-			} else {
-				this.timeTrackerService.turnOnTimer();
-			}
 			this._errorHandlingService.handleError(error);
 		}
 		this.isDisable = false;
@@ -325,6 +386,7 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 
 	onTaskSelected(task: ITask) {
 		this.taskTitle = task?.title ?? null;
+		this.updateTimerConfig({ taskTitle: this.taskTitle });
 	}
 
 	/**
@@ -336,8 +398,18 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 		this.position = event.position;
 	}
 
-	public xor(a: boolean, b: boolean): boolean {
+	xor(a: boolean, b: boolean): boolean {
 		return (!a && b) || (a && !b);
+	}
+
+	private triggerCheckStatus() {
+		const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+		this.timeTrackerService.checkTimerStatus({
+			tenantId: this.store.tenantId ?? this.timeTrackerService.timerConfig?.tenantId,
+			organizationId: this.store.organizationId ?? this.timeTrackerService.timerConfig?.organizationId,
+			relations: ['employee'],
+			timeZone
+		});
 	}
 
 	ngOnDestroy() {

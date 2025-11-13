@@ -730,7 +730,8 @@
 			"ONLY_FUTURE": "Only Future"
 		},
 		"NOTIFICATIONS": {
-			"STARTED_WORK_ON": "It's required to enter the date when the employee started work to generate employee payroll, enable the employee to participate in split expenses, see employee statistics"
+			"STARTED_WORK_ON": "It's required to enter the date when the employee started work to generate employee payroll, enable the employee to participate in split expenses, see employee statistics",
+			"RATE_EFFECTIVE_VALUE_CONFIRM": "\nThese changes will be effective from the moment of acceptance and will affect the invoicing process and other processes in the application. \nBefore confirming, please ask the employee to issue an invoice for the period that has not yet been invoiced.\nAfter that, make sure the invoice has been created, and then you can proceed with the changes.\nKeep in mind that the new invoice, with the updated data, should cover the period starting from today and onwards.\nIt is also recommended to inform the employee about the invoice items generation period."
 		},
 		"ARCHIVE_CONFIRMATION": {
 			"SURE": "Are you sure you want to archive",
@@ -2164,6 +2165,8 @@
 			}
 		},
 		"PERMISSIONS": {
+			"VIEW_ASSIGNED_PROJECTS_ONLY": "Show only assigned projects (for managerial roles)",
+			"PROFILE_EDIT": "Edit profile",
 			"ADMIN_DASHBOARD_VIEW": "View Admin Dashboard",
 			"TEAM_DASHBOARD": "View Team Dashboard",
 			"PROJECT_MANAGEMENT_DASHBOARD": "View Project Management Dashboard",
@@ -3066,6 +3069,7 @@
 		"ESTIMATE_DATE": "Estimate Date",
 		"DUE_DATE": "Due Date",
 		"CURRENCY": "Currency",
+		"CURRENCIES": "Currencies",
 		"DISCOUNT": "Discount",
 		"CONTACT": "Contact",
 		"TOTAL_VALUE": "Total Value",
@@ -3621,6 +3625,8 @@
 			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "has been reached. Contact system administrator to modify limits.",
 			"WORKED_THIS_WEEK": "Worked this week",
 			"WEEKLY_LIMIT": "Weekly limit",
+			"WARNING_RELOAD_TIMER_SOON": "Warning: Timer is reloading for the new day soon...",
+			"WARNING_TIMER_RELOADING": "Warning: The timer is reloading for the new day. Please wait a few seconds...",
 			"ERRORS": "Please check the form for errors",
 			"PROJECT_LOAD": "Could Not Load Projects",
 			"COPIED": "Link copied to clipboard",

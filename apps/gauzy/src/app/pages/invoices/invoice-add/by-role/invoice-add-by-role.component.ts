@@ -150,9 +150,14 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				filter((organization) => !!organization),
 				tap((organization) => {
 					this.organization = organization;
-					this.currency = organization.currency;
 					this.discountAfterTax = organization.discountAfterTax;
-					this.initializeForm();
+					if (!this.form) {
+						this.initializeForm();
+					} else {
+						this.form.patchValue({
+							organization: this.organization?.name
+						});
+					}
 					this._initializeMethods();
 				}),
 				untilDestroyed(this)
@@ -169,7 +174,13 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 					}
 
 					this.selectedEmployee = user;
-					this.initializeForm();
+					if (!this.form) {
+						this.initializeForm();
+					} else {
+						this.form.patchValue({
+							selectedEmployee: this.selectedEmployee?.name
+						});
+					}
 					this._initializeMethods();
 				}),
 				untilDestroyed(this)
@@ -487,6 +498,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 			const id = invoiceItem.selectedItem ? invoiceItem.selectedItem.id : null;
 			const itemToAdd = {
 				description: invoiceItem.description,
+				currency: invoiceItem.currency,
 				price: Number(invoiceItem.price),
 				quantity: Number(invoiceItem.quantity),
 				totalValue: Number(invoiceItem.totalValue),
@@ -740,6 +752,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				if (data && data.length > 0) {
 					const rate = data[0];
 					this.rate = rate.billRateValue;
+					this.currency = rate.billRateCurrency;
 					return this.rate;
 				} else {
 					return 0;
@@ -921,6 +934,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 
 		if (isNotEmpty(invoiceData)) {
 			let subtotal = 0;
+
 			invoiceData.forEach((data) => {
 				subtotal += +data.price * +data.quantity;
 			});
@@ -956,10 +970,11 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 	}
 
 	// Helper function to create invoice data objects
-	private createInvoiceData(selectedItem, price: number, quantity: number) {
+	private createInvoiceData(selectedItem, price: number, quantity: number, currency?: string) {
 		return {
 			price: price,
 			quantity: quantity,
+			currency: currency,
 			selectedItem: selectedItem,
 			totalValue: (Math.round((price * quantity + Number.EPSILON) * 100) / 100).toFixed(2),
 			applyTax: true,
@@ -992,6 +1007,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		let totalTax = 0;
 		const tableData = await this.smartTableSource.getAll();
 		for (const item of tableData) {
+			// --- TAX ---
 			if (item.applyTax) {
 				switch (this.form.value.taxType) {
 					case DiscountTaxTypeEnum.PERCENT:
@@ -1004,6 +1020,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 						totalTax = 0;
 						break;
 				}
+
 				switch (this.form.value.tax2Type) {
 					case DiscountTaxTypeEnum.PERCENT:
 						totalTax += item.totalValue * (+tax2 / 100);
@@ -1012,10 +1029,12 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 						totalTax += +tax2;
 						break;
 					default:
-						totalTax = 0;
+						totalTax += +tax2;
 						break;
 				}
 			}
+
+			// --- DISCOUNT ---
 			if (item.applyDiscount) {
 				switch (this.form.value.discountType) {
 					case DiscountTaxTypeEnum.PERCENT:
@@ -1039,6 +1058,8 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		if (this.total < 0) {
 			this.total = 0;
 		}
+
+		// Update pagination
 		this.setPagination({
 			...this.getPagination(),
 			totalItems: this.smartTableSource.count()
@@ -1086,9 +1107,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		) {
 			newData = { ...newData, price: extractNumber(newData.price) };
 			const itemTotal = +newData.quantity * +extractNumber(newData.price);
-			newData.totalValue = itemTotal;
 			this.subtotal += itemTotal;
-
 			await event.confirm.resolve(newData);
 			await this.calculateTotal();
 		} else {

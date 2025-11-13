@@ -690,7 +690,8 @@
 			"ONLY_FUTURE": "Seulement l'avenir"
 		},
 		"NOTIFICATIONS": {
-			"STARTED_WORK_ON": "Il est nécessaire de saisir la date à laquelle l'employé a commencé à travailler afin de générer la paie de l'employé, de lui permettre de participer aux dépenses partagées et de consulter les statistiques de l'employé."
+			"STARTED_WORK_ON": "Il est nécessaire de saisir la date à laquelle l'employé a commencé à travailler afin de générer la paie de l'employé, de lui permettre de participer aux dépenses partagées et de consulter les statistiques de l'employé.",
+			"RATE_EFFECTIVE_VALUE_CONFIRM": "\nCes changements prendront effet au moment de l’acceptation et affecteront le processus de facturation ainsi que d’autres processus dans l’application.\nAvant de confirmer, veuillez demander à l’employé d’émettre une facture pour la période qui n’a pas encore été facturée.\nEnsuite, assurez-vous que la facture a été créée, puis vous pouvez procéder aux modifications.\nGardez à l’esprit que la nouvelle facture, avec les données mises à jour, doit couvrir la période à partir d’aujourd’hui.\nIl est également recommandé d’informer l’employé de la période de génération des éléments de facture."
 		},
 		"ARCHIVE_CONFIRMATION": {
 			"SURE": "Êtes-vous certain(e) de vouloir archiver ?",
@@ -2045,6 +2046,8 @@
 			}
 		},
 		"PERMISSIONS": {
+			"VIEW_ASSIGNED_PROJECTS_ONLY": "Afficher uniquement les projets attribués (pour les rôles de gestion)",
+			"PROFILE_EDIT": "Modifier le profil",
 			"ADMIN_DASHBOARD_VIEW": "Afficher le tableau de bord de l'administrateur",
 			"TEAM_DASHBOARD": "Voir le tableau de bord de l'équipe",
 			"PROJECT_MANAGEMENT_DASHBOARD": "Voir le tableau de bord de gestion de projet",
@@ -2912,7 +2915,8 @@
 		"INVOICE_DATE": "Date de la facture",
 		"ESTIMATE_DATE": "Date estimée",
 		"DUE_DATE": "Date d'échéance",
-		"CURRENCY": "Devise.",
+		"CURRENCY": "Devise",
+		"CURRENCIES": "Devises",
 		"DISCOUNT": "Remise",
 		"CONTACT": "Contact",
 		"TOTAL_VALUE": "Valeur totale",
@@ -3515,6 +3519,8 @@
 			"UNABLE_TO_UPDATE_ERROR_MESSAGE_PART_FIRST": "Impossible de mettre à jour le journal de temps. La limite hebdomadaire de temps de travail de ",
 			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "a été atteinte. Contactez l'administrateur système pour modifier les limites.",
 			"ERRORS": "Veuillez vérifier le formulaire pour les erreurs.",
+			"WARNING_RELOAD_TIMER_SOON": "Attention : Le minuteur va bientôt se recharger pour le nouveau jour...",
+			"WARNING_TIMER_RELOADING": "Attention : Le minuteur se recharge pour le nouveau jour. Veuillez patienter quelques secondes...",
 			"PROJECT_LOAD": "Impossible de charger les projets.",
 			"COPIED": "Lien copié dans le presse-papiers",
 			"INVITES_LOAD": "Impossible de charger les invitations.",

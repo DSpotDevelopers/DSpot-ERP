@@ -63,8 +63,9 @@ export class Invoice extends TenantOrganizationBaseEntity implements IInvoice {
 
 	@ApiProperty({ type: () => String, enum: CurrenciesEnum })
 	@IsEnum(CurrenciesEnum)
-	@MultiORMColumn()
-	currency: string;
+	@IsOptional()
+	@MultiORMColumn({ nullable: true })
+	currency?: string;
 
 	@ApiProperty({ type: () => Number })
 	@IsNumber()

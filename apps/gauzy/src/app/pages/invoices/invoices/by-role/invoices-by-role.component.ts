@@ -87,14 +87,17 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 	settingsContextMenu: NbMenuItem[];
 	columns: string[] = [];
 	perPage = 10;
+	tempPerPage = this.perPage;
 	histories: IInvoiceEstimateHistory[] = [];
-	includeArchived = false;
 	invoiceTabsEnum = InvoiceTabsEnum;
 	permissionsEnum = PermissionsEnum;
 	invoices$: Subject<IInvoice[]> = this.subject$;
 	nbTab$: Subject<string> = new BehaviorSubject(InvoiceTabsEnum.ACTIONS);
 	currentUser: IUser;
 	isShouldShowPagination = false;
+
+	private lastSavePerPage = this.perPage;
+
 	private readonly _refresh$: Subject<void> = new Subject();
 
 	/*
@@ -197,7 +200,6 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 				tap(([organization, dateRange]) => {
 					this.organization = organization;
 					this.selectedDateRange = dateRange;
-					this._refresh$.next();
 					this.invoices$.next([]);
 				})
 			),
@@ -394,7 +396,6 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 				organizationId,
 				tenantId,
 				isEstimate: this.isEstimate,
-				isArchived: this.includeArchived,
 				invoiceDate: {
 					startDate: toInvoiceDateFilter(startDate),
 					endDate: toInvoiceDateFilter(endDate)
@@ -416,6 +417,7 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 					itemsPerPage: this.perPage,
 					totalItems: this.smartTableSource.count()
 				});
+				this.isShouldShowPagination = this.pagination.itemsPerPage < this.pagination.totalItems;
 				this.loading = false;
 			}
 		});
@@ -427,10 +429,6 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 		}
 		try {
 			this.setSmartTableSource();
-
-			const { activePage, itemsPerPage } = this.getPagination();
-			this.smartTableSource.setPaging(activePage, itemsPerPage, false);
-			this.isShouldShowPagination = this.smartTableSource?.getPaging()?.perPage < this.pagination?.totalItems;
 		} catch (error) {
 			this.toastrService.danger(
 				this.getTranslation('NOTES.INVOICE.INVOICE_ERROR', {
@@ -727,19 +725,20 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 	}
 
 	showPerPage() {
-		if (this.perPage && this.isPerPageValid()) {
+		if (this.tempPerPage && this.isPerPageValid()) {
+			this.perPage = this.tempPerPage;
 			this.setPagination({
 				...this.getPagination(),
 				itemsPerPage: this.perPage
 			});
-			this.isShouldShowPagination = this.pagination.itemsPerPage < this.pagination.totalItems;
+			this.lastSavePerPage = this.perPage;
 			this._loadSmartTableSettings();
 			this.toggleTableSettingsPopover();
 		}
 	}
 
 	isPerPageValid(): boolean {
-		const value = Number(this.perPage);
+		const value = Number(this.tempPerPage);
 		return Number.isInteger(value) && value > 0 && value <= 100;
 	}
 
@@ -800,12 +799,6 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 		}
 	}
 
-	toggleIncludeArchived(event) {
-		this.includeArchived = event;
-		this._refresh$.next();
-		this.invoices$.next([]);
-	}
-
 	reset() {
 		this.searchForm.reset();
 		this._filters = {};
@@ -835,6 +828,14 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 	}
 
 	toggleTableSettingsPopover() {
+		if (!this.isPerPageValid()) {
+			this.perPage = this.lastSavePerPage || 10;
+			this.setPagination({
+				...this.getPagination(),
+				itemsPerPage: this.perPage
+			});
+			this._loadSmartTableSettings();
+		}
 		this.popups.first.toggle();
 		if (this.popups.length > 1) {
 			this.popups.last.hide();

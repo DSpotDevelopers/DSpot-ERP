@@ -730,7 +730,8 @@
 			"ONLY_FUTURE": "Nur Zukunft"
 		},
 		"NOTIFICATIONS": {
-			"STARTED_WORK_ON": "Das Eintrittsdatum des Mitarbeiters ist erforderlich, um die Gehaltsabrechnung zu erstellen, Split-Ausgaben zu ermöglichen und Mitarbeiterstatistiken anzuzeigen"
+			"STARTED_WORK_ON": "Das Eintrittsdatum des Mitarbeiters ist erforderlich, um die Gehaltsabrechnung zu erstellen, Split-Ausgaben zu ermöglichen und Mitarbeiterstatistiken anzuzeigen",
+			"RATE_EFFECTIVE_VALUE_CONFIRM": "\nDiese Änderungen treten ab dem Moment der Bestätigung in Kraft und wirken sich auf den Rechnungsstellungsprozess und andere Prozesse in der Anwendung aus.\nBevor Sie bestätigen, bitten Sie den Mitarbeiter, eine Rechnung für den Zeitraum auszustellen, der noch nicht abgerechnet wurde.\nStellen Sie danach sicher, dass die Rechnung erstellt wurde, und fahren Sie dann mit den Änderungen fort.\nBeachten Sie, dass die neue Rechnung mit den aktualisierten Daten den Zeitraum ab heute abdecken sollte.\nEs wird auch empfohlen, den Mitarbeiter über den Zeitraum der Rechnungsposten-Generierung zu informieren."
 		},
 		"ARCHIVE_CONFIRMATION": {
 			"SURE": "Sind Sie sicher, dass Sie archivieren möchten",
@@ -2164,6 +2165,8 @@
 			}
 		},
 		"PERMISSIONS": {
+			"VIEW_ASSIGNED_PROJECTS_ONLY": "Nur zugewiesene Projekte anzeigen (für Management-Rollen)",
+			"PROFILE_EDIT": "Profil bearbeiten",
 			"ADMIN_DASHBOARD_VIEW": "Admin-Dashboard anzeigen",
 			"TEAM_DASHBOARD": "Team-Dashboard anzeigen",
 			"PROJECT_MANAGEMENT_DASHBOARD": "Projektmanagement-Dashboard anzeigen",
@@ -3064,6 +3067,7 @@
 		"ESTIMATE_DATE": "Kostenvoranschlagsdatum",
 		"DUE_DATE": "Fälligkeitsdatum",
 		"CURRENCY": "Währung",
+		"CURRENCIES": "Währungen",
 		"DISCOUNT": "Rabatt",
 		"CONTACT": "Kontakt",
 		"TOTAL_VALUE": "Gesamtwert",
@@ -3619,6 +3623,8 @@
 			"UNABLE_TO_ADD_ERROR_MESSAGE_PART_SECOND": "wurde erreicht. Wenden Sie sich an den Systemadministrator, um das Limit zu ändern.",
 			"WORKED_THIS_WEEK": "Diese Woche gearbeitet",
 			"WEEKLY_LIMIT": "Wochenlimit",
+			"WARNING_RELOAD_TIMER_SOON": "Warnung: Der Timer wird bald für den neuen Tag neu geladen...",
+			"WARNING_TIMER_RELOADING": "Warnung: Der Timer wird für den neuen Tag neu geladen. Bitte warten Sie einige Sekunden...",
 			"ERRORS": "Bitte überprüfen Sie das Formular auf Fehler",
 			"PROJECT_LOAD": "Projekte konnten nicht geladen werden",
 			"COPIED": "Link in die Zwischenablage kopiert",

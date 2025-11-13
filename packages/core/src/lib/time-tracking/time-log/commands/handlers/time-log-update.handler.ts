@@ -47,7 +47,7 @@ export class TimeLogUpdateHandler implements ICommandHandler<TimeLogUpdateComman
 		this.logger.verbose(`Retrieved TimeLog: ${JSON.stringify(timeLog)}`);
 
 		// Calculate the previous time log duration that was already saved
-		const previousTime =  Math.abs(moment(timeLog.stoppedAt).diff(moment(timeLog.startedAt), 'seconds'));
+		const previousTime = Math.abs(moment(timeLog.stoppedAt).diff(moment(timeLog.startedAt), 'seconds'));
 		this.logger.verbose(`Previous TimeLog Duration: ${previousTime}`);
 
 		const { employeeId, organizationId } = timeLog;
@@ -78,13 +78,22 @@ export class TimeLogUpdateHandler implements ICommandHandler<TimeLogUpdateComman
 		});
 		this.logger.verbose(`Updated TimeLog in the repository: ${JSON.stringify({ id: timeLog.id, input })}`);
 
+		timeLog = await this.typeOrmTimeLogRepository.findOne({
+			where: { id: timeLog.id }
+		});
+		this.logger.verbose(`Retrieved updated TimeLog from repository: ${JSON.stringify(timeLog)}`);
+
 		// Regenerate the existing time slots for the time log to check if any time slots are conflicting with the updated time log
 		const timeSlots = this.timeSlotService.generateTimeSlots(timeLog.startedAt, timeLog.stoppedAt);
 		this.logger.verbose(`Regenerated existing TimeSlots for TimeLog: ${JSON.stringify(timeSlots)}`);
 
-		// Retrieve the updated time log
-		timeLog = await this.typeOrmTimeLogRepository.findOneBy({ id: timeLog.id });
-		this.logger.verbose(`Retrieved updated TimeLog from repository: ${JSON.stringify(timeLog)}`);
+		if (updateTimeSlots && updateTimeSlots.length > 0) {
+			for (const slot of updateTimeSlots) {
+				if (!slot.timeLogId) {
+					slot.timeLogId = timeLog.id;
+				}
+			}
+		}
 
 		// Check if time slots need to be updated
 		if (needToUpdateTimeSlots) {
@@ -99,6 +108,13 @@ export class TimeLogUpdateHandler implements ICommandHandler<TimeLogUpdateComman
 			}
 			// Create new time slots if needed for Web Timer
 			if (!manualTimeSlot && timeLog.source === TimeLogSourceEnum.WEB_TIMER) {
+				// Ensure every TimeSlot has an assigned timeLogId
+				updateTimeSlots.forEach((slot) => {
+					// If the timeLogId is missing, assign the current timeLog's id
+					if (!slot.timeLogId) {
+						slot.timeLogId = timeLog.id; // <- assign here if missing
+					}
+				});
 				await this.bulkCreateTimeSlots(updateTimeSlots, timeLog, employeeId, organizationId, tenantId);
 				this.logger.verbose(`Created new TimeSlots for Web Timer: ${JSON.stringify(updateTimeSlots)}`);
 			}

@@ -315,7 +315,6 @@
 				<div class="d-flex" *ngIf="isRemainingAmount || invoice.hasRemainingAmountInvoiced">
 					<div class="total-item">
 						{{ 'INVOICES_PAGE.ALREADY_PAID' | translate }}: {{ invoice?.currency }}
-						{{ alreadyPaid.toFixed(2) }}
 					</div>
 					<div class="total-item">
 						{{ 'INVOICES_PAGE.AMOUNT_DUE' | translate }}: {{ invoice?.currency }} {{ amountDue.toFixed(2) }}

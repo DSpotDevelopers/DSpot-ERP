@@ -10,6 +10,8 @@ import {
 	MultiOrmEntityManager,
 	TypeOrmEntityManager
 } from '../core/entities/subscribers/entity-event-subscriber.types';
+import { environment } from '@gauzy/config';
+import { CurrenciesEnum } from '@gauzy/contracts';
 
 @EventSubscriber()
 export class EmployeeSubscriber extends BaseEntityEventSubscriber<Employee> {
@@ -42,6 +44,11 @@ export class EmployeeSubscriber extends BaseEntityEventSubscriber<Employee> {
 			// Default billRateValue to 0 if it's not set or falsy
 			if (Object.hasOwn(entity, 'billRateValue')) {
 				entity.billRateValue = entity.billRateValue || 0;
+			}
+
+			// Default billRateValue to 0 if it's not set or falsy
+			if (Object.hasOwn(entity, 'billRateCurrency')) {
+				entity.billRateCurrency = entity.billRateCurrency || (environment.defaultCurrency as CurrenciesEnum);
 			}
 		} catch (error) {
 			// Handle or log the error as needed
