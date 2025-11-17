@@ -6,6 +6,7 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { IOrganization, ITask, PermissionsEnum, TaskStatusEnum } from '@gauzy/contracts';
 import { distinctUntilChange } from '@gauzy/ui-core/common';
 import { AuthService, Store, TasksService, ToastrService } from '@gauzy/ui-core/core';
+import { TaskSocketService } from '@gauzy/ui-core/core';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
@@ -92,6 +93,18 @@ export class TaskSelectorComponent implements OnInit, ControlValueAccessor {
 		this.subject$.next(true);
 	}
 
+	/*
+	 * Getter & Setter for set showOnlyActiveTasks
+	 */
+	private _showOnlyActiveTasks = false;
+	public get showOnlyActiveTasks(): boolean {
+		return this._showOnlyActiveTasks;
+	}
+	@Input() public set showOnlyActiveTasks(value: boolean) {
+		this._showOnlyActiveTasks = value;
+		this.subject$.next(true);
+	}
+
 	@Output() taskSelected = new EventEmitter<ITask>();
 
 	/*
@@ -124,7 +137,8 @@ export class TaskSelectorComponent implements OnInit, ControlValueAccessor {
 		private readonly tasksService: TasksService,
 		private readonly toastrService: ToastrService,
 		private readonly store: Store,
-		private readonly authService: AuthService
+		private readonly authService: AuthService,
+		private readonly taskSocketService: TaskSocketService
 	) {}
 
 	onChange: any = () => {};
@@ -139,6 +153,13 @@ export class TaskSelectorComponent implements OnInit, ControlValueAccessor {
 			.pipe(
 				debounceTime(50),
 				tap(() => this.getTasks()),
+				untilDestroyed(this)
+			)
+			.subscribe();
+		this.taskSocketService.tasksChanged$
+			.pipe(
+				filter((changed) => changed === true && !!this.organization),
+				tap(() => this.subject$.next(true)),
 				untilDestroyed(this)
 			)
 			.subscribe();
@@ -245,7 +266,13 @@ export class TaskSelectorComponent implements OnInit, ControlValueAccessor {
 
 			// Retrieve tasks based on employee or all tasks
 			if (this.employeeId) {
-				this.tasks = await this.tasksService.getAllTasksByEmployee(this.employeeId, { where: queryOption });
+				if (this.showOnlyActiveTasks) {
+					this.tasks = await this.tasksService.getActiveTasksByEmployee(this.employeeId, {
+						where: queryOption
+					});
+				} else {
+					this.tasks = await this.tasksService.getAllTasksByEmployee(this.employeeId, { where: queryOption });
+				}
 			} else {
 				const { items = [] } = await firstValueFrom(this.tasksService.getAllTasks({ ...queryOption }));
 				this.tasks = items;

@@ -12,6 +12,7 @@ import { TimesheetFilterService } from '../timesheet/timesheet-filter.service';
 import { TimeTrackerService } from '../time-tracker/time-tracker.service';
 import { Store } from '../store/store.service';
 import { deleteCookie } from '../../auth/cookie-helper';
+import { SocketConnectionService } from '../socket-connection/socket-connection.service';
 
 @Injectable()
 export class AuthStrategy extends NbAuthStrategy {
@@ -70,7 +71,8 @@ export class AuthStrategy extends NbAuthStrategy {
 		private readonly timeTrackerService: TimeTrackerService,
 		private readonly timesheetFilterService: TimesheetFilterService,
 		private readonly cookieService: CookieService,
-		private readonly electronService: ElectronService
+		private readonly electronService: ElectronService,
+		private readonly socketService: SocketConnectionService
 	) {
 		super();
 		this.logout$
@@ -276,6 +278,8 @@ export class AuthStrategy extends NbAuthStrategy {
 			this.electronService.ipcRenderer.send('logout');
 		}
 
+		this.socketService.socket?.disconnect();
+
 		return new NbAuthResult(
 			true,
 			null,
@@ -335,6 +339,22 @@ export class AuthStrategy extends NbAuthStrategy {
 				this.store.organizationId = user?.employee?.organizationId;
 				this.store.tenantId = user?.tenantId;
 				this.store.user = user;
+
+				/**
+				 * Perform the initial status check after user login or service initialization.
+				 * Ensures that the current timer status is loaded immediately,
+				 * before any "timer:changed" events are received from the socket.
+				 */
+				if (token) {
+					this.socketService.connect();
+					const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+					this.timeTrackerService.checkTimerStatus({
+						tenantId: user?.tenantId,
+						organizationId: user?.employee?.organizationId,
+						relations: ['employee'],
+						timeZone
+					});
+				}
 
 				this.electronAuthentication({ user, token });
 

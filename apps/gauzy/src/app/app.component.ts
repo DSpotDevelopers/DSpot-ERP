@@ -30,13 +30,13 @@ import { I18nService } from '@gauzy/ui-core/i18n';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ga-app',
-    template: '<router-outlet *ngIf="!loading"></router-outlet>',
-    standalone: false
+	selector: 'ga-app',
+	template: '<router-outlet *ngIf="!loading"></router-outlet>',
+	standalone: false
 })
 export class AppComponent implements OnInit, AfterViewInit {
 	// Loading indicator
-	public loading: boolean = true;
+	public loading = true;
 
 	constructor(
 		private readonly _jitsuService: JitsuService,

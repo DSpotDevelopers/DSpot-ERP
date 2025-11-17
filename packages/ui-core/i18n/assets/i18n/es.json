@@ -730,7 +730,8 @@
 			"ONLY_FUTURE": "Solo futuro"
 		},
 		"NOTIFICATIONS": {
-			"STARTED_WORK_ON": "Es necesario ingresar la fecha en que el empleado comenzó a trabajar para generar la nómina, habilitar la participación en gastos compartidos y ver estadísticas del empleado"
+			"STARTED_WORK_ON": "Es necesario ingresar la fecha en que el empleado comenzó a trabajar para generar la nómina, habilitar la participación en gastos compartidos y ver estadísticas del empleado",
+			"RATE_EFFECTIVE_VALUE_CONFIRM": "\nEstos cambios serán efectivos desde el momento de la aceptación y afectarán el proceso de facturación y otros procesos en la aplicación.\nAntes de confirmar, pida al empleado que emita una factura por el período que aún no ha sido facturado.\nDespués de eso, asegúrese de que la factura se haya creado y luego puede continuar con los cambios.\nTenga en cuenta que la nueva factura, con los datos actualizados, debe cubrir el período a partir de hoy en adelante.\nTambién se recomienda informar al empleado sobre el período de generación de los elementos de la factura."
 		},
 		"ARCHIVE_CONFIRMATION": {
 			"SURE": "¿Está seguro de que desea archivar?",
@@ -2164,6 +2165,8 @@
 			}
 		},
 		"PERMISSIONS": {
+			"VIEW_ASSIGNED_PROJECTS_ONLY": "Mostrar solo los proyectos asignados (para roles de gestión)",
+			"PROFILE_EDIT": "Editar perfil",
 			"ADMIN_DASHBOARD_VIEW": "Ver panel de administración",
 			"TEAM_DASHBOARD": "Ver panel del equipo",
 			"PROJECT_MANAGEMENT_DASHBOARD": "Ver panel de gestión de proyectos",
@@ -3064,6 +3067,7 @@
 		"ESTIMATE_DATE": "Fecha de estimación",
 		"DUE_DATE": "Fecha de vencimiento",
 		"CURRENCY": "Moneda",
+		"CURRENCIES": "Monedas",
 		"DISCOUNT": "Descuento",
 		"CONTACT": "Contacto",
 		"TOTAL_VALUE": "Valor total",

@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 import { reduce } from 'underscore';
 import { ArraySum } from '@gauzy/utils';
 import { ITimeLog, TimeLogPartialStatus, TimeLogType } from '@gauzy/contracts';
@@ -42,7 +42,12 @@ export const calculateDuration = (logs: ITimeLog[], logType: TimeLogType): numbe
  * @returns The duration of the time log in seconds.
  */
 export const calculateTimeLogDuration = (log: ITimeLog): number => {
-	return Math.trunc(moment(log.stoppedAt).diff(moment(log.startedAt), 'seconds'));
+	if (!log.startedAt || !log.stoppedAt) {
+		return 0;
+	}
+
+	const duration = moment(log.stoppedAt).diff(moment(log.startedAt), 'seconds');
+	return Math.max(0, Math.trunc(duration));
 };
 
 /**
@@ -105,9 +110,9 @@ export function fixTimeLogsBoundary(
 			const newLog = {
 				...log,
 				startedAt: nextDayStart.toDate(),
-				partialStatus: TimeLogPartialStatus.TO_RIGHT,
-				duration: calculateTimeLogDuration(log)
+				partialStatus: TimeLogPartialStatus.TO_RIGHT
 			};
+			newLog.duration = calculateTimeLogDuration(newLog);
 
 			// Update the original log to the current day boundary
 			log.stoppedAt = currentDayEnd.toDate();
@@ -124,4 +129,59 @@ export function fixTimeLogsBoundary(
 	}
 
 	return result;
+}
+
+/**
+ * Calculate the duration of a time log within a specific date range, taking into account the timezone.
+ *
+ * @param log - The time log object, must have startedAt and stoppedAt dates.
+ * @param startDate - Optional start of the range. If not provided, the log's startedAt is used.
+ * @param endDate - Optional end of the range. If not provided, the log's stoppedAt is used.
+ * @param tz - Timezone string (default is 'UTC') for consistent calculation.
+ * @returns Duration in seconds, clipped to the provided date range. Returns 0 if log is invalid or out of range.
+ */
+export function calculateTimeLogDurationInRange(
+	log: ITimeLog,
+	startDate?: string | Date,
+	endDate?: string | Date,
+	tz = 'UTC'
+): number {
+	// Return 0 if either start or stop time is missing
+	if (!log.startedAt || !log.stoppedAt) return 0;
+
+	// Convert startDate and endDate to moment objects in the specified timezone
+	const start = moment.tz(startDate ?? log.startedAt, tz);
+	const end = moment.tz(endDate ?? log.stoppedAt, tz);
+
+	// Clip the log start and end times to the provided range
+	const clippedStart = moment.max(moment.tz(log.startedAt, tz), start);
+	const clippedEnd = moment.min(moment.tz(log.stoppedAt, tz), end);
+
+	// If clipped end is before clipped start, duration is 0
+	if (clippedEnd.isBefore(clippedStart)) return 0;
+
+	// Calculate duration in seconds
+	const duration = clippedEnd.diff(clippedStart, 'seconds');
+
+	// Ensure duration is never negative
+	return Math.max(0, Math.trunc(duration));
+}
+
+/**
+ * Calculate the total duration of multiple time logs within a specified date range.
+ *
+ * @param logs - Array of time log objects.
+ * @param startDate - Optional start of the range for calculation.
+ * @param endDate - Optional end of the range for calculation.
+ * @param tz - Timezone string (default 'UTC') to use for all logs.
+ * @returns Total duration in seconds of all logs within the range.
+ */
+export function calculateTotalDuration(
+	logs: ITimeLog[],
+	startDate?: string | Date,
+	endDate?: string | Date,
+	tz = 'UTC'
+): number {
+	// Sum the clipped durations of all logs in the array
+	return logs.reduce((sum, log) => sum + calculateTimeLogDurationInRange(log, startDate, endDate, tz), 0);
 }

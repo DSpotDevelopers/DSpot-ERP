@@ -5,6 +5,7 @@
 		"ALREADY_PAID": "Already Paid",
 		"AMOUNT_DUE": "Amount Due",
 		"CURRENCY": "מטבע",
+		"CURRENCIES": "מטבעות",
 		"DATE": "תאריך",
 		"DISCOUNT_TYPE": "Discount Type",
 		"DUE_DATE": "Due Date",
@@ -20,6 +21,10 @@
 		"TAX_VALUE": "Tax",
 		"TO": "TO",
 		"YES": "Yes",
+		"TAX_ID": "מס' ח.פ/ע.מ",
+		"ADDRESS": "כתובת",
+		"ADDRESS_2": "כתובת 2",
+		"POSTCODE": "מיקוד",
 		"INVOICE_ITEM": {
 			"DESCRIPTION": "Description",
 			"ITEM": "Item",

@@ -730,7 +730,8 @@
 			"ONLY_FUTURE": "仅未来"
 		},
 		"NOTIFICATIONS": {
-			"STARTED_WORK_ON": "生成员工工资单、启用员工参与分摊费用、查看员工统计信息时，必须输入员工开始工作的日期"
+			"STARTED_WORK_ON": "生成员工工资单、启用员工参与分摊费用、查看员工统计信息时，必须输入员工开始工作的日期",
+			"RATE_EFFECTIVE_VALUE_CONFIRM": "\n这些更改将在接受后立即生效，并将影响开票过程和应用程序中的其他流程。\n在确认之前，请要求员工为尚未开具发票的期间生成发票。\n之后，请确保发票已创建，然后您可以继续进行更改。\n请注意，新发票（包含更新的数据）应涵盖从今天起的期间。\n还建议通知员工有关发票项目生成期间的信息。"
 		},
 		"ARCHIVE_CONFIRMATION": {
 			"SURE": "您确定要归档吗",
@@ -2164,6 +2165,8 @@
 			}
 		},
 		"PERMISSIONS": {
+			"VIEW_ASSIGNED_PROJECTS_ONLY": "仅显示分配的项目（适用于管理角色）",
+			"PROFILE_EDIT": "编辑个人资料",
 			"ADMIN_DASHBOARD_VIEW": "查看管理员仪表盘",
 			"TEAM_DASHBOARD": "查看团队仪表盘",
 			"PROJECT_MANAGEMENT_DASHBOARD": "查看项目管理仪表盘",
@@ -3064,6 +3067,7 @@
 		"ESTIMATE_DATE": "估算日期",
 		"DUE_DATE": "到期日",
 		"CURRENCY": "货币",
+		"CURRENCIES": "货币",
 		"DISCOUNT": "折扣",
 		"CONTACT": "联系人",
 		"TOTAL_VALUE": "总价值",

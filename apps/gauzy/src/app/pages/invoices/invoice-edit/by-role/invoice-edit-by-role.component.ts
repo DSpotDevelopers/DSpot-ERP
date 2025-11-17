@@ -180,6 +180,12 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 
 				await this._loadOrganizationData().finally(() => this.updateValueAndValidity(invoice));
 			})
+			.catch((error) => {
+				console.error('Error fetching invoice:', error);
+				this.toastrService.danger(
+					'Error fetching invoice. Check if the invoice belongs to the selected organization or to the employee.'
+				);
+			})
 			.finally(() => {
 				this.loading = false;
 			});
@@ -378,7 +384,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			isAddable: false,
 			isEditable: false,
 			valuePrepareFunction: (cell) => {
-				return `${this.invoice.currency} ${parseFloat(cell ?? '0')?.toFixed(2) ?? (0).toFixed(2)}`;
+				return `${this.invoice?.currency} ${parseFloat(cell ?? '0')?.toFixed(2) ?? (0).toFixed(2)}`;
 			},
 			isFilterable: false,
 			width: '13%'
@@ -621,7 +627,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				id: invoiceData.id,
 				invoiceNumber: invoiceData.invoiceNumber,
 				invoiceDate: invoiceData.invoiceDate,
-				currency: this.organization.currency,
+				currency: invoiceData.currency,
 				dueDate: invoiceData.dueDate,
 				discountValue: invoiceData.discountValue,
 				discountType: invoiceData.discountType,
@@ -641,9 +647,8 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				isEstimate: this.isEstimate,
 				alreadyPaid: this.invoice.alreadyPaid,
 				amountDue: this.invoice.amountDue,
-				hasRemainingAmountInvoiced: Boolean(this.isRemainingAmount || this.invoice.hasRemainingAmountInvoiced),
-				invoiceItems: []
-			};
+				hasRemainingAmountInvoiced: Boolean(this.isRemainingAmount || this.invoice.hasRemainingAmountInvoiced)
+			} as IInvoice;
 
 			const invoiceItems = [];
 
@@ -752,6 +757,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 		let totalTax = 0;
 
 		for (const item of tableData) {
+			// --- TAX ---
 			if (item.applyTax) {
 				switch (this.form.value.taxType) {
 					case DiscountTaxTypeEnum.PERCENT:
@@ -764,6 +770,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 						totalTax = 0;
 						break;
 				}
+
 				switch (this.form.value.tax2Type) {
 					case DiscountTaxTypeEnum.PERCENT:
 						totalTax += item.totalValue * (+tax2 / 100);
@@ -777,6 +784,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				}
 			}
 
+			// --- DISCOUNT ---
 			if (item.applyDiscount) {
 				switch (this.form.value.discountType) {
 					case DiscountTaxTypeEnum.PERCENT:
@@ -794,6 +802,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			}
 		}
 
+		// --- DISCOUNT AFTER TAX i TOTAL ---
 		if (this.discountAfterTax && this.form.value.discountType === DiscountTaxTypeEnum.PERCENT) {
 			totalDiscount = (this.subtotal + totalTax) * (+discountValue / 100);
 		}
@@ -806,6 +815,8 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 
 		this.alreadyPaid = +this.invoice.alreadyPaid;
 		this.amountDue = +this.total - +this.alreadyPaid;
+
+		// --- UPDATE PAGINATION ---
 		this.setPagination({
 			...this.getPagination(),
 			totalItems: this.smartTableSource.count()

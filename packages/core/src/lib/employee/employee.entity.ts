@@ -2,9 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { JoinColumn, JoinTable, RelationId } from 'typeorm';
 import { EntityRepositoryType } from '@mikro-orm/core';
 import { IsBoolean, IsDateString, IsEnum, IsNumber, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
-import { Transform, TransformFnParams } from 'class-transformer';
 import {
-	CurrenciesEnum,
 	IEmployee,
 	PayPeriodEnum,
 	IContact,
@@ -37,7 +35,8 @@ import {
 	IFavorite,
 	IComment,
 	IOrganizationSprint,
-	IEmployeeAvailability
+	IEmployeeAvailability,
+	CurrenciesEnum
 } from '@gauzy/contracts';
 import {
 	ColumnIndex,
@@ -95,6 +94,7 @@ import { ColumnNumericTransformerPipe } from '../shared/pipes';
 import { Taggable } from '../tags/tag.types';
 import { MikroOrmEmployeeRepository } from './repository/mikro-orm-employee.repository';
 import { OrganizationProjectModuleEmployee } from '../organization-project-module/organization-project-module-employee.entity';
+import { Transform, TransformFnParams } from 'class-transformer';
 
 @MultiORMEntity('employee', { mikroOrmRepository: () => MikroOrmEmployeeRepository })
 export class Employee extends TenantOrganizationBaseEntity implements IEmployee, Taggable, HasCustomFields {

@@ -1,13 +1,14 @@
 import { currencyWithSymbol } from '@gauzy/utils';
 import { IInvoice, IOrganization, IOrganizationContact, InvoiceTypeEnum } from '@gauzy/contracts';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 
 export async function generateInvoicePdfDefinition(
 	invoice: IInvoice,
 	organization: IOrganization,
 	organizationContact: IOrganizationContact,
 	translatedText?: any,
-	language?: string
+	language?: string,
+	country?: string
 ) {
 	const body = [];
 	for (const item of invoice.invoiceItems) {
@@ -58,6 +59,81 @@ export async function generateInvoicePdfDefinition(
 		{ text: translatedText.totalValue, bold: true }
 	];
 
+	const tableBody: any[] = [];
+
+	// TaxId
+	const taxId = invoice.toOrganization?.taxId ?? organization.taxId;
+	if (taxId) {
+		tableBody.push([{ text: `${translatedText.taxId}:`, bold: true }, { text: taxId }]);
+	}
+
+	// Address + City + Country
+	const address =
+		invoice.toOrganization?.contact?.address ??
+		organizationContact?.contact?.address ??
+		organization?.contact?.address;
+
+	const city =
+		invoice.toOrganization?.contact?.city ?? organizationContact?.contact?.city ?? organization?.contact?.city;
+
+	const showCountry =
+		invoice.toOrganization?.contact?.country ??
+		organizationContact?.contact?.country ??
+		organization?.contact?.country;
+
+	if (address || city || showCountry) {
+		let addressLine = '';
+
+		if (address) {
+			addressLine += address;
+		}
+
+		if (city) {
+			addressLine += (address ? ', ' : '') + city;
+		}
+
+		if (showCountry) {
+			addressLine += (city || address ? ', ' : '') + country;
+		}
+
+		tableBody.push([{ text: `${translatedText.address}:`, bold: true }, { text: addressLine }]);
+	}
+
+	// Address2
+	const address2 =
+		invoice.toOrganization?.contact?.address2 ??
+		organizationContact?.contact?.address2 ??
+		organization?.contact?.address2;
+	if (address2) {
+		tableBody.push([{ text: `${translatedText.address2}:`, bold: true }, { text: address2 }]);
+	}
+
+	// Postcode
+	const postcode =
+		invoice.toOrganization?.contact?.postcode ??
+		organizationContact?.contact?.postcode ??
+		organization?.contact?.postcode;
+	if (postcode) {
+		tableBody.push([{ text: `${translatedText.postcode}:`, bold: true }, { text: postcode }]);
+	}
+	const stack: any[] = [
+		{ bold: true, text: `${translatedText.to}:\n` },
+		{
+			text: `${invoice.toOrganization?.name ?? organizationContact?.name ?? organization.name}`,
+			margin: [0, 0, 0, 5]
+		}
+	];
+
+	if (tableBody.length) {
+		stack.push({
+			table: {
+				widths: ['auto', '*'],
+				body: tableBody
+			},
+			layout: 'noBorders'
+		});
+	}
+
 	const docDefinition = {
 		watermark: {
 			text: `${invoice.paid ? translatedText.paid.toUpperCase() : ''}`,
@@ -103,7 +179,9 @@ export async function generateInvoicePdfDefinition(
 									translatedText.date
 								}: `
 							},
-							`${moment(invoice.invoiceDate).format(organization.dateFormat)}`
+							`${moment(invoice.invoiceDate)
+								.tz(invoice.fromUser?.timeZone ?? organization.timeZone)
+								.format(organization.dateFormat)}`
 						]
 					}
 				]
@@ -138,13 +216,7 @@ export async function generateInvoicePdfDefinition(
 			},
 			' ',
 			{
-				text: [
-					{
-						bold: true,
-						text: `${translatedText.to}:\n`
-					},
-					`${invoice.toOrganization?.name ?? organizationContact?.name ?? organization.name}`
-				]
+				stack
 			},
 			' ',
 			' ',

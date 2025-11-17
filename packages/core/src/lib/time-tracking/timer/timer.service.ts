@@ -1,12 +1,18 @@
-import { Injectable, NotFoundException, ForbiddenException, NotAcceptableException, Logger } from '@nestjs/common';
+import {
+	Injectable,
+	NotFoundException,
+	ForbiddenException,
+	NotAcceptableException,
+	Logger,
+	InternalServerErrorException
+} from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { IsNull, Not, In, Between } from 'typeorm';
+import { IsNull, Not, In, And, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import * as moment from 'moment';
 import {
 	TimeLogType,
 	ITimerStatus,
 	ITimerToggleInput,
-	IDateRange,
 	TimeLogSourceEnum,
 	ITimerStatusInput,
 	ITimeLog,
@@ -16,7 +22,8 @@ import {
 	IEmployeeFindInput,
 	ID,
 	ITimerStatusWithWeeklyLimits,
-	TimeErrorsEnum
+	TimeErrorsEnum,
+	TaskStatusEnum
 } from '@gauzy/contracts';
 import { SortOrderEnum } from '@gauzy/common';
 import { environment as env } from '@gauzy/config';
@@ -35,10 +42,10 @@ import {
 import { prepareSQLQuery as p } from '../../database/database.helper';
 import { EmployeeService } from '../../employee/employee.service';
 import {
-	DeleteTimeSpanCommand,
 	IGetConflictTimeLogCommand,
 	ScheduleTimeLogEntriesCommand,
 	TimeLogCreateCommand,
+	TimeLogDeleteCommand,
 	TimeLogUpdateCommand
 } from '../time-log/commands';
 import { TypeOrmTimeLogRepository } from '../time-log/repository/type-orm-time-log.repository';
@@ -49,6 +56,7 @@ import { addRelationsToQuery, buildCommonQueryParameters, buildLogQueryParameter
 import { TimerWeeklyLimitService } from './timer-weekly-limit.service';
 import { TaskService } from '../../tasks';
 import { OrganizationProjectService } from '../../organization-project';
+import { SocketService } from '../../socket/socket.service';
 
 // Get the type of the Object-Relational Mapping (ORM) used in the application.
 const ormType: MultiORM = getORMType();
@@ -67,6 +75,7 @@ export class TimerService {
 		private readonly _timerWeeklyLimitService: TimerWeeklyLimitService,
 		private readonly _commandBus: CommandBus,
 		private readonly _taskService: TaskService,
+		private readonly _socketService: SocketService,
 		private readonly _organizationProjectService: OrganizationProjectService
 	) {}
 
@@ -87,6 +96,256 @@ export class TimerService {
 				throw new Error(`Not implemented for ${this.ormType}`);
 		}
 	}
+
+	// TODO: Verify in stage 3 — implement save logic integration with the desktop app
+	/**
+	 * Implementation of timer status logic
+	 * This is intended to be used directly by the command handler
+	 */
+	// async getTimerStatus(request: ITimerStatusInput): Promise<ITimerStatusWithWeeklyLimits> {
+	// 	const tenantId = RequestContext.currentTenantId() || request.tenantId;
+	// 	const { organizationId, source, todayStart, todayEnd } = request;
+
+	// 	let employee: IEmployee;
+
+	// 	/** SUPER_ADMIN have ability to see employees timer status by specific employee (employeeId) */
+	// 	const permission = RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
+
+	// 	if (!!permission && isNotEmpty(request.employeeId)) {
+	// 		const { employeeId } = request;
+	// 		employee = await this.fetchEmployee({ id: employeeId, tenantId, organizationId });
+	// 	} else {
+	// 		const userId = RequestContext.currentUserId();
+	// 		employee = await this.fetchEmployee({ userId, tenantId, organizationId });
+	// 	}
+
+	// 	if (!employee) {
+	// 		throw new NotFoundException("We couldn't find the employee you were looking for.");
+	// 	}
+
+	// 	const { id: employeeId } = employee;
+
+	// 	/** */
+	// 	const { start, end } = getDateRangeFormat(
+	// 		moment.utc(todayStart || moment().startOf('day')),
+	// 		moment.utc(todayEnd || moment().endOf('day'))
+	// 	);
+
+	// 	let logs: TimeLog[] = [];
+	// 	let lastLog: TimeLog;
+
+	// 	// Define common parameters for querying
+	// 	const queryParams = {
+	// 		...(source ? { source } : {}),
+	// 		startedAt: Between<Date>(start as Date, end as Date),
+	// 		stoppedAt: Not(IsNull()),
+	// 		employeeId,
+	// 		tenantId,
+	// 		organizationId,
+	// 		timeZone: request?.timeZone
+	// 	};
+
+	// 	switch (this.ormType) {
+	// 		case MultiORMEnum.MikroORM:
+	// 			{
+	// 				/**
+	// 				 * Get today's completed timelogs
+	// 				 */
+	// 				const parseQueryParams = parseTypeORMFindToMikroOrm<TimeLog>(buildLogQueryParameters(queryParams));
+	// 				const items = await this.mikroOrmTimeLogRepository.findAll(parseQueryParams);
+	// 				// Optionally wrapSerialize is a function that serializes the entity
+	// 				logs = items.map((entity: TimeLog) => wrapSerialize(entity));
+	// 				/**
+	// 				 * Get today's last log (running or completed)
+	// 				 */
+	// 				// Common query parameters for time log operations.
+	// 				const lastLogQueryParamsMikroOrm = buildCommonQueryParameters(queryParams);
+	// 				// Adds relations from the request to the query parameters.
+	// 				addRelationsToQuery(lastLogQueryParamsMikroOrm, request);
+	// 				// Converts TypeORM-style query parameters to a format compatible with MikroORM.
+	// 				const parseMikroOrmOptions = parseTypeORMFindToMikroOrm<TimeLog>(lastLogQueryParamsMikroOrm);
+
+	// 				// Get today's last log (running or completed)
+	// 				lastLog = (await this.mikroOrmTimeLogRepository.findOne(
+	// 					parseMikroOrmOptions.where,
+	// 					parseMikroOrmOptions.mikroOptions
+	// 				)) as TimeLog;
+	// 			}
+	// 			break;
+	// 		case MultiORMEnum.TypeORM: {
+	// 			// Get today's completed timelogs (not running timers)
+	// 			const previousLogsParams = buildLogQueryParameters(queryParams);
+	// 			previousLogsParams.where.isRunning = false;
+	// 			logs = await this.typeOrmTimeLogRepository.find(previousLogsParams);
+	// 			const lastLogQueryParamsTypeOrm = buildCommonQueryParameters(queryParams); // Common query parameters for time log operations.
+	// 			addRelationsToQuery(lastLogQueryParamsTypeOrm, request); // Adds relations from the request to the query parameters.
+	// 			// Get today's last log (running or completed)
+	// 			lastLog = await this.typeOrmTimeLogRepository.findOne(lastLogQueryParamsTypeOrm);
+	// 			break;
+	// 		}
+
+	// 		default:
+	// 			// Unsupported ORM type – should not happen unless new type is added and not handled
+	// 			throw new Error(`Not implemented for ${this.ormType}`);
+	// 	}
+
+	// 	// If last log is not found, we need to check if there is any running log
+	// 	// If there is a running log, that means that the timer is still running
+	// 	// since previous day, so, we need to stop it saving the time and start new
+	// 	// timer for the current day
+	// 	if (!lastLog) {
+	// 		const runningLog = (await this.getRunningLogs()) as ITimeLog;
+	// 		if (runningLog) {
+	// 			const newTimerStartedAt = moment.utc(todayStart || moment().startOf('day'));
+
+	// 			// Ensure that the new timer won't be started in the past
+	// 			if (moment(runningLog.startedAt).isBefore(newTimerStartedAt)) {
+	// 				// Stop the current running log and save the time at end of day
+	// 				const stoppedAt = moment(runningLog.startedAt).endOf('day').subtract(1, 'millisecond').toDate();
+	// 				await this.stopTimer({
+	// 					tenantId,
+	// 					organizationId,
+	// 					startedAt: runningLog.startedAt,
+	// 					stoppedAt,
+	// 					timeZone: request?.timeZone
+	// 				});
+
+	// 				// Add small delta to avoid overlap
+	// 				const safeStart = moment
+	// 					.max(moment(newTimerStartedAt), moment(stoppedAt).add(1, 'millisecond'))
+	// 					.toDate();
+
+	// 				// Start new timer for the current day
+	// 				lastLog = await this.startTimer({
+	// 					tenantId,
+	// 					organizationId,
+	// 					projectId: runningLog.projectId,
+	// 					taskId: runningLog.taskId,
+	// 					description: runningLog.description,
+	// 					logType: runningLog.logType,
+	// 					source: runningLog.source,
+	// 					tags: (runningLog.tags ?? []).map((tag) => tag.id),
+	// 					isBillable: runningLog.isBillable,
+	// 					startedAt: safeStart,
+	// 					timeZone: request?.timeZone
+	// 				});
+	// 			}
+	// 		}
+	// 	}
+
+	// 	const now = moment();
+
+	// 	// If the timer is running, ensure that the employee is assigned to the project/task of the running timer
+	// 	if (lastLog?.isRunning) {
+	// 		const projects = await this._organizationProjectService.findByEmployee(employeeId, {
+	// 			tenantId,
+	// 			organizationId,
+	// 			relations: ['members']
+	// 		});
+	// 		const isAssignedToProject = projects.some((project) => project.id === lastLog.projectId);
+
+	// 		if (!isAssignedToProject) {
+	// 			await this.stopTimer({
+	// 				tenantId,
+	// 				organizationId,
+	// 				startedAt: lastLog.startedAt,
+	// 				stoppedAt: now.toDate(),
+	// 				timeZone: request?.timeZone
+	// 			});
+	// 			throw new ForbiddenException(TimeErrorsEnum.INVALID_PROJECT_PERMISSIONS);
+	// 		}
+
+	// 		const tasks = await this._taskService.getAllTasksByEmployee(employeeId, {
+	// 			where: {
+	// 				id: lastLog.taskId,
+	// 				projectId: lastLog.projectId,
+	// 				organizationId,
+	// 				tenantId
+	// 			},
+	// 			take: 1,
+	// 			skip: 0,
+	// 			withDeleted: false,
+	// 			order: {
+	// 				createdAt: SortOrderEnum.DESC
+	// 			}
+	// 		});
+	// 		const isAssignedToTask = tasks.some((task) => task.id === lastLog.taskId);
+
+	// 		if (!isAssignedToTask) {
+	// 			await this.stopTimer({
+	// 				tenantId,
+	// 				organizationId,
+	// 				startedAt: lastLog.startedAt,
+	// 				stoppedAt: now.toDate(),
+	// 				timeZone: request?.timeZone
+	// 			});
+	// 			throw new ForbiddenException(TimeErrorsEnum.INVALID_TASK_PERMISSIONS);
+	// 		}
+	// 	}
+
+	// 	// Get weekly statistics
+	// 	let weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(
+	// 		employee,
+	// 		start as Date,
+	// 		request?.timeZone,
+	// 		true
+	// 	);
+
+	// 	// If the user reached the weekly limit, then stop the current timer
+	// 	let lastLogStopped = false;
+	// 	if (lastLog?.isRunning) {
+	// 		const remainingWeeklyLimit =
+	// 			weeklyLimitStatus.remainWeeklyTime - now.diff(moment(lastLog.stoppedAt), 'seconds');
+	// 		if (lastLog?.isRunning && remainingWeeklyLimit <= 0) {
+	// 			lastLogStopped = true;
+	// 			lastLog = await this.stopTimer({
+	// 				tenantId,
+	// 				organizationId,
+	// 				startedAt: lastLog.startedAt,
+	// 				stoppedAt: now.toDate(),
+	// 				timeZone: request?.timeZone
+	// 			});
+	// 			// Recalculate the weekly limit status
+	// 			weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(
+	// 				employee,
+	// 				start as Date,
+	// 				request?.timeZone,
+	// 				true
+	// 			);
+	// 		}
+	// 	}
+
+	// 	const status: ITimerStatusWithWeeklyLimits = {
+	// 		duration: 0,
+	// 		running: false,
+	// 		lastLog: null,
+	// 		reWeeklyLimit: employee.reWeeklyLimit,
+	// 		workedThisWeek: weeklyLimitStatus.workedThisWeek
+	// 	};
+
+	// 	// Calculate completed timelogs duration
+	// 	status.duration += logs.filter(Boolean).reduce((sum, log) => sum + log.duration, 0);
+
+	// 	// Calculate last TimeLog duration
+	// 	if (lastLog) {
+	// 		status.lastLog = lastLog;
+	// 		status.running = lastLog.isRunning;
+
+	// 		// Include the last log into duration if it's running or was stopped
+	// 		if (status.running || lastLogStopped) {
+	// 			status.duration += Math.abs(
+	// 				(lastLogStopped ? moment(lastLog.stoppedAt) : now).diff(moment(lastLog.startedAt), 'seconds')
+	// 			);
+	// 		}
+
+	// 		// If timer is running, then add the non saved duration to the workedThisWeek
+	// 		if (lastLog.isRunning) {
+	// 			status.workedThisWeek += now.diff(moment(lastLog.stoppedAt), 'seconds');
+	// 		}
+	// 	}
+
+	// 	return status;
+	// }
 
 	/**
 	 * Implementation of timer status logic
@@ -127,8 +386,8 @@ export class TimerService {
 		// Define common parameters for querying
 		const queryParams = {
 			...(source ? { source } : {}),
-			startedAt: Between<Date>(start as Date, end as Date),
-			stoppedAt: Not(IsNull()),
+			startedAt: LessThanOrEqual(end as Date), // Include logs that started before or during the selected day
+			stoppedAt: And(MoreThanOrEqual(start as Date), Not(IsNull())), // Include logs that ended on or after the selected day and are completed
 			employeeId,
 			tenantId,
 			organizationId,
@@ -160,6 +419,15 @@ export class TimerService {
 						parseMikroOrmOptions.where,
 						parseMikroOrmOptions.mikroOptions
 					)) as TimeLog;
+
+					// If the last log is not running, check if there is another running timer
+					if (!lastLog?.isRunning) {
+						const runningLog = await this.getRunningLogs();
+						this.logger.debug('Replacing lastLog with runningLog', { lastLog, runningLog });
+						if (runningLog) {
+							lastLog = runningLog as TimeLog;
+						}
+					}
 				}
 				break;
 			case MultiORMEnum.TypeORM: {
@@ -171,6 +439,16 @@ export class TimerService {
 				addRelationsToQuery(lastLogQueryParamsTypeOrm, request); // Adds relations from the request to the query parameters.
 				// Get today's last log (running or completed)
 				lastLog = await this.typeOrmTimeLogRepository.findOne(lastLogQueryParamsTypeOrm);
+
+				// If the last log is not running, check if there is another running timer
+				if (!lastLog?.isRunning) {
+					const runningLog = await this.getRunningLogs();
+					this.logger.debug('Replacing lastLog with runningLog', { lastLog, runningLog });
+
+					if (runningLog) {
+						lastLog = runningLog as TimeLog;
+					}
+				}
 				break;
 			}
 
@@ -192,7 +470,7 @@ export class TimerService {
 				if (moment(runningLog.startedAt).isBefore(newTimerStartedAt)) {
 					// Stop the current running log and save the time at end of day
 					const stoppedAt = moment(runningLog.startedAt).endOf('day').subtract(1, 'millisecond').toDate();
-					await this.stopTimer({
+					await this.safeStopTimer({
 						tenantId,
 						organizationId,
 						startedAt: runningLog.startedAt,
@@ -235,7 +513,7 @@ export class TimerService {
 			const isAssignedToProject = projects.some((project) => project.id === lastLog.projectId);
 
 			if (!isAssignedToProject) {
-				await this.stopTimer({
+				await this.safeStopTimer({
 					tenantId,
 					organizationId,
 					startedAt: lastLog.startedAt,
@@ -259,10 +537,28 @@ export class TimerService {
 					createdAt: SortOrderEnum.DESC
 				}
 			});
+
+			const hasDoneTask = tasks.some((task) => task.id === lastLog.taskId && task.status === TaskStatusEnum.DONE);
+
+			if (hasDoneTask) {
+				this.logger.debug('Stopping timer because the related task is DONE', {
+					taskId: lastLog.taskId
+				});
+
+				await this.safeStopTimer({
+					tenantId,
+					organizationId,
+					startedAt: lastLog.startedAt,
+					stoppedAt: now.toDate(),
+					timeZone: request?.timeZone
+				});
+				throw new ForbiddenException(TimeErrorsEnum.INVALID_TASK_PERMISSIONS);
+			}
+
 			const isAssignedToTask = tasks.some((task) => task.id === lastLog.taskId);
 
 			if (!isAssignedToTask) {
-				await this.stopTimer({
+				await this.safeStopTimer({
 					tenantId,
 					organizationId,
 					startedAt: lastLog.startedAt,
@@ -283,18 +579,32 @@ export class TimerService {
 
 		// If the user reached the weekly limit, then stop the current timer
 		let lastLogStopped = false;
+
+		// Global map to track timers & new week notifications
+		const runningWeeklyLimitTimeouts: Map<string, NodeJS.Timeout> = new Map();
+		const weeklyResetTimeouts: Map<string, NodeJS.Timeout> = new Map();
+
+		// Weekly limit exceeded → stop the current timer immediately
 		if (lastLog?.isRunning) {
 			const remainingWeeklyLimit =
 				weeklyLimitStatus.remainWeeklyTime - now.diff(moment(lastLog.stoppedAt), 'seconds');
-			if (lastLog?.isRunning && remainingWeeklyLimit <= 0) {
+
+			if (remainingWeeklyLimit <= 0) {
 				lastLogStopped = true;
-				lastLog = await this.stopTimer({
+				lastLog = await this.safeStopTimer({
 					tenantId,
 					organizationId,
 					startedAt: lastLog.startedAt,
-					stoppedAt: now.toDate(),
+					stoppedAt: now.toDate(), // stop immediately
 					timeZone: request?.timeZone
 				});
+
+				// Clear any previously scheduled timeout for this employee
+				const existingTimeout = runningWeeklyLimitTimeouts.get(employeeId);
+				if (existingTimeout) {
+					clearTimeout(existingTimeout);
+					runningWeeklyLimitTimeouts.delete(employeeId);
+				}
 				// Recalculate the weekly limit status
 				weeklyLimitStatus = await this._timerWeeklyLimitService.checkWeeklyLimit(
 					employee,
@@ -302,32 +612,89 @@ export class TimerService {
 					request?.timeZone,
 					true
 				);
+				lastLog.isRunning = false;
+
+				if (weeklyLimitStatus.remainWeeklyTime <= 5 && lastLogStopped) {
+					lastLog = await this.startTimer({
+						tenantId,
+						organizationId,
+						projectId: lastLog.projectId,
+						taskId: lastLog.taskId,
+						description: lastLog.description,
+						logType: lastLog.logType,
+						source: lastLog.source,
+						isBillable: lastLog.isBillable,
+						startedAt: now.toDate(),
+						timeZone: request?.timeZone
+					});
+					// Update flag: timer is running again
+					lastLogStopped = false;
+				}
+			} else if (remainingWeeklyLimit <= 21 * 60) {
+				// Less than 21 minutes remaining → schedule a single socket event
+				const existingTimeout = runningWeeklyLimitTimeouts.get(employeeId);
+
+				if (!existingTimeout) {
+					const timeout = setTimeout(() => {
+						// Attempt to send timer update via socket; do not send event if socket not connected
+						this._socketService.sendTimerChanged(employeeId);
+
+						runningWeeklyLimitTimeouts.delete(employeeId);
+					}, remainingWeeklyLimit * 1000); // convert seconds to milliseconds
+
+					runningWeeklyLimitTimeouts.set(employeeId, timeout);
+				}
+			} else {
+				// More than 21 minutes remaining → clear any old timeout
+				const existingTimeout = runningWeeklyLimitTimeouts.get(employeeId);
+				if (existingTimeout) {
+					clearTimeout(existingTimeout);
+					runningWeeklyLimitTimeouts.delete(employeeId);
+				}
 			}
 		}
 
+		// Weekly reset event (minimal load)
+		if (!weeklyResetTimeouts.has(employeeId)) {
+			const nowLocal = moment.tz(request?.timeZone);
+			const nextMonday = nowLocal.clone().startOf('isoWeek').add(1, 'week');
+			const msUntilNextMondayEvent = nextMonday.diff(nowLocal) - 21 * 60 * 1000; // 20 min before Monday
+
+			if (msUntilNextMondayEvent <= 0 && nextMonday.diff(nowLocal) > 0) {
+				const timeout = setTimeout(() => {
+					this._socketService.sendTimerChanged(employeeId);
+					weeklyResetTimeouts.delete(employeeId);
+				}, msUntilNextMondayEvent);
+				weeklyResetTimeouts.set(employeeId, timeout);
+			}
+		}
+
+		// Prepare the timer status object
 		const status: ITimerStatusWithWeeklyLimits = {
 			duration: 0,
 			running: false,
 			lastLog: null,
 			reWeeklyLimit: employee.reWeeklyLimit,
-			workedThisWeek: weeklyLimitStatus.workedThisWeek
+			workedThisWeek: weeklyLimitStatus.workedThisWeek || 0
 		};
 
+		status.lastLog = lastLog;
+		status.running = lastLog?.isRunning;
 		// Calculate completed timelogs duration
 		status.duration += logs.filter(Boolean).reduce((sum, log) => sum + log.duration, 0);
 
 		// Calculate last TimeLog duration
 		if (lastLog) {
-			status.lastLog = lastLog;
-			status.running = lastLog.isRunning;
-
 			// Include the last log into duration if it's running or was stopped
 			if (status.running || lastLogStopped) {
-				status.duration += Math.abs(
-					(lastLogStopped ? moment(lastLog.stoppedAt) : now).diff(moment(lastLog.startedAt), 'seconds')
-				);
-			}
+				const started = moment(lastLog.startedAt);
+				const until = lastLogStopped ? moment(lastLog.stoppedAt) : now;
 
+				// Ensure that duration is cut at today's midnight (local timezone)
+				const todayMidnight = moment.tz(request?.timeZone).startOf('day');
+				const effectiveStart = started.isBefore(todayMidnight) ? todayMidnight : started;
+				status.duration += Math.abs(until.diff(effectiveStart, 'seconds'));
+			}
 			// If timer is running, then add the non saved duration to the workedThisWeek
 			if (lastLog.isRunning) {
 				status.workedThisWeek += now.diff(moment(lastLog.stoppedAt), 'seconds');
@@ -445,6 +812,24 @@ export class TimerService {
 		// Check if the employee has reached the weekly limit
 		await this._timerWeeklyLimitService.checkWeeklyLimit(employee, startedAt, request?.timeZone);
 
+		// Check for conflicting time logs
+		// Creating a temporary/fake time log object with only the required fields
+		// This is used to detect any overlapping/conflicting logs for the employee
+		// forceDelete = true ensures that any conflicts are resolved by deleting overlapping logs
+		await this.handleConflictingTimeLogs(
+			{
+				...({} as ITimeLog), // fake object with only required fields
+				id: null, // no existing log to ignore, as this is a new entry
+				startedAt,
+				stoppedAt: startedAt, // using startedAt as stoppedAt because duration is zero
+				employeeId,
+				organizationId
+			},
+			tenantId,
+			organizationId,
+			true // forceDelete: remove all conflicting logs
+		);
+
 		// Create a new time log entry using the command bus
 		const timeLog = await this._commandBus.execute(
 			new TimeLogCreateCommand({
@@ -474,6 +859,10 @@ export class TimerService {
 		});
 
 		this.logger.verbose(`Last created time log: ${JSON.stringify(timeLog)}`);
+
+		// Send a real-time event to the specified user via socket.
+		// No error is thrown if the user is not currently connected.
+		this._socketService.sendTimerChanged(employeeId);
 
 		// Return the newly created time log entry
 		return timeLog;
@@ -539,6 +928,66 @@ export class TimerService {
 			);
 		}
 
+		// Calculate the duration of the log in seconds
+		const duration = moment(stoppedAt).diff(moment(lastLog.startedAt), 'seconds');
+
+		// Handle zero-duration logs
+		if (duration <= 0) {
+			this.logger.verbose('Skipping 0-duration time log');
+			try {
+				await this._commandBus.execute(new TimeLogDeleteCommand(lastLog, {}, true));
+				this.logger.verbose(`Deleted zero-duration TimeLog ${lastLog.id}`);
+			} catch (e) {
+				this.logger.error(`Failed to delete zero-duration TimeLog ${lastLog.id}`, e);
+				throw new InternalServerErrorException(`Failed to delete zero-duration time log.`);
+			}
+			return lastLog;
+		}
+
+		// Determine start and stop day boundaries using the user's local timezone
+		// ⚠️ Added logic to handle cases where the web app was closed or inactive,
+		// ensuring proper handling of timers that span across midnight
+		const tz = request.timeZone || 'UTC';
+		const startDay = moment.tz(lastLog.startedAt, tz).startOf('day');
+		const stopDay = moment.tz(stoppedAt, tz).startOf('day');
+
+		// Split logs if the time spans across multiple days
+		if (!startDay.isSame(stopDay)) {
+			const endOfStartDay = startDay.clone().endOf('day').subtract(4, 'seconds');
+			const startOfNextDay = stopDay.clone().startOf('day');
+
+			// Update the first log to end at the end of the start day
+			const firstLog = await this._commandBus.execute(
+				new TimeLogUpdateCommand(
+					{ isRunning: false, stoppedAt: endOfStartDay.toDate() },
+					lastLog.id,
+					request.manualTimeSlot
+				)
+			);
+			await this.handleConflictingTimeLogs(firstLog, tenantId, organizationId, true);
+
+			// Create a new log for the next day starting at the beginning of that day
+			const secondLog = await this._commandBus.execute(
+				new TimeLogCreateCommand({
+					employeeId,
+					organizationId,
+					tenantId,
+					projectId: lastLog.projectId,
+					taskId: lastLog.taskId,
+					source: lastLog.source,
+					startedAt: startOfNextDay.toDate(),
+					stoppedAt,
+					isRunning: false,
+					logType: TimeLogType.TRACKED
+				})
+			);
+			await this.handleConflictingTimeLogs(secondLog, tenantId, organizationId, true);
+
+			this.logger.verbose('Time log was split over midnight and conflicts checked for both parts');
+
+			return lastLog;
+		}
+
 		// Construct the update payload, conditionally excluding stoppedAt if it shouldn't be updated
 		const partialTimeLog: Partial<ITimeLog> = {
 			isRunning: false,
@@ -552,6 +1001,13 @@ export class TimerService {
 			new TimeLogUpdateCommand(partialTimeLog, lastLog.id, request.manualTimeSlot)
 		);
 
+		if (!lastLog || lastLog.isRunning) {
+			this.logger.error(
+				`Failed to stop timer for log ${lastLog?.id}. Payload: ${JSON.stringify(partialTimeLog)}`
+			);
+			throw new InternalServerErrorException(`Failed to stop timer. Please try again.`);
+		}
+
 		// Update the employee's tracking status to reflect they are now tracking time
 		await this._employeeService.update(employeeId, {
 			isOnline: false, // Employee status (Online/Offline)
@@ -562,7 +1018,11 @@ export class TimerService {
 		await this.stopPreviousRunningTimers(employeeId, organizationId, tenantId);
 
 		// Handle conflicting time logs
-		await this.handleConflictingTimeLogs(lastLog, tenantId, organizationId);
+		await this.handleConflictingTimeLogs(lastLog, tenantId, organizationId, true);
+
+		// Send a real-time event to the specified user via socket.
+		// No error is thrown if the user is not currently connected.
+		this._socketService.sendTimerChanged(employeeId);
 
 		// Return the last log
 		return lastLog;
@@ -598,6 +1058,10 @@ export class TimerService {
 				})
 			);
 
+			if (!conflicts?.length) {
+				return;
+			}
+
 			this.logger.verbose('Conflicting Time Logs:', conflicts, {
 				ignoreId: lastLog.id,
 				startDate: lastLog.startedAt,
@@ -607,26 +1071,51 @@ export class TimerService {
 				tenantId
 			});
 
-			// Resolve conflicts by deleting conflicting time slots
-			if (conflicts?.length) {
-				const times: IDateRange = {
-					start: new Date(lastLog.startedAt),
-					end: new Date(lastLog.stoppedAt)
-				};
+			// Loop through each conflicting time log
+			for await (const timeLog of conflicts) {
+				if (!timeLog) {
+					this.logger.warn('Skipping null TimeLog from conflicts query');
+					continue;
+				}
 
-				// Loop through each conflicting time log
-				for await (const timeLog of conflicts) {
-					const { timeSlots = [] } = timeLog;
+				try {
 					// Delete conflicting time slots
-					for await (const timeSlot of timeSlots) {
-						await this._commandBus.execute(
-							new DeleteTimeSpanCommand(times, timeLog, timeSlot, forceDelete)
-						);
-					}
+					await this._commandBus.execute(new TimeLogDeleteCommand(timeLog, {}, forceDelete));
+					this.logger.verbose(`Deleted conflicting TimeLog ${timeLog.id}`);
+				} catch (e) {
+					this.logger.error(`Failed to delete conflicting TimeLog ${timeLog.id}`, e);
+					throw new InternalServerErrorException(`Failed to delete conflicting TimeLog ${timeLog.id}`);
 				}
 			}
 		} catch (error) {
 			this.logger.error('Error while handling conflicts in time logs', error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Attempts to stop a running timer with a retry mechanism.
+	 *
+	 * This method wraps the standard stopTimer() call and ensures
+	 * that if the first attempt fails (e.g. due to a transient error),
+	 * it will retry once before propagating the error.
+	 *
+	 * @param request - The timer toggle input containing details for stopping the timer.
+	 * @returns A promise that resolves with the updated ITimeLog if successful.
+	 * @throws Will rethrow the error if both attempts to stop the timer fail.
+	 */
+	private async safeStopTimer(request: ITimerToggleInput): Promise<ITimeLog> {
+		try {
+			return await this.stopTimer(request);
+		} catch (error) {
+			this.logger.warn(`First stopTimer() attempt failed, retrying...`, error);
+
+			try {
+				return await this.stopTimer(request);
+			} catch (finalError) {
+				this.logger.error(`Second stopTimer() attempt failed`, finalError);
+				throw finalError;
+			}
 		}
 	}
 

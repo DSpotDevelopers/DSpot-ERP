@@ -1,5 +1,5 @@
 import { EventBus } from '@nestjs/cqrs';
-import { Injectable, BadRequestException, HttpStatus, HttpException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException, HttpStatus, HttpException, Logger, NotFoundException } from '@nestjs/common';
 import {
 	IsNull,
 	SelectQueryBuilder,
@@ -11,7 +11,9 @@ import {
 	Between,
 	FindOptionsRelations,
 	Raw,
-	ILike
+	ILike,
+	Not,
+	DeleteResult
 } from 'typeorm';
 import { isBoolean, isUUID } from 'class-validator';
 import * as moment from 'moment';
@@ -33,7 +35,9 @@ import {
 	ITaskAdvancedFilter,
 	IAdvancedTaskFiltering,
 	EmployeeNotificationTypeEnum,
-	NotificationActionTypeEnum
+	NotificationActionTypeEnum,
+	ITimeLog,
+	TaskStatusEnum
 } from '@gauzy/contracts';
 import { isNotEmpty } from '@gauzy/utils';
 import { isSqlite } from '@gauzy/config';
@@ -54,6 +58,8 @@ import { TypeOrmTaskRepository } from './repository/type-orm-task.repository';
 import { MikroOrmTaskRepository } from './repository/mikro-orm-task.repository';
 import { TaskProjectSequenceService } from './project-sequence/project-sequence.service';
 import { OrganizationProjectService } from '../organization-project/organization-project.service';
+import { TypeOrmTimeLogRepository } from '../time-tracking/time-log/repository/type-orm-time-log.repository';
+import { SocketService } from '../socket/socket.service';
 
 @Injectable()
 export class TaskService extends TenantAwareCrudService<Task> {
@@ -63,6 +69,7 @@ export class TaskService extends TenantAwareCrudService<Task> {
 		readonly typeOrmTaskRepository: TypeOrmTaskRepository,
 		readonly mikroOrmTaskRepository: MikroOrmTaskRepository,
 		readonly typeOrmOrganizationSprintTaskHistoryRepository: TypeOrmOrganizationSprintTaskHistoryRepository,
+		readonly typeOrmTimeLogRepository: TypeOrmTimeLogRepository,
 		private readonly _eventBus: EventBus,
 		private readonly _taskViewService: TaskViewService,
 		private readonly _entitySubscriptionService: EntitySubscriptionService,
@@ -70,7 +77,8 @@ export class TaskService extends TenantAwareCrudService<Task> {
 		private readonly _mentionService: MentionService,
 		private readonly _activityLogService: ActivityLogService,
 		private readonly _employeeNotificationService: EmployeeNotificationService,
-		private readonly _organizationProjectService: OrganizationProjectService
+		private readonly _organizationProjectService: OrganizationProjectService,
+		private readonly _socketService: SocketService
 	) {
 		super(typeOrmTaskRepository, mikroOrmTaskRepository);
 	}
@@ -161,21 +169,34 @@ export class TaskService extends TenantAwareCrudService<Task> {
 
 			const { organizationId } = updatedTask;
 
+			// Check if status changed to DONE
+			if (updatedTask.status === TaskStatusEnum.DONE && task.status !== TaskStatusEnum.DONE) {
+				try {
+					this.logger.debug(`Task ${updatedTask.id} changed status to DONE`);
+					this._socketService.sendTimerChangedMany([...existingMemberIdSet])
+				} catch (error) {
+					this.logger.error(`Error emitting DONE status event for task ${updatedTask.id}: ${error}`);
+				}
+			}
+
 			// Unsubscribe members who were unassigned from task
 			if (removedMembers.length > 0) {
 				try {
 					await Promise.all(
-						removedMembers.map(
-							async (member) =>
-								await this._entitySubscriptionService.delete({
-									entity: BaseEntityEnum.Task,
-									entityId: updatedTask.id,
-									employeeId: member.id,
-									type: EntitySubscriptionTypeEnum.ASSIGNMENT,
-									organizationId,
-									tenantId
-								})
-						)
+						removedMembers.map(async (member) => {
+							await this._entitySubscriptionService.delete({
+								entity: BaseEntityEnum.Task,
+								entityId: updatedTask.id,
+								employeeId: member.id,
+								type: EntitySubscriptionTypeEnum.ASSIGNMENT,
+								organizationId,
+								tenantId
+							});
+
+							// Send a real-time event to the specified user via socket.
+							// No error is thrown if the user is not currently connected.
+							this._socketService.sendTimerChanged(member?.id);
+						})
 					);
 				} catch (error) {
 					this.logger.error(`Error unsubscribing members from the task: ${error}`);
@@ -217,6 +238,18 @@ export class TaskService extends TenantAwareCrudService<Task> {
 				} catch (error) {
 					this.logger.error(`Error publishing CreateSubscriptionEvent: ${error}`);
 				}
+			}
+
+			try {
+				[
+					...existingMemberIdSet,
+					...newMembers.map((member) => member.id)
+				].forEach((memberId) => {
+					this._socketService.emitToClient(memberId, 'tasks:changed', null);
+				});
+
+			} catch (error) {
+				this.logger.error(`Error while sending tasks changed event: ${error}`);
 			}
 
 			// Generate the activity log
@@ -462,14 +495,19 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			const { where } = options;
 			const { members } = where;
 
-			const hasPermission = RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
+			const hasPermission =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				!RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
+			const isManager =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
 
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
 			query.innerJoin(`${query.alias}.members`, 'members');
 
-			if (!hasPermission) {
+			if (!hasPermission || isManager) {
 				// Employee without permission: get their projects first
-				const employeeId = RequestContext.currentEmployeeId();
+				const employeeId = RequestContext.currentEmployeeId() ?? RequestContext.currentUser().employeeId;
 				if (isNotEmpty(employeeId)) {
 					const tenantId = RequestContext.currentTenantId();
 					const organizationId = where?.organizationId as string;
@@ -501,6 +539,30 @@ export class TaskService extends TenantAwareCrudService<Task> {
 					if (isNotEmpty(members) && isNotEmpty(members['id'])) {
 						const employeeId = members['id'];
 						subQuery.andWhere(p('"task_employee"."employeeId" = :employeeId'), { employeeId });
+					}
+				} else if (isManager) {
+					const selectedEmployeeId = members?.['id'];
+					const managerId = RequestContext.currentUser().employeeId;
+
+					if (isNotEmpty(selectedEmployeeId) && selectedEmployeeId !== managerId) {
+						subQuery
+							.andWhere(p('"task_employee"."employeeId" = :employeeId'), {
+								employeeId: selectedEmployeeId
+							})
+							.andWhere(
+								`EXISTS (
+					SELECT 1 FROM "task_employee" te2
+					WHERE te2."taskId" = "task_employee"."taskId"
+					AND te2."employeeId" = :managerId
+				)`
+							)
+							.setParameters({ managerId });
+					} else {
+						if (isNotEmpty(managerId)) {
+							subQuery.andWhere(p('"task_employee"."employeeId" = :employeeId'), {
+								employeeId: managerId
+							});
+						}
 					}
 				} else {
 					// If employee has login and don't have permission to change employee
@@ -601,6 +663,89 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	}
 
 	/**
+	 * GET all active tasks by employee
+	 *
+	 * @param employeeId - The employee ID for whom retrieve tasks
+	 * @param options - Pagination options including limit, page, and sorting.
+	 * @param filters - Optional filters for advanced task filtering.
+	 * @returns
+	 */
+	async getActiveTasksByEmployee(
+		employeeId: IEmployee['id'],
+		options: PaginationParams<Task> & IAdvancedTaskFiltering
+	) {
+		try {
+			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
+			query.leftJoin(`${query.alias}.members`, 'members');
+			query.leftJoin(`${query.alias}.teams`, 'teams');
+			const { isScreeningTask = false } = options.where;
+			const { filters } = options;
+
+			// Apply advanced filters
+			if (filters) {
+				const advancedWhere = this.buildAdvancedWhereCondition(filters, options.where);
+				query.setFindOptions({ where: advancedWhere });
+			}
+
+			/**
+			 * If additional options found
+			 */
+			query.setFindOptions({
+				...(isNotEmpty(options) &&
+					isNotEmpty(options.where) && {
+						where: options.where
+					}),
+				...(isNotEmpty(options) &&
+					isNotEmpty(options.relations) && {
+						relations: options.relations
+					})
+			});
+
+			query.andWhere(
+				new Brackets((qb: WhereExpressionBuilder) => {
+					const tenantId = RequestContext.currentTenantId();
+					qb.andWhere(p(`"${query.alias}"."tenantId" = :tenantId`), {
+						tenantId
+					});
+				})
+			);
+			query.andWhere(
+				new Brackets((web: WhereExpressionBuilder) => {
+					web.andWhere((qb: SelectQueryBuilder<Task>) => {
+						const subQuery = qb.subQuery();
+						subQuery.select(p('"task_employee"."taskId"')).from(p('task_employee'), p('task_employee'));
+						subQuery.andWhere(p('"task_employee"."employeeId" = :employeeId'), { employeeId });
+						return p(`"task_members"."taskId" IN (${subQuery.distinct(true).getQuery()})`);
+					});
+					web.orWhere((qb: SelectQueryBuilder<Task>) => {
+						const subQuery = qb.subQuery();
+						subQuery.select(p('"task_team"."taskId"')).from(p('task_team'), p('task_team'));
+						subQuery.leftJoin(
+							'organization_team_employee',
+							'organization_team_employee',
+							p('"organization_team_employee"."organizationTeamId" = "task_team"."organizationTeamId"')
+						);
+						subQuery.andWhere(p('"organization_team_employee"."employeeId" = :employeeId'), { employeeId });
+						return p(`"task_teams"."taskId" IN (${subQuery.distinct(true).getQuery()})`);
+					});
+				})
+			);
+
+			query.andWhere(p(`"${query.alias}"."isScreeningTask" = :isScreeningTask`), {
+				isScreeningTask
+			});
+
+			query.andWhere(`${query.alias}.status != :excludedStatus`, {
+				excludedStatus: TaskStatusEnum.DONE
+			});
+
+			return await query.getMany();
+		} catch (error) {
+			throw new BadRequestException(error);
+		}
+	}
+
+	/**
 	 * GET team tasks
 	 *
 	 * @param options - Pagination options including limit, page, and sorting.
@@ -613,14 +758,19 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			const { teams = [] } = where;
 			const { members } = where;
 
-			const hasPermission = RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
+			const hasPermission =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				!RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
+			const isManager =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
 			query.leftJoin(`${query.alias}.teams`, 'teams');
 
 			let projectIds: string[] = [];
 
-			if (!hasPermission) {
-				const employeeId = RequestContext.currentEmployeeId();
+			if (!hasPermission || isManager) {
+				const employeeId = RequestContext.currentEmployeeId() ?? RequestContext.currentUser().employeeId;
 				if (isNotEmpty(employeeId)) {
 					const tenantId = RequestContext.currentTenantId();
 					const organizationId = where?.organizationId as string;
@@ -657,6 +807,31 @@ export class TaskService extends TenantAwareCrudService<Task> {
 					if (isNotEmpty(members) && isNotEmpty(members['id'])) {
 						const employeeId = members['id'];
 						subQuery.andWhere(p('"organization_team_employee"."employeeId" = :employeeId'), { employeeId });
+					}
+				} else if (isManager) {
+					const selectedEmployeeId = members?.['id'];
+					const managerId = RequestContext.currentUser().employeeId;
+
+					if (isNotEmpty(selectedEmployeeId) && selectedEmployeeId !== managerId) {
+						subQuery
+							.andWhere(p('"organization_team_employee"."employeeId" = :employeeId'), {
+								employeeId: selectedEmployeeId
+							})
+							.andWhere(
+								`EXISTS (
+						SELECT 1
+						FROM "organization_team_employee" te
+						WHERE te."organizationTeamId" = "organization_team_employee"."organizationTeamId"
+						  AND te."employeeId" = :managerId
+					)`
+							)
+							.setParameters({ managerId });
+					} else {
+						if (isNotEmpty(managerId)) {
+							subQuery.andWhere(p('"organization_team_employee"."employeeId" = :employeeId'), {
+								employeeId: managerId
+							});
+						}
 					}
 				} else {
 					// If employee has login and don't have permission to change employee
@@ -759,11 +934,17 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			const employeeId = RequestContext.currentEmployeeId();
 			const tenantId = RequestContext.currentTenantId();
 			const organizationId = where.organizationId as string;
-			const hasPermission = RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
+			const hasPermission =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				!RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
+			const isManager =
+				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
+				RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
 			const userProvidedProjectId = !!options.where?.projectId;
 
-			if (!userProvidedProjectId && !hasPermission) {
-				const projects = await this._organizationProjectService.findByEmployee(employeeId, {
+			if (!userProvidedProjectId && (isManager || !hasPermission)) {
+				const emplId = employeeId ?? RequestContext.currentUser().employeeId;
+				const projects = await this._organizationProjectService.findByEmployee(emplId, {
 					tenantId,
 					organizationId,
 					relations: ['members']
@@ -918,6 +1099,10 @@ export class TaskService extends TenantAwareCrudService<Task> {
 					task.members = task.members.filter((member) => member.id !== employeeId);
 				}
 			});
+
+			// Send a real-time event to the specified user via socket.
+			// No error is thrown if the user is not currently connected.
+			this._socketService.sendTimerChanged(employeeId);
 
 			// TODO : Unsubscribe employee from task
 
@@ -1204,5 +1389,66 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			...(createdByUserIds.length && !where.createdByUserId ? { createdByUserId: In(createdByUserIds) } : {}),
 			...(dailyPlans.length && !where.dailyPlans ? { dailyPlans: { id: In(dailyPlans) } } : {})
 		};
+	}
+
+	/**
+	 * Deletes a task and notifies all employees
+	 * who were assigned to it or had an active timer on it.
+	 *
+	 * @param taskId - ID of the task to delete
+	 * @returns Promise resolving to the deletion result
+	 */
+	public async delete(taskId: string): Promise<DeleteResult> {
+		try {
+			const tenantId = RequestContext.currentTenantId();
+
+			// Fetch the task along with its assigned members
+			const task = await this.typeOrmTaskRepository.findOne({
+				where: { id: taskId, tenantId },
+				relations: ['members']
+			});
+
+			if (!task) {
+				throw new NotFoundException(`Task with ID ${taskId} not found`);
+			}
+
+			// Collect IDs of all assigned employees
+			const affectedEmployeeIds = task.members.map((member) => member.id);
+			const result = await super.delete(taskId);
+
+			for (const employeeId of affectedEmployeeIds) {
+				// Send a real-time event to the specified user via socket.
+				// No error is thrown if the user is not currently connected.
+				this._socketService.sendTimerChanged(employeeId);
+			}
+
+			return result;
+		} catch (err) {
+			this.logger.error(`Error during task delete operation: ${err}`);
+			throw new NotFoundException(`The task was not found`, err);
+		}
+	}
+
+	/**
+	 * Fetch all running timers for a specific task.
+	 *
+	 * @param taskId - ID of the task
+	 * @returns Array of running time logs associated with the task
+	 */
+	private async getRunningLogsByTask(taskId: string): Promise<ITimeLog[]> {
+		const tenantId = RequestContext.currentTenantId();
+
+		const { organizationId } = await this._organizationProjectService.findEmployee();
+
+		return await this.typeOrmTimeLogRepository.find({
+			where: {
+				taskId,
+				tenantId,
+				organizationId,
+				isRunning: true,
+				stoppedAt: Not(IsNull())
+			},
+			relations: ['employee']
+		});
 	}
 }

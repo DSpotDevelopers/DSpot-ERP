@@ -729,7 +729,8 @@
 			"ONLY_FUTURE": "Tylko przyszłość"
 		},
 		"NOTIFICATIONS": {
-			"STARTED_WORK_ON": "Wymagane jest wprowadzenie daty rozpoczęcia pracy przez pracownika, aby wygenerować listę płac, umożliwić udział w podziale wydatków, zobaczyć statystyki pracownika"
+			"STARTED_WORK_ON": "Wymagane jest wprowadzenie daty rozpoczęcia pracy przez pracownika, aby wygenerować listę płac, umożliwić udział w podziale wydatków, zobaczyć statystyki pracownika",
+			"RATE_EFFECTIVE_VALUE_CONFIRM": "\nTe zmiany będą obowiązywać od momentu akceptacji i będą miały wpływ na proces wystawiania faktur oraz inne procesy w aplikacji.\nPrzed zatwierdzeniem poproś pracownika o wystawienie faktury za okres, za który nie została jeszcze wystawiona.\nPo tym upewnij się, że faktura została utworzona, a następnie możesz kontynuować wprowadzanie zmian.\nPamiętaj, że nowa faktura z aktualnymi danymi powinna obejmować okres od dziś wzwyż.\nZaleca się również poinformowanie pracownika o okresie generowania pozycji faktury."
 		},
 		"ARCHIVE_CONFIRMATION": {
 			"SURE": "Czy na pewno chcesz zarchiwizować",
@@ -2163,6 +2164,8 @@
 			}
 		},
 		"PERMISSIONS": {
+			"VIEW_ASSIGNED_PROJECTS_ONLY": "Pokazuj tylko przypisane projekty (dla menedżerskich ról)",
+			"PROFILE_EDIT": "Edytuj profil",
 			"ADMIN_DASHBOARD_VIEW": "Wyświetl pulpit administratora",
 			"TEAM_DASHBOARD": "Wyświetl pulpit zespołu",
 			"PROJECT_MANAGEMENT_DASHBOARD": "Wyświetl pulpit zarządzania projektami",
@@ -3063,6 +3066,7 @@
 		"ESTIMATE_DATE": "Data szacunku",
 		"DUE_DATE": "Termin",
 		"CURRENCY": "Waluta",
+		"CURRENCIES": "Waluty",
 		"DISCOUNT": "Rabat",
 		"CONTACT": "Kontakt",
 		"TOTAL_VALUE": "Łączna wartość",

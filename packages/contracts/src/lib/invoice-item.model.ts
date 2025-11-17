@@ -10,7 +10,7 @@ export interface IInvoiceItem extends IBasePerTenantAndOrganizationEntityModel {
 	description: string;
 	price: number;
 	quantity: number;
-	totalValue: number;
+	totalValue?: number;
 	invoiceId?: string;
 	taskId?: string;
 	employeeId?: string;

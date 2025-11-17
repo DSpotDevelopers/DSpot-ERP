@@ -19,7 +19,7 @@ import { NgxPermissionsService } from 'ngx-permissions';
 import { TranslateService } from '@ngx-translate/core';
 import moment from 'moment';
 import { pick } from 'underscore';
-import { combineLatest, Observable, Subject, takeUntil } from 'rxjs';
+import { combineLatest, debounceTime, Observable, Subject, takeUntil } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import {
 	DateRangePickerBuilderService,
@@ -123,6 +123,7 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 		this.subject$
 			.pipe(
 				filter(() => !!this.calendar.getApi() && !!this.organization),
+				debounceTime(200), // wait for rapid emissions
 				tap(() => this.setCalendarOptions()),
 				tap(() => this.setCalenderInitialView()),
 				untilDestroyed(this)
@@ -254,7 +255,7 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 		const timeZone = this.timeZoneService.currentTimeZone;
 		const startDate = moment(arg.start).startOf('day').format('YYYY-MM-DD HH:mm:ss');
 		const endDate = moment(arg.end).subtract(1, 'days').endOf('day').format('YYYY-MM-DD HH:mm:ss');
-		const appliedFilter = pick(this.filters, 'source', 'activityLevel', 'logType');
+		const appliedFilter = pick(this.filters, 'source', 'employmentTypes', 'activityLevel', 'logType');
 		const request: IGetTimeLogInput = {
 			...appliedFilter,
 			...this.getFilterRequest({ startDate, endDate })
@@ -262,11 +263,12 @@ export class CalendarComponent extends BaseSelectorFilterComponent implements On
 
 		try {
 			this.loading = true;
-			const timeLogs$ = this.timesheetService.getTimeLogs(request, [
+			const timeLogs$ = this.timesheetService.getTimeLogsChunk(request, [
 				'project',
 				'task',
 				'organizationContact',
-				'employee.user'
+				'employee.user',
+				'employee.organizationEmploymentTypes'
 			]);
 			timeLogs$.then((logs: ITimeLog[]) => {
 				const events = logs.map((log: ITimeLog): EventInput => {
