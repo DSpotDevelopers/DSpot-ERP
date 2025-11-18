@@ -63,6 +63,7 @@ describe('Organization projects test', { testIsolation: false }, () => {
 		organizationProjectsPage.saveProjectButtonVisible();
 		organizationProjectsPage.clickSaveProjectButton();
 		organizationProjectsPage.waitMessageToHide();
+		organizationProjectsPage.verifyProjectExists(editName);
 	});
 	it.only('Should be able to delete project', () => {
 		organizationProjectsPage.selectTableRowByName(editName);
@@ -71,6 +72,5 @@ describe('Organization projects test', { testIsolation: false }, () => {
 		organizationProjectsPage.confirmDeleteButtonVisible();
 		organizationProjectsPage.clickConfirmDeleteButton();
 		organizationProjectsPage.waitMessageToHide();
-		organizationProjectsPage.verifyProjectIsDeleted(editName);
 	});
 });

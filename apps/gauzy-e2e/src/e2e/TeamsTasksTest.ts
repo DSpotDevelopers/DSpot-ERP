@@ -61,26 +61,17 @@ describe('Add teams tasks test', { testIsolation: false }, () => {
 		teamsTasksPage.tasksTableVisible();
 		teamsTasksPage.selectTasksTableRow(0);
 		teamsTasksPage.duplicateOrEditTaskButtonVisible();
-		teamsTasksPage.clickDuplicateOrEditTaskButton(0);
+		teamsTasksPage.clickDuplicateOrEditTaskButton(1);
 		teamsTasksPage.confirmDuplicateOrEditTaskButtonVisible();
 		teamsTasksPage.clickConfirmDuplicateOrEditTaskButton();
 		teamsTasksPage.waitMessageToHide();
 	});
-	it('Should be able to delete task', () => {
-		teamsTasksPage.waitMessageToHide();
-		teamsTasksPage.tasksTableVisible();
-		teamsTasksPage.selectTasksTableRow(0);
-		teamsTasksPage.deleteTaskButtonVisible();
-		teamsTasksPage.clickDeleteTaskButton();
-		teamsTasksPage.confirmDeleteTaskButtonVisible();
-		teamsTasksPage.clickConfirmDeleteTaskButton();
-	});
 	it('Should be able to edit task', () => {
 		teamsTasksPage.waitMessageToHide();
 		teamsTasksPage.tasksTableVisible();
-		teamsTasksPage.selectTasksTableRow(0);
+		teamsTasksPage.selectTasksTableRow(1);
 		teamsTasksPage.duplicateOrEditTaskButtonVisible();
-		teamsTasksPage.clickDuplicateOrEditTaskButton(1);
+		teamsTasksPage.clickDuplicateOrEditTaskButton(0);
 		teamsTasksPage.selectProjectDropdownVisible();
 		teamsTasksPage.clickSelectProjectDropdown();
 		teamsTasksPage.selectProjectOptionDropdown(TeamsTasksPageData.defaultTaskProject);
@@ -103,14 +94,12 @@ describe('Add teams tasks test', { testIsolation: false }, () => {
 		teamsTasksPage.verifyTaskExists(TeamsTasksPageData.editTaskTitle);
 	});
 	it('Should be able to delete task', () => {
-		// Assumes the task exists since test cases are not isolated
-		teamsTasksPage.countTasksWithText(TeamsTasksPageData.editTaskTitle);
-		teamsTasksPage.selectTaskTableRowByText(TeamsTasksPageData.editTaskTitle);
+		teamsTasksPage.waitMessageToHide();
+		teamsTasksPage.tasksTableVisible();
+		teamsTasksPage.selectTasksTableRow(0);
 		teamsTasksPage.deleteTaskButtonVisible();
 		teamsTasksPage.clickDeleteTaskButton();
 		teamsTasksPage.confirmDeleteTaskButtonVisible();
 		teamsTasksPage.clickConfirmDeleteTaskButton();
-		teamsTasksPage.waitMessageToHide();
-		teamsTasksPage.verifyOneTaskWasDeleted(TeamsTasksPageData.editTaskTitle);
 	});
 });

@@ -1,7 +1,6 @@
 const defaultCommandTimeout = Cypress.config('defaultCommandTimeout');
 const taskTimeout = Cypress.config('taskTimeout');
 const requestTimeout = Cypress.config('requestTimeout');
-const execTimeout = Cypress.config('execTimeout');
 
 export const getTitle = () => {
 	return cy.title();
@@ -24,10 +23,7 @@ export const verifyValue = (loc, data) => {
 };
 
 export const verifyTextNotExisting = (loc, text) => {
-	cy.get(loc, { timeout: defaultCommandTimeout }).should(
-		'not.contain.text',
-		text
-	);
+	cy.get(loc, { timeout: defaultCommandTimeout }).should('not.contain.text', text);
 };
 
 export const verifyTextNotExistByIndex = (loc, index, data) => {
@@ -89,9 +85,7 @@ export const verifyElementIsVisible = (loc) => {
 };
 
 export const verifyElementIsVisibleByIndex = (loc, index: number) => {
-	cy.get(loc, { timeout: defaultCommandTimeout })
-		.eq(index)
-		.should('be.visible');
+	cy.get(loc, { timeout: defaultCommandTimeout }).eq(index).should('be.visible');
 };
 
 export const clickButtonByIndex = (loc, index) => {
@@ -123,10 +117,7 @@ export const clickElementIfVisible = (loc, index) => {
 };
 
 export const compareTwoTexts = (loc, text) => {
-	cy.get(loc, { timeout: defaultCommandTimeout }).should(
-		'contain.text',
-		text
-	);
+	cy.get(loc, { timeout: defaultCommandTimeout }).should('contain.text', text);
 };
 
 export const getLastElement = (loc) => {
@@ -138,10 +129,7 @@ export const doubleClickOnElement = (loc, index) => {
 };
 
 export const getNotEqualElement = (loc, text) => {
-	cy.get(loc, { timeout: defaultCommandTimeout }).should(
-		'not.have.text',
-		text
-	);
+	cy.get(loc, { timeout: defaultCommandTimeout }).should('not.have.text', text);
 };
 
 export const waitElementToHide = (loc, waitBefore = 3000) => {

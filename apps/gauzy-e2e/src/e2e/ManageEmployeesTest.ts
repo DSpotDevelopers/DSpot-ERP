@@ -86,11 +86,9 @@ describe('Manage employees test', { testIsolation: false }, () => {
 		manageEmployeesPage.lastStepButtonVisible();
 		manageEmployeesPage.clickLastStepButton();
 		manageEmployeesPage.waitMessageToHide();
-		manageEmployeesPage.filterByTag(tagName);
 		manageEmployeesPage.verifyEmployeeExists(`${firstName} ${lastName}`);
 	});
 	it('Should be able to edit employee', () => {
-		manageEmployeesPage.filterByTag(tagName);
 		manageEmployeesPage.tableRowVisible();
 		manageEmployeesPage.selectLastTableRow();
 		manageEmployeesPage.editButtonVisible();
@@ -113,7 +111,6 @@ describe('Manage employees test', { testIsolation: false }, () => {
 	});
 	it('Should be able to end work', () => {
 		manageEmployeesPage.waitMessageToHide();
-		manageEmployeesPage.filterByTag(tagName);
 		manageEmployeesPage.selectLastTableRow();
 		manageEmployeesPage.endWorkButtonVisible();
 		manageEmployeesPage.clickEndWorkButton();
@@ -122,14 +119,12 @@ describe('Manage employees test', { testIsolation: false }, () => {
 		manageEmployeesPage.waitMessageToHide();
 	});
 	it('Should be able to delete employee', () => {
-		manageEmployeesPage.filterByTag(tagName);
 		manageEmployeesPage.selectLastTableRow();
 		manageEmployeesPage.deleteButtonVisible();
 		manageEmployeesPage.clickDeleteButton();
 		manageEmployeesPage.confirmDeleteButtonVisible();
 		manageEmployeesPage.clickConfirmDeleteButton();
 		manageEmployeesPage.waitMessageToHide();
-		manageEmployeesPage.filterByTag(tagName);
 		manageEmployeesPage.verifyEmployeeIsDeleted(`${firstName} ${lastName}`);
 	});
 	it('Should be able to copy invite link', () => {
@@ -151,11 +146,11 @@ describe('Manage employees test', { testIsolation: false }, () => {
 	});
 	it('Should be able to delete invite', () => {
 		manageEmployeesPage.clickManageInviteButton();
-			manageEmployeesPage.selectTableRowsWithProject(ManageEmployeesPageData.defaultProject);
-			manageEmployeesPage.deleteInviteButtonVisible();
-			manageEmployeesPage.clickDeleteInviteButton();
-			manageEmployeesPage.confirmDeleteInviteButtonVisible();
-			manageEmployeesPage.clickConfirmDeleteInviteButton();
-			manageEmployeesPage.waitMessageToHide();
+		manageEmployeesPage.selectTableRowsWithProject(ManageEmployeesPageData.defaultProject);
+		manageEmployeesPage.deleteInviteButtonVisible();
+		manageEmployeesPage.clickDeleteInviteButton();
+		manageEmployeesPage.confirmDeleteInviteButtonVisible();
+		manageEmployeesPage.clickConfirmDeleteInviteButton();
+		manageEmployeesPage.waitMessageToHide();
 	});
 });

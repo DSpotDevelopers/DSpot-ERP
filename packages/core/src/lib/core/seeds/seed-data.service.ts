@@ -387,7 +387,7 @@ export class SeedDataService {
 	 * Seed E2E Testing Data
 	 * Seeds only an organization within an existing database for e2e testing
 	 */
-	public async runE2ESeed(fromAPI: boolean) {
+	public async runE2ESeed() {
 		try {
 			this.seedType = SeederTypeEnum.E2E;
 

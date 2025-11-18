@@ -55,7 +55,7 @@ export async function seedE2E(devConfig: Partial<ApplicationPluginConfig>) {
 		.then((app) => {
 			const seeder = app.get(SeedDataService);
 			seeder
-				.runE2ESeed(false)
+				.runE2ESeed()
 				.then(() => {
 					// E2E seed completed successfully
 				})
