@@ -500,6 +500,7 @@ export const DEFAULT_ROLE_PERMISSIONS = [
 			PermissionsEnum.PROJECT_MODULE_READ,
 			PermissionsEnum.PROJECT_MODULE_UPDATE,
 			PermissionsEnum.PROJECT_MODULE_DELETE,
+			PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY,
 			/** Dashboard */
 			PermissionsEnum.DASHBOARD_CREATE,
 			PermissionsEnum.DASHBOARD_READ,
@@ -569,7 +570,83 @@ export const DEFAULT_ROLE_PERMISSIONS = [
 	},
 	{
 		role: RolesEnum.MANAGER,
-		defaultEnabledPermissions: [PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY]
+		defaultEnabledPermissions: [
+			/** Dashboards */
+			PermissionsEnum.TEAM_DASHBOARD,
+			PermissionsEnum.PROJECT_MANAGEMENT_DASHBOARD,
+			PermissionsEnum.TIME_TRACKING_DASHBOARD,
+			PermissionsEnum.DASHBOARD_READ,
+			/** Employee Selection */
+			PermissionsEnum.SELECT_EMPLOYEE,
+			PermissionsEnum.CHANGE_SELECTED_EMPLOYEE,
+			PermissionsEnum.CHANGE_SELECTED_ORGANIZATION,
+			PermissionsEnum.ORG_EMPLOYEES_VIEW,
+			/** Tasks */
+			PermissionsEnum.ORG_TASK_ADD,
+			PermissionsEnum.ORG_TASK_VIEW,
+			PermissionsEnum.ORG_TASK_EDIT,
+			PermissionsEnum.ORG_TASK_DELETE,
+			PermissionsEnum.ORG_TASK_SETTING,
+			PermissionsEnum.ORG_TEAM_EDIT_ACTIVE_TASK,
+			/** Time Off */
+			PermissionsEnum.TIME_OFF_ADD,
+			PermissionsEnum.TIME_OFF_VIEW,
+			PermissionsEnum.TIME_OFF_EDIT,
+			PermissionsEnum.TIME_OFF_DELETE,
+			/** Approvals */
+			PermissionsEnum.APPROVAL_POLICY_VIEW,
+			PermissionsEnum.REQUEST_APPROVAL_EDIT,
+			PermissionsEnum.REQUEST_APPROVAL_VIEW,
+			/** Projects */
+			PermissionsEnum.ACCESS_PRIVATE_PROJECTS,
+			PermissionsEnum.ORG_PROJECT_VIEW,
+			PermissionsEnum.ORG_PROJECT_EDIT,
+			PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY,
+			/** Timesheet */
+			PermissionsEnum.TIMESHEET_EDIT_TIME,
+			PermissionsEnum.CAN_APPROVE_TIMESHEET,
+			/** Invoices */
+			PermissionsEnum.INVOICES_VIEW,
+			PermissionsEnum.INVOICES_EDIT,
+			/** Tags */
+			PermissionsEnum.ORG_TAGS_ADD,
+			PermissionsEnum.ORG_TAGS_VIEW,
+			PermissionsEnum.ORG_TAGS_EDIT,
+			PermissionsEnum.ORG_TAGS_DELETE,
+			/** Sprints */
+			PermissionsEnum.ORG_SPRINT_ADD,
+			PermissionsEnum.ORG_SPRINT_EDIT,
+			PermissionsEnum.ORG_SPRINT_VIEW,
+			PermissionsEnum.ORG_SPRINT_DELETE,
+			/** Contacts */
+			PermissionsEnum.ORG_CONTACT_VIEW,
+			/** Daily Plans */
+			PermissionsEnum.DAILY_PLAN_CREATE,
+			PermissionsEnum.DAILY_PLAN_READ,
+			PermissionsEnum.DAILY_PLAN_UPDATE,
+			PermissionsEnum.DAILY_PLAN_DELETE,
+			/** Project Modules */
+			PermissionsEnum.PROJECT_MODULE_CREATE,
+			PermissionsEnum.PROJECT_MODULE_READ,
+			PermissionsEnum.PROJECT_MODULE_UPDATE,
+			PermissionsEnum.PROJECT_MODULE_DELETE,
+			/** Teams */
+			PermissionsEnum.ORG_TEAM_ADD,
+			PermissionsEnum.ORG_TEAM_VIEW,
+			PermissionsEnum.ORG_TEAM_EDIT,
+			PermissionsEnum.ORG_TEAM_JOIN_REQUEST_VIEW,
+			PermissionsEnum.ORG_TEAM_JOIN_REQUEST_EDIT,
+			/** Other */
+			PermissionsEnum.EVENT_TYPES_VIEW,
+			PermissionsEnum.TIME_TRACKER,
+			PermissionsEnum.MEDIA_GALLERY_VIEW,
+			PermissionsEnum.EQUIPMENT_APPROVE_REQUEST,
+			/** Time Management */
+			PermissionsEnum.ALLOW_DELETE_TIME,
+			PermissionsEnum.ALLOW_MODIFY_TIME,
+			PermissionsEnum.ALLOW_MANUAL_TIME,
+			PermissionsEnum.DELETE_SCREENSHOTS
+		]
 	},
 	{
 		role: RolesEnum.VIEWER,

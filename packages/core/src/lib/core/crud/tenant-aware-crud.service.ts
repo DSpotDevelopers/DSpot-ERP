@@ -28,7 +28,7 @@ export abstract class TenantAwareCrudService<T extends TenantBaseEntity>
 	 * @returns The find conditions based on the current user's relationship with employees.
 	 */
 	private findConditionsWithEmployeeByUser(): FindOptionsWhere<T> {
-		const employeeId = RequestContext.currentEmployeeId();
+		const employeeId = RequestContext.currentUser().employeeId;
 		return (
 			/**
 			 * If the employee has logged in, retrieve their own data unless
@@ -36,8 +36,9 @@ export abstract class TenantAwareCrudService<T extends TenantBaseEntity>
 			 */
 			(
 				isNotEmpty(employeeId)
-					? !RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE) &&
-					  this.typeOrmRepository.metadata?.hasColumnWithPropertyPath('employeeId')
+					? (!RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE)
+					  || RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY))
+					  && this.typeOrmRepository.metadata?.hasColumnWithPropertyPath('employeeId')
 						? {
 								employee: {
 									id: employeeId

@@ -2165,7 +2165,7 @@
 			}
 		},
 		"PERMISSIONS": {
-			"VIEW_ASSIGNED_PROJECTS_ONLY": "Показвай само назначените проекти (за управленски роли)",
+			"VIEW_ASSIGNED_PROJECTS_ONLY": "Показвай само назначените проекти",
 			"PROFILE_EDIT": "Редактиране на профила",
 			"ADMIN_DASHBOARD_VIEW": "Виж админ табло",
 			"TEAM_DASHBOARD": "Виж табло на екипа",

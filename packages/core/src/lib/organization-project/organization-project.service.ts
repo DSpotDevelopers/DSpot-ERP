@@ -16,7 +16,8 @@ import {
 	IPagination,
 	RolesEnum,
 	EntitySubscriptionTypeEnum,
-	ITimeLog
+	ITimeLog,
+	PermissionsEnum
 } from '@gauzy/contracts';
 import { getConfig } from '@gauzy/config';
 import { CustomEmbeddedFieldConfig } from '@gauzy/common';
@@ -445,6 +446,37 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 			query.andWhere(`project_team.id = :organizationTeamId`, { organizationTeamId });
 		}
 
+		const userEmployeeId = RequestContext.currentUser().employeeId;
+		if (
+			employeeId !== userEmployeeId &&
+			RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)
+		) {
+			query.andWhere((qb: SelectQueryBuilder<OrganizationProject>) => {
+				const subQuery = qb.subQuery();
+				subQuery
+					.select(p('"project"."id" AS "id"'))
+					.from('organization_project', 'project')
+					.innerJoin('project.members', 'project_members');
+
+				subQuery
+					.where(p('"project_members"."employeeId" = :userEmployeeId'), { userEmployeeId })
+					.andWhere(p('"project"."tenantId" = :tenantId'), { tenantId })
+					.andWhere(p('"project"."organizationId" = :organizationId'), { organizationId });
+
+				if (isNotEmpty(organizationContactId)) {
+					subQuery.andWhere(p('"project"."organizationContactId" = :organizationContactId'), {
+						organizationContactId
+					});
+				}
+
+				if (isNotEmpty(organizationTeamId)) {
+					subQuery.andWhere(p('"project_team"."id" = :organizationTeamId'), { organizationTeamId });
+				}
+
+				return p(`"${query.alias}"."id" IN `) + subQuery.distinct(true).getQuery();
+			});
+		}
+
 		// Get the results
 		return query.getMany();
 	}
@@ -459,6 +491,15 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 		// Check and handle the case where `organizationContactId` is explicitly set to 'null'
 		if (options?.where?.organizationContactId === 'null') {
 			options.where.organizationContactId = IsNull();
+		}
+
+		const userEmployeeId = RequestContext.currentUser().employeeId;
+		if (isNotEmpty(userEmployeeId) && RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)) {
+			options.where.members = {
+				employee: {
+					id: userEmployeeId
+				}
+			};
 		}
 
 		// Call the parent class's findAll method with the modified options
@@ -525,6 +566,17 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 					}
 				};
 			}
+		}
+
+		if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)) {
+			const employeeAssignedProjects = await this.typeOrmOrganizationProjectEmployeeRepository.find({
+				where: {
+					employeeId: RequestContext.currentUser().employeeId,
+					organizationId: options.where.organizationId
+				}
+			});
+
+			options.where.id = In(employeeAssignedProjects.map((employee) => employee.organizationProjectId));
 		}
 
 		// Call the parent class's paginate method with the modified options
