@@ -5,19 +5,14 @@ import { IEmployee, IOrganization, IRole, ITenant, RolesEnum } from '@gauzy/cont
 import * as _ from 'underscore';
 import { faker } from '@faker-js/faker';
 import { DEFAULT_ORGANIZATION_TEAMS } from './default-organization-teams';
-import { E2E_ORGANIZATION_TEAMS } from './e2e-organization-teams';
 
 export const createDefaultTeams = async (
 	dataSource: DataSource,
 	organization: IOrganization,
 	employees: IEmployee[],
-	roles: IRole[],
-	teamsConfig?: any
+	roles: IRole[]
 ): Promise<OrganizationTeam[]> => {
-	// Use provided teams config or default to DEFAULT_ORGANIZATION_TEAMS
-	// Note: DEFAULT_ORGANIZATION_TEAMS contains hardcoded emails like 'ruslan@example-dspot.com.pl'
-	// For E2E, we use E2E_ORGANIZATION_TEAMS with E2E-specific emails
-	const teams = teamsConfig || DEFAULT_ORGANIZATION_TEAMS;
+	const teams = DEFAULT_ORGANIZATION_TEAMS;
 
 	const organizationTeams: OrganizationTeam[] = [];
 	for (let i = 0; i < teams.length; i++) {
@@ -62,7 +57,6 @@ export const createRandomTeam = async (
 	tenantOrganizationsMap: Map<ITenant, IOrganization[]>,
 	organizationEmployeesMap: Map<IOrganization, IEmployee[]>
 ): Promise<OrganizationTeam[]> => {
-
 	const teamNames = ['QA', 'Designers', 'Developers', 'Employees'];
 	const organizationTeams: OrganizationTeam[] = [];
 
@@ -73,7 +67,6 @@ export const createRandomTeam = async (
 			const { id: organizationId } = organization;
 			const employees = organizationEmployeesMap.get(organization);
 			for (const name of teamNames) {
-
 				const team = new OrganizationTeam();
 				team.name = name;
 				team.organizationId = organization.id;
@@ -88,14 +81,16 @@ export const createRandomTeam = async (
 					.values()
 					.value();
 				managers.forEach((employee: IEmployee) => {
-					team.members.push(new OrganizationTeamEmployee({
-						employeeId: employee.id,
-						tenantId,
-						organizationId,
-						role: roles.filter(
-							(role: IRole) => role.name === RolesEnum.MANAGER && role.tenantId === tenantId
-						)
-					}));
+					team.members.push(
+						new OrganizationTeamEmployee({
+							employeeId: employee.id,
+							tenantId,
+							organizationId,
+							role: roles.filter(
+								(role: IRole) => role.name === RolesEnum.MANAGER && role.tenantId === tenantId
+							)
+						})
+					);
 				});
 				organizationTeams.push(team);
 			}
@@ -111,9 +106,6 @@ export const createRandomTeam = async (
 	return uniqueTeams;
 };
 
-const insertOrganizationTeam = async (
-	dataSource: DataSource,
-	teams: OrganizationTeam[]
-): Promise<void> => {
+const insertOrganizationTeam = async (dataSource: DataSource, teams: OrganizationTeam[]): Promise<void> => {
 	await dataSource.manager.save(teams);
 };

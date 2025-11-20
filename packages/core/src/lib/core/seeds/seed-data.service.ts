@@ -22,15 +22,12 @@ import {
 	createRandomSuperAdminUsers,
 	createRandomUsers
 } from '../../user/user.seed';
-import { createE2EAdminUsers, createE2EEmployeesUsers } from '../../user/e2e-user.seed';
-import { E2E_EMPLOYEES } from '../../user/e2e-users';
 import { createDefaultEmployees, createRandomEmployees } from '../../employee/employee.seed';
 import {
 	createDefaultOrganizations,
 	createRandomOrganizations,
-	DEFAULT_ORGANIZATIONS,
 	DEFAULT_EVER_ORGANIZATIONS,
-	DEFAULT_E2E_ORGANIZATIONS
+	DEFAULT_ORGANIZATIONS
 } from '../../organization';
 import { createDefaultEmployeeDashboards, createRandomEmployeeDashboards } from '../../dashboard/dashboard.seed';
 import { createDefaultIncomes, createRandomIncomes } from '../../income/income.seed';
@@ -41,15 +38,8 @@ import {
 } from '../../user-organization/user-organization.seed';
 import { createCountries } from '../../country/country.seed';
 import { createDefaultTeams, createRandomTeam } from '../../organization-team/organization-team.seed';
-import { E2E_ORGANIZATION_TEAMS } from '../../organization-team/e2e-organization-teams';
 import { createRolePermissions } from '../../role-permission/role-permission.seed';
-import {
-	createDefaultTenant,
-	createRandomTenants,
-	DEFAULT_EVER_TENANT,
-	DEFAULT_TENANT,
-	DEFAULT_E2E_TENANT
-} from '../../tenant';
+import { createDefaultTenant, createRandomTenants, DEFAULT_EVER_TENANT, DEFAULT_TENANT } from '../../tenant';
 import { createDefaultTenantSetting } from './../../tenant/tenant-setting/tenant-setting.seed';
 import { createDefaultEmailTemplates } from '../../email-template/email-template.seed';
 import {
@@ -234,14 +224,7 @@ import { createRandomOrganizationTagTypes, createTagTypes } from '../../tag-type
 export enum SeederTypeEnum {
 	ALL = 'all',
 	EVER = 'ever',
-	DEFAULT = 'default',
-	E2E = 'e2e'
-}
-
-export interface SeedConfig {
-	tasks?: number;
-	goals?: number;
-	[key: string]: any;
+	DEFAULT = 'default'
 }
 
 @Injectable()
@@ -335,9 +318,6 @@ export class SeedDataService {
 			// Seed basic default data for default tenant
 			await this.seedBasicDefaultData();
 
-			// Seed default data including contacts, projects, teams, etc.
-			await this.seedDefaultData();
-
 			// Seed reports related data
 			await this.seedReportsData();
 
@@ -368,9 +348,6 @@ export class SeedDataService {
 			// Seed basic default data for default tenant
 			await this.seedBasicDefaultData();
 
-			// Seed default data including contacts, projects, teams, etc.
-			await this.seedDefaultData();
-
 			// Seed reports related data
 			await this.seedReportsData();
 
@@ -378,40 +355,6 @@ export class SeedDataService {
 			await this.closeConnection();
 
 			console.log('Database DSpot ERP Seed Completed');
-		} catch (error) {
-			this.handleError(error);
-		}
-	}
-
-	/**
-	 * Seed E2E Testing Data
-	 * Seeds only an organization within an existing database for e2e testing
-	 */
-	public async runE2ESeed() {
-		try {
-			this.seedType = SeederTypeEnum.E2E;
-
-			await this.cleanUpPreviousRuns();
-
-			// Connect to database
-			await this.createConnection();
-
-			// Reset database to start with new, fresh data
-			await this.resetDatabase();
-
-			// Seed basic default data for e2e tenant
-			await this.seedBasicDefaultData();
-
-			// Seed default data including contacts, projects, teams, etc.
-			await this.seedDefaultData({ tasks: 0, goals: 0 });
-
-			// Seed reports related data
-			await this.seedReportsData();
-
-			// Disconnect to database
-			await this.closeConnection();
-
-			console.log('E2E Organization Seed Completed');
 		} catch (error) {
 			this.handleError(error);
 		}
@@ -517,12 +460,7 @@ export class SeedDataService {
 		await this.tryExecute('Issue Types', createDefaultIssueTypes(this.dataSource));
 
 		// default and internal tenant
-		const tenantName =
-			this.seedType === SeederTypeEnum.E2E
-				? DEFAULT_E2E_TENANT
-				: this.seedType !== SeederTypeEnum.DEFAULT
-				? DEFAULT_EVER_TENANT
-				: DEFAULT_TENANT;
+		const tenantName = this.seedType !== SeederTypeEnum.DEFAULT ? DEFAULT_EVER_TENANT : DEFAULT_TENANT;
 		this.tenant = (await this.tryExecute('Tenant', createDefaultTenant(this.dataSource, tenantName))) as ITenant;
 
 		this.roles = await createRoles(this.dataSource, [this.tenant]);
@@ -533,11 +471,7 @@ export class SeedDataService {
 
 		// Tenant level inserts which only need connection, tenant, roles
 		const organizations =
-			this.seedType === SeederTypeEnum.E2E
-				? DEFAULT_E2E_ORGANIZATIONS
-				: this.seedType !== SeederTypeEnum.DEFAULT
-				? DEFAULT_EVER_ORGANIZATIONS
-				: DEFAULT_ORGANIZATIONS;
+			this.seedType !== SeederTypeEnum.DEFAULT ? DEFAULT_EVER_ORGANIZATIONS : DEFAULT_ORGANIZATIONS;
 		this.organizations = (await this.tryExecute(
 			'Organizations',
 			createDefaultOrganizations(this.dataSource, this.tenant, organizations)
@@ -557,35 +491,15 @@ export class SeedDataService {
 
 		await this.tryExecute('Skills', createDefaultSkills(this.dataSource, this.tenant, this.defaultOrganization));
 
-		// Create users based on seed type
-		let defaultSuperAdminUsers: IUser[] = [];
-		let defaultAdminUsers: IUser[] = [];
-		let defaultEmployeeUsers: IUser[] = [];
+		const { defaultSuperAdminUsers, defaultAdminUsers } = await createDefaultAdminUsers(
+			this.dataSource,
+			this.tenant
+		);
+		this.superAdminUsers.push(...(defaultSuperAdminUsers as IUser[]));
 
-		if (this.seedType === SeederTypeEnum.E2E) {
-			// Use E2E-specific user creation
-			const { e2eSuperAdminUsers, e2eAdminUsers } = await createE2EAdminUsers(this.dataSource, this.tenant);
-			const { e2eEmployeeUsers } = await createE2EEmployeesUsers(this.dataSource, this.tenant);
+		const { defaultEmployeeUsers } = await createDefaultEmployeesUsers(this.dataSource, this.tenant);
 
-			defaultSuperAdminUsers = e2eSuperAdminUsers;
-			defaultAdminUsers = e2eAdminUsers;
-			defaultEmployeeUsers = e2eEmployeeUsers;
-		} else {
-			// Use default user creation
-			const { defaultSuperAdminUsers: superAdmins, defaultAdminUsers: admins } = await createDefaultAdminUsers(
-				this.dataSource,
-				this.tenant
-			);
-			const { defaultEmployeeUsers: employees } = await createDefaultEmployeesUsers(this.dataSource, this.tenant);
-
-			defaultSuperAdminUsers = superAdmins as IUser[];
-			defaultAdminUsers = admins;
-			defaultEmployeeUsers = employees;
-		}
-
-		this.superAdminUsers.push(...defaultSuperAdminUsers);
-
-		if (this.seedType !== SeederTypeEnum.DEFAULT && this.seedType !== SeederTypeEnum.E2E) {
+		if (this.seedType !== SeederTypeEnum.DEFAULT) {
 			const { defaultEverEmployeeUsers, defaultCandidateUsers } = await createDefaultUsers(
 				this.dataSource,
 				this.tenant
@@ -600,8 +514,7 @@ export class SeedDataService {
 			createDefaultUsersOrganizations(this.dataSource, this.tenant, this.organizations, defaultUsers)
 		);
 
-		const allDefaultEmployees =
-			this.seedType === SeederTypeEnum.E2E ? E2E_EMPLOYEES : DEFAULT_EMPLOYEES.concat(DEFAULT_EVER_EMPLOYEES);
+		const allDefaultEmployees = DEFAULT_EMPLOYEES.concat(DEFAULT_EVER_EMPLOYEES);
 		//User level data that needs dataSource, tenant, organization, role, users
 		this.defaultEmployees = await createDefaultEmployees(
 			this.dataSource,
@@ -659,155 +572,9 @@ export class SeedDataService {
 	}
 
 	/**
-	 * Populate Database with E2E Testing Organization Data
-	 * Seeds only organization-specific data within an existing database
-	 */
-	private async seedE2EOrganizationData() {
-		this.log(chalk.magenta(`🌱 SEEDING E2E TESTING ORGANIZATION...`));
-
-		// Get or create E2E tenant
-		this.tenant = await this.getOrCreateE2ETenant();
-
-		// Get or create E2E organization
-		this.defaultOrganization = await this.getOrCreateE2EOrganization();
-
-		// Create E2E-specific users with different emails to avoid conflicts
-		await this.createE2EUsers();
-
-		// Check if tag types already exist before creating them
-		const existingTagTypes = await this.dataSource.getRepository('TagType').find({
-			where: { tenantId: this.tenant.id }
-		});
-
-		if (existingTagTypes.length === 0) {
-			await this.tryExecute(
-				'E2E Tag Types',
-				createTagTypes(this.dataSource, this.tenant, [this.defaultOrganization])
-			);
-		} else {
-			this.log(chalk.blue(`Tag types already exist for E2E tenant, skipping...`));
-		}
-
-		// Check if tags already exist before creating them
-		const existingTags = await this.dataSource.getRepository('Tag').find({
-			where: { tenantId: this.tenant.id }
-		});
-
-		if (existingTags.length === 0) {
-			const defaultTagTypes = (await this.dataSource.getRepository('TagType').find({
-				where: { tenantId: this.tenant.id }
-			})) as any[];
-			await this.tryExecute(
-				'E2E Tags',
-				createDefaultTags(this.dataSource, this.tenant, [this.defaultOrganization], defaultTagTypes)
-			);
-		} else {
-			this.log(chalk.blue(`Tags already exist for E2E tenant, skipping...`));
-		}
-
-		// Check if employee levels already exist before creating them
-		const existingEmployeeLevels = await this.dataSource.getRepository('EmployeeLevel').find({
-			where: { tenantId: this.tenant.id }
-		});
-
-		if (existingEmployeeLevels.length === 0) {
-			await this.tryExecute(
-				'E2E Employee Levels',
-				createEmployeeLevels(this.dataSource, this.tenant, [this.defaultOrganization])
-			);
-		} else {
-			this.log(chalk.blue(`Employee levels already exist for E2E tenant, skipping...`));
-		}
-
-		this.log(chalk.magenta(`✅ SEEDED E2E TESTING ORGANIZATION`));
-	}
-
-	/**
-	 * Create E2E-specific users with different emails to avoid conflicts
-	 */
-	private async createE2EUsers() {
-		// Create E2E admin users with different emails
-		const { e2eSuperAdminUsers, e2eAdminUsers } = await createE2EAdminUsers(this.dataSource, this.tenant);
-
-		// Create E2E employee users
-		const { e2eEmployeeUsers } = await createE2EEmployeesUsers(this.dataSource, this.tenant);
-
-		// Create user-organization relationships
-		const e2eUsers = [...e2eSuperAdminUsers, ...e2eAdminUsers, ...e2eEmployeeUsers];
-		await this.tryExecute(
-			'E2E Users',
-			createDefaultUsersOrganizations(this.dataSource, this.tenant, [this.defaultOrganization], e2eUsers)
-		);
-
-		// Create employees
-		this.defaultEmployees = await createDefaultEmployees(
-			this.dataSource,
-			this.tenant,
-			this.defaultOrganization,
-			e2eEmployeeUsers,
-			E2E_EMPLOYEES
-		);
-	}
-
-	/**
-	 * Get or create E2E tenant
-	 */
-	private async getOrCreateE2ETenant(): Promise<ITenant> {
-		// Try to find existing E2E tenant
-		const existingTenant = await this.dataSource.getRepository('Tenant').findOne({
-			where: { name: 'E2E Testing Tenant' }
-		});
-
-		if (existingTenant) {
-			this.log(chalk.blue(`Found existing E2E tenant: ${existingTenant.name}`));
-			return existingTenant;
-		}
-
-		// Create new E2E tenant
-		this.log(chalk.blue(`Creating new E2E tenant...`));
-		return (await this.tryExecute(
-			'E2E Tenant',
-			createDefaultTenant(this.dataSource, 'E2E Testing Tenant')
-		)) as ITenant;
-	}
-
-	/**
-	 * Get or create E2E organization
-	 */
-	private async getOrCreateE2EOrganization(): Promise<IOrganization> {
-		// Try to find existing E2E organization
-		const existingOrg = (await this.dataSource.getRepository('Organization').findOne({
-			where: { name: 'E2E Testing Organization' }
-		})) as IOrganization;
-
-		if (existingOrg) {
-			this.log(chalk.blue(`Found existing E2E organization: ${existingOrg.name}`));
-			return existingOrg;
-		}
-
-		// Create new E2E organization
-		this.log(chalk.blue(`Creating new E2E organization...`));
-		const organizations = (await this.tryExecute(
-			'E2E Organization',
-			createDefaultOrganizations(this.dataSource, this.tenant, [
-				{
-					name: 'E2E Testing Organization',
-					currency: 'USD',
-					defaultValueDateType: 'TODAY',
-					imageUrl: 'assets/images/logos/dspot_erp_light.svg',
-					isDefault: true,
-					totalEmployees: 1
-				}
-			])
-		)) as IOrganization[];
-
-		return organizations.find((org) => org.name === 'E2E Testing Organization');
-	}
-
-	/**
 	 * Populate default data for default tenant
 	 */
-	private async seedDefaultData(config?: SeedConfig) {
+	private async seedDefaultData() {
 		this.log(chalk.magenta(`🌱 SEEDING DEFAULT ${env.production ? 'PRODUCTION' : ''} DATABASE...`));
 
 		await this.tryExecute(
@@ -865,13 +632,7 @@ export class SeedDataService {
 		// Employee level data that need connection, tenant, organization, role, users, employee
 		await this.tryExecute(
 			'Default Teams',
-			createDefaultTeams(
-				this.dataSource,
-				this.defaultOrganization,
-				this.defaultEmployees,
-				this.roles,
-				this.seedType === SeederTypeEnum.E2E ? E2E_ORGANIZATION_TEAMS : undefined
-			)
+			createDefaultTeams(this.dataSource, this.defaultOrganization, this.defaultEmployees, this.roles)
 		);
 
 		this.defaultProjects = await this.tryExecute(
@@ -879,14 +640,10 @@ export class SeedDataService {
 			createDefaultOrganizationProjects(this.dataSource, this.tenant, this.defaultOrganization)
 		);
 
-		// Create tasks based on config
-		const taskCount = config?.tasks;
-		if (taskCount !== 0) {
-			await this.tryExecute(
-				'Default Projects Task',
-				createDefaultTask(this.dataSource, this.tenant, this.defaultOrganization, taskCount)
-			);
-		}
+		await this.tryExecute(
+			'Default Projects Task',
+			createDefaultTask(this.dataSource, this.tenant, this.defaultOrganization)
+		);
 
 		await this.tryExecute(
 			'Default Organization Departments',
@@ -1016,33 +773,29 @@ export class SeedDataService {
 			)
 		);
 
-		// Create goals based on config
-		const goalCount = config?.goals;
-		if (goalCount !== 0) {
-			await this.tryExecute(
-				'Default Goal KPIs',
-				createDefaultGoalKpi(this.dataSource, this.tenant, this.organizations, this.defaultEmployees)
-			);
+		await this.tryExecute(
+			'Default Goal KPIs',
+			createDefaultGoalKpi(this.dataSource, this.tenant, this.organizations, this.defaultEmployees)
+		);
 
-			const goals = await this.tryExecute(
-				'Default Goals',
-				createDefaultGoals(this.dataSource, this.tenant, this.organizations, this.defaultEmployees, goalCount)
-			);
+		const goals = await this.tryExecute(
+			'Default Goals',
+			createDefaultGoals(this.dataSource, this.tenant, this.organizations, this.defaultEmployees)
+		);
 
-			const keyResults = await this.tryExecute(
-				'Default Key Results',
-				createDefaultKeyResults(this.dataSource, this.tenant, this.defaultEmployees, goals)
-			);
+		const keyResults = await this.tryExecute(
+			'Default Key Results',
+			createDefaultKeyResults(this.dataSource, this.tenant, this.defaultEmployees, goals)
+		);
 
-			await this.tryExecute(
-				'Default Key Result Updates',
-				createDefaultKeyResultUpdates(this.dataSource, this.tenant, this.defaultOrganization, keyResults)
-			);
+		await this.tryExecute(
+			'Default Key Result Updates',
+			createDefaultKeyResultUpdates(this.dataSource, this.tenant, this.defaultOrganization, keyResults)
+		);
 
-			await this.tryExecute('Default Key Result Progress', updateDefaultKeyResultProgress(this.dataSource));
+		await this.tryExecute('Default Key Result Progress', updateDefaultKeyResultProgress(this.dataSource));
 
-			await this.tryExecute('Default Goal Progress', updateDefaultGoalProgress(this.dataSource));
-		}
+		await this.tryExecute('Default Goal Progress', updateDefaultGoalProgress(this.dataSource));
 
 		const approvalPolicies = await this.tryExecute(
 			'Default Approval Policies',
@@ -1959,13 +1712,12 @@ export class SeedDataService {
 			const databaseType = getDBType(this.configService.dbConnectionOptions);
 
 			switch (databaseType) {
-				case DatabaseTypeEnum.postgres: {
+				case DatabaseTypeEnum.postgres:
 					const tables = entities.map((entity) => '"' + entity.tableName + '"');
 					const truncateSql = `TRUNCATE TABLE ${tables.join(',')} RESTART IDENTITY CASCADE;`;
 					await manager.query(truncateSql);
 					break;
-				}
-				case DatabaseTypeEnum.mysql: {
+				case DatabaseTypeEnum.mysql:
 					// -- disable foreign_key_checks to avoid query failing when there is a foreign key in the table
 					await manager.query(`SET foreign_key_checks = 0;`);
 					for (const entity of entities) {
@@ -1973,15 +1725,13 @@ export class SeedDataService {
 					}
 					await manager.query(`SET foreign_key_checks = 1;`);
 					break;
-				}
 				case DatabaseTypeEnum.sqlite:
-				case DatabaseTypeEnum.betterSqlite3: {
+				case DatabaseTypeEnum.betterSqlite3:
 					await manager.query(`PRAGMA foreign_keys = OFF;`);
 					for (const entity of entities) {
 						await manager.query(`DELETE FROM "${entity.tableName}";`);
 					}
 					break;
-				}
 				default:
 					throw Error(`Unsupported database type: ${databaseType}`);
 			}

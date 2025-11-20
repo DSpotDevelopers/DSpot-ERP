@@ -29,14 +29,3 @@ export const DEFAULT_ORGANIZATIONS = [
 		totalEmployees: 1
 	}
 ];
-
-export const DEFAULT_E2E_ORGANIZATIONS = [
-	{
-		name: 'E2E Testing Organization',
-		currency: CurrenciesEnum.USD,
-		defaultValueDateType: DefaultValueDateTypeEnum.TODAY,
-		imageUrl: 'assets/images/logos/dspot_erp_light.svg',
-		isDefault: true,
-		totalEmployees: 1
-	}
-];
