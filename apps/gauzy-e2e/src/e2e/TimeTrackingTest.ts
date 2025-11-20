@@ -13,7 +13,7 @@ describe('Time tracking page test', () => {
 	});
 
 	it('Should be able to verify time tracking page', () => {
-		//timeTrackingPage.headerTextExist(TimeTrackingPageData.header);
+		timeTrackingPage.headerTextExist(TimeTrackingPageData.header);
 		timeTrackingPage.topCardTextExist(TimeTrackingPageData.membersWorked);
 		timeTrackingPage.topCardTextExist(TimeTrackingPageData.projectsWorked);
 		timeTrackingPage.topCardTextExist(TimeTrackingPageData.weeklyActivity);
