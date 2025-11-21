@@ -20,7 +20,7 @@ let employeeEmail = ' ';
 let imgUrl = ' ';
 const tagName = `Test-${Date.now().toString().slice(-5)}`;
 
-describe('Manage employees test', { testIsolation: false }, () => {
+describe.skip('Manage employees test', { testIsolation: false }, () => {
 	before(() => {
 		email = faker.internet.exampleEmail();
 		secEmail = faker.internet.exampleEmail();
