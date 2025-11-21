@@ -222,18 +222,19 @@ services:
       - overlay
 
   pgweb:
-    image: sosedoff/pgweb
+    image: sosedoff/pgweb:latest
     container_name: pgweb
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - db
-    links:
-      - db:${DB_HOST:-db}
+      db:
+        condition: service_healthy
     environment:
+      DATABASE_URL: postgres://${DB_USER:-postgres}:${DB_PASS:-gauzy_password}@db:5432/${DB_NAME:-gauzy}?sslmode=disable
+      # Alternative environment variables (pgweb supports both)
       POSTGRES_DB: ${DB_NAME:-gauzy}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASS:-gauzy_password}
-      PGWEB_DATABASE_URL: postgres://${DB_USER:-postgres}:${DB_PASS:-gauzy_password}@${DB_HOST:-db}:${DB_PORT:-5432}/${DB_NAME:-gauzy}?sslmode=disable
+      PGWEB_DATABASE_URL: postgres://${DB_USER:-postgres}:${DB_PASS:-gauzy_password}@db:5432/${DB_NAME:-gauzy}?sslmode=disable
     ports:
       - '8081:8081'
     networks:

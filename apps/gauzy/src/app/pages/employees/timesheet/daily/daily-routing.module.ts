@@ -13,6 +13,9 @@ const routes: Routes = [
 				unitOfTime: 'day',
 				isLockDatePicker: true,
 				isSingleDatePicker: true
+			},
+			selectors: {
+				team: false
 			}
 		},
 		resolve: {

@@ -12,6 +12,9 @@ const routes: Routes = [
 			datePicker: {
 				unitOfTime: 'week',
 				isLockDatePicker: true
+			},
+			selectors: {
+				team: false
 			}
 		},
 		resolve: {

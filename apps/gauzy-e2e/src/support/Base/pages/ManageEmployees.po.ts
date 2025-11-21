@@ -11,7 +11,8 @@ import {
 	waitElementToHide,
 	verifyText,
 	verifyTextNotExisting,
-	clickButtonWithForce
+	clickButtonWithForce,
+	clickLastButton
 } from '../utils/util';
 import { ManageEmployeesPage } from '../pageobjects/ManageEmployeesPageObject';
 
@@ -189,6 +190,14 @@ export const tableRowVisible = () => {
 
 export const selectTableRow = (index) => {
 	clickButtonByIndex(ManageEmployeesPage.selectTableRowCss, index);
+};
+
+export const selectLastTableRow = () => {
+	clickLastButton(ManageEmployeesPage.selectTableRowCss);
+};
+
+export const selectTableRowsWithProject = (projectName, index = 0) => {
+	cy.get(ManageEmployeesPage.selectTableRowCss).contains(projectName).eq(index).click();
 };
 
 export const editButtonVisible = () => {
@@ -383,17 +392,26 @@ export const verifyEmployeeExists = (text) => {
 	verifyText(ManageEmployeesPage.verifyEmployeeCss, text);
 };
 
-export const verifyEmployeeIsDeleted = (text) => {
+export const verifyEmployeeIsDeleted = (employeeName: string) => {
 	cy.document().then((doc) => {
 		const rows = doc.querySelectorAll(ManageEmployeesPage.verifyEmployeeCss);
-		cy.wrap(!rows || rows.length === 0).as('isEmpty');
-	});
-	cy.get('@isEmpty').then((isEmpty) => {
-		if (!isEmpty) {
-			verifyText(ManageEmployeesPage.verifyEmployeeCss, text);
-		} else {
-			cy.wrap(isEmpty).should('be.true', 'No employees found');
+
+		if (rows.length === 0) {
+			// No employees at all → OK
+			cy.wrap(true).should('be.true');
+			return;
 		}
+
+		// Convert NodeList to array and check each row separately
+		const texts = Array.from(rows).map((row) => row.textContent?.trim() || '');
+
+		// Assert NONE of the row texts contains the employee name
+		texts.forEach((text) => {
+			expect(text).to.not.include(
+				employeeName,
+				`Employee "${employeeName}" should be deleted but found in: ${text}`
+			);
+		});
 	});
 };
 

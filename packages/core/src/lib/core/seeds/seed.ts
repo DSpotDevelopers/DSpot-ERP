@@ -27,7 +27,9 @@ export async function seedDefault(devConfig: Partial<ApplicationPluginConfig>) {
 			const seeder = app.get(SeedDataService);
 			seeder
 				.runDefaultSeed(false)
-				.then(() => {})
+				.then(() => {
+					// Seed completed successfully
+				})
 				.catch((error) => {
 					throw error;
 				})

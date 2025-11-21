@@ -6,7 +6,7 @@ import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AppService {
-	public count: number = 0;
+	public count = 0;
 
 	constructor(
 		@Inject(forwardRef(() => SeedDataService))
