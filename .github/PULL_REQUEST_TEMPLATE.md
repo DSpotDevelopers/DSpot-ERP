@@ -12,7 +12,12 @@ Why is the change needed?
 - If the change cannot be fully automated, include manual steps to apply it (commands, DB updates, config changes, feature flags to toggle, etc.)
 
 # Screenshots (if apply)
-- If the change includes UI updates, attach screenshots or a short screen recording showing the before and after. If there are no UI changes, please write "No UI changes".
+- If the change includes UI updates, attach screenshots or a short screen recording showing the before and after. 
+
+# Scope of Changes
+- [ ] API change
+- [ ] Frontend change
+- [ ] DevOps change
 
 # Checklist
 - [ ] I have added/updated relevant tests
