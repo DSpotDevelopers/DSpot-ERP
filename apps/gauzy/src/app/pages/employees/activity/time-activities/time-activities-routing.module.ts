@@ -15,6 +15,9 @@ const routes: Routes = [
 				isLockDatePicker: true,
 				isSaveDatePicker: true,
 				isSingleDatePicker: true
+			},
+			selectors: {
+				team: false
 			}
 		},
 		resolve: {

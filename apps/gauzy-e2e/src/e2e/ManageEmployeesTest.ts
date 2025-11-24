@@ -20,14 +20,13 @@ let employeeEmail = ' ';
 let imgUrl = ' ';
 const tagName = `Test-${Date.now().toString().slice(-5)}`;
 
-describe.skip('Manage employees test', { testIsolation: false }, () => {
+describe('Manage employees test', { testIsolation: false }, () => {
 	before(() => {
 		email = faker.internet.exampleEmail();
 		secEmail = faker.internet.exampleEmail();
 		firstName = faker.person.firstName();
 		lastName = faker.person.lastName();
 		username = faker.internet.userName();
-		email = faker.internet.exampleEmail();
 		password = faker.internet.password();
 		employeeEmail = faker.internet.exampleEmail();
 		imgUrl = faker.image.avatar();
