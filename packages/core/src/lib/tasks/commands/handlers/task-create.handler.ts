@@ -26,6 +26,7 @@ import { MentionService } from '../../../mention/mention.service';
 import { ActivityLogService } from '../../../activity-log/activity-log.service';
 import { TaskProjectSequenceService } from '../../project-sequence/project-sequence.service';
 import { EmployeeNotificationService } from '../../../employee-notification/employee-notification.service';
+import { SocketService } from '../../../socket/socket.service';
 
 @CommandHandler(TaskCreateCommand)
 export class TaskCreateHandler implements ICommandHandler<TaskCreateCommand> {
@@ -40,7 +41,8 @@ export class TaskCreateHandler implements ICommandHandler<TaskCreateCommand> {
 		private readonly mentionService: MentionService,
 		private readonly activityLogService: ActivityLogService,
 		private readonly taskProjectSequenceService: TaskProjectSequenceService,
-		private readonly employeeNotificationService: EmployeeNotificationService
+		private readonly employeeNotificationService: EmployeeNotificationService,
+		private readonly _socketService: SocketService
 	) {}
 
 	/**
@@ -189,6 +191,15 @@ export class TaskCreateHandler implements ICommandHandler<TaskCreateCommand> {
 							);
 						})
 					);
+
+					// Emit tasks:changed event to all members to update their task list in the timer
+					try {
+						employees.forEach((employee: IEmployee) => {
+							this._socketService.emitToClient(employee.id, 'tasks:changed', null);
+						});
+					} catch (error) {
+						this.logger.error(`Error while sending tasks:changed event to members: ${error}`);
+					}
 				} catch (error) {
 					this.logger.error('Error while subscribing members to task', error);
 				}

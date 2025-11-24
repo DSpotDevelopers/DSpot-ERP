@@ -26,6 +26,7 @@ import { Task } from './../../task.entity';
 import { TypeOrmIntegrationMapRepository } from '../../../integration-map/repository/type-orm-integration-map.repository';
 import { TypeOrmTaskStatusRepository } from '../../statuses/repository/type-orm-task-status.repository';
 import { TypeOrmTaskRepository } from '../../repository/type-orm-task.repository';
+import { SocketService } from '../../../socket/socket.service';
 
 @CommandHandler(AutomationTaskSyncCommand)
 export class AutomationTaskSyncHandler implements ICommandHandler<AutomationTaskSyncCommand> {
@@ -37,7 +38,8 @@ export class AutomationTaskSyncHandler implements ICommandHandler<AutomationTask
 		private readonly _taskService: TaskService,
 		private readonly activityLogService: ActivityLogService,
 		private readonly _employeeService: EmployeeService,
-		private readonly _entitySubscriptionService: EntitySubscriptionService
+		private readonly _entitySubscriptionService: EntitySubscriptionService,
+		private readonly _socketService: SocketService
 	) {}
 
 	/**
@@ -187,6 +189,15 @@ export class AutomationTaskSyncHandler implements ICommandHandler<AutomationTask
 							)
 						)
 					);
+
+					// Emit tasks:changed event to all members to update their task list in the timer
+					try {
+						employees.forEach((employee: IEmployee) => {
+							this._socketService.emitToClient(employee.id, 'tasks:changed', null);
+						});
+					} catch (error) {
+						console.error(`Error while sending tasks:changed event to members: ${error}`);
+					}
 				} catch (error) {
 					console.error('Error subscribing new members to the task:', error);
 				}
@@ -300,6 +311,16 @@ export class AutomationTaskSyncHandler implements ICommandHandler<AutomationTask
 				} catch (error) {
 					console.error('Error subscribing new members to the task:', error);
 				}
+			}
+
+			// Emit tasks:changed event to all existing members as well
+			try {
+				const allMemberIds = new Set([...existingMemberIds, ...memberIds]);
+				allMemberIds.forEach((memberId) => {
+					this._socketService.emitToClient(memberId, 'tasks:changed', null);
+				});
+			} catch (error) {
+				console.error(`Error while sending tasks:changed event to all members: ${error}`);
 			}
 
 			// Activity Log Task Update
