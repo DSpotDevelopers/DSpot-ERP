@@ -390,7 +390,13 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	 * @returns
 	 */
 	async getMyTasks(options: PaginationParams<Task> & IAdvancedTaskFiltering) {
-		return await this.getEmployeeTasks(options);
+		const { where } = options;
+
+		const members = {
+			id: RequestContext.currentUser().employeeId as string
+		};
+
+		return await this.getEmployeeTasks({ ...options, where: { ...where, members } });
 	}
 
 	private addTaskCommonFilters(
