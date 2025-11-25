@@ -1217,44 +1217,8 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	 */
 	async findModuleTasks(options: PaginationParams<Task> & IAdvancedTaskFiltering): Promise<IPagination<ITask>> {
 		try {
-			const { where, filters } = options;
+			const { where } = options;
 			const { modules = [], members } = where;
-
-			if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)) {
-				const userEmployeeId = RequestContext.currentUser().employeeId;
-				const assignedProjects = await this._organizationProjectService.findByEmployee(userEmployeeId, {
-					tenantId: RequestContext.currentTenantId(),
-					organizationId: where?.organizationId as string
-				});
-
-				// If no projects assigned to the current user, return empty result
-				if (isEmpty(assignedProjects)) {
-					return { items: [], total: 0 };
-				}
-
-				const assignedProjectIds = new Set(assignedProjects.map((p) => p.id));
-
-				if (isNotEmpty(filters?.projects)) {
-					const projects = filters.projects.filter((project) => assignedProjectIds.has(project));
-
-					// If the project filter is set and the projects are not assigned to the current user, return empty result
-					if (isEmpty(projects)) {
-						return { items: [], total: 0 };
-					}
-
-					// Only filter by projects that are assigned to the current user
-					options.filters = {
-						...(filters ?? {}),
-						projects: projects
-					};
-				} else {
-					// If no project filter is set, filter by all projects assigned to the current user
-					options.filters = {
-						...(filters ?? {}),
-						projects: Array.from(assignedProjectIds)
-					};
-				}
-			}
 
 			// Initialize the query
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
@@ -1305,10 +1269,6 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	 * @memberof TaskService
 	 */
 	async findTasksByViewQuery(viewId: ID): Promise<IPagination<ITask>> {
-		// NOTE: This method is currently not being used by the frontend.
-		// When it is going to be used, you must add a filter so that it only shows projects
-		// that are allowed for users who have permission to view only the projects to which they are assigned.
-
 		const tenantId = RequestContext.currentTenantId();
 		try {
 			// Retrieve Task View by ID for getting their pre-defined query params
@@ -1395,10 +1355,6 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	 * @throws {Error} Will throw an error if there is a problem with the database query.
 	 */
 	async getTasksByDateFilters(params: ITaskDateFilterInput): Promise<IPagination<ITask>> {
-		// NOTE: This method is currently not being used by the frontend.
-		// When it is going to be used, you must add a filter so that it only shows projects
-		// that are allowed for users who have permission to view only the projects to which they are assigned.
-
 		const tenantId = RequestContext.currentTenantId() || params.tenantId;
 
 		try {
