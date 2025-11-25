@@ -1039,7 +1039,7 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			}
 
 			// Apply filters for organizationSprintId, setting null if not a valid UUID
-			if (isNotEmpty(organizationSprintId) && !isUUID(organizationSprintId)) {
+			if ((isNotEmpty(organizationSprintId) && !isUUID(organizationSprintId)) || organizationSprintId === 'null') {
 				options.where.organizationSprintId = IsNull();
 			}
 
