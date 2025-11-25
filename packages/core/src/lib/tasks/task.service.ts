@@ -1420,6 +1420,7 @@ export class TaskService extends TenantAwareCrudService<Task> {
 				// Send a real-time event to the specified user via socket.
 				// No error is thrown if the user is not currently connected.
 				this._socketService.sendTimerChanged(employeeId);
+				this._socketService.emitToClient(employeeId, 'tasks:changed', null);
 			}
 
 			return result;
