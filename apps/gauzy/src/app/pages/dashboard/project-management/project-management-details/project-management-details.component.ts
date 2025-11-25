@@ -23,10 +23,10 @@ import { MyTaskDialogComponent } from '../../../tasks/components/my-task-dialog/
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'gauzy-project-management-details',
-    templateUrl: './project-management-details.component.html',
-    styleUrls: ['./project-management-details.component.scss'],
-    standalone: false
+	selector: 'gauzy-project-management-details',
+	templateUrl: './project-management-details.component.html',
+	styleUrls: ['./project-management-details.component.scss'],
+	standalone: false
 })
 export class ProjectManagementDetailsComponent extends PaginationFilterBaseComponent implements OnInit, OnDestroy {
 	private _smartTableSource: ServerDataSource;
@@ -109,7 +109,7 @@ export class ProjectManagementDetailsComponent extends PaginationFilterBaseCompo
 			where: {
 				organizationId,
 				tenantId,
-				...(this.selectedEmployeeId ? { employeeId: this.selectedEmployeeId } : {}),
+				...(this.selectedEmployeeId ? { members: { id: this.selectedEmployeeId } } : {}),
 				...(this.selectedProjectId ? { projectId: this.selectedProjectId } : {}),
 				...(this.filters.where ? this.filters.where : {})
 			}
@@ -237,5 +237,7 @@ export class ProjectManagementDetailsComponent extends PaginationFilterBaseCompo
 		this._router.navigate(['/pages/tasks/me']);
 	}
 
-	ngOnDestroy(): void {}
+	ngOnDestroy(): void {
+		// No cleanup needed - subscriptions are handled by async pipe
+	}
 }

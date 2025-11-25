@@ -185,12 +185,16 @@ export class ProjectSelectorComponent implements OnInit, AfterViewInit {
 
 	/**
 	 * Callback function to notify changes in the form control.
+	 * @remarks This is overridden by Angular's ControlValueAccessor.registerOnChange
 	 */
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	private onChange: (value: ID | ID[]) => void = () => {};
 
 	/**
 	 * Callback function to notify touch events in the form control.
+	 * @remarks This is overridden by Angular's ControlValueAccessor.registerOnTouched
 	 */
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	private onTouched: () => void = () => {};
 
 	constructor(
@@ -337,13 +341,6 @@ export class ProjectSelectorComponent implements OnInit, AfterViewInit {
 
 		const { id: organizationId, tenantId } = this.organization;
 
-		const isAdmin =
-			this._store.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
-			!this._store.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
-		const isManager =
-			this._store.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY) &&
-			this._store.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT);
-
 		const queryOptions: IOrganizationProjectsFindInput = {
 			...(this.organizationContactId && { organizationContactId: this.organizationContactId }),
 			organizationId,
@@ -351,27 +348,10 @@ export class ProjectSelectorComponent implements OnInit, AfterViewInit {
 		};
 
 		try {
-			let projects: IOrganizationProject[] = [];
-
-			// ADMIN — full access to all projects
-			if (isAdmin) {
-				const { items } = await this._organizationProjects.getAll([], queryOptions);
-				projects = items || [];
-			}
-			// MANAGER — only projects where the manager is a member
-			else if (isManager) {
-				const managerId = this._store.user.employee?.id;
-				if (managerId) {
-					projects = await this._organizationProjects.getAllByEmployee(managerId, queryOptions);
-				}
-			}
-			// EMPLOYEE — only their own projects
-			else {
-				if (this.employeeId) {
-					projects = await this._organizationProjects.getAllByEmployee(this.employeeId, queryOptions);
-				}
-			}
-			this.projects = projects;
+			// Retrieve projects based on whether employeeId is provided
+			this.projects = this.employeeId
+				? await this._organizationProjects.getAllByEmployee(this.employeeId, queryOptions)
+				: (await this._organizationProjects.getAll([], queryOptions)).items || [];
 
 			// Optionally add "All Projects" option
 			if (this.showAllOption) {

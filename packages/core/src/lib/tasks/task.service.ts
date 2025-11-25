@@ -39,7 +39,7 @@ import {
 	ITimeLog,
 	TaskStatusEnum
 } from '@gauzy/contracts';
-import { isNotEmpty } from '@gauzy/utils';
+import { isEmpty, isNotEmpty } from '@gauzy/utils';
 import { isSqlite } from '@gauzy/config';
 import { TenantAwareCrudService, PaginationParams } from './../core/crud';
 import { addBetween, LIKE_OPERATOR } from './../core/util';
@@ -173,7 +173,7 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			if (updatedTask.status === TaskStatusEnum.DONE && task.status !== TaskStatusEnum.DONE) {
 				try {
 					this.logger.debug(`Task ${updatedTask.id} changed status to DONE`);
-					this._socketService.sendTimerChangedMany([...existingMemberIdSet])
+					this._socketService.sendTimerChangedMany([...existingMemberIdSet]);
 				} catch (error) {
 					this.logger.error(`Error emitting DONE status event for task ${updatedTask.id}: ${error}`);
 				}
@@ -241,13 +241,9 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			}
 
 			try {
-				[
-					...existingMemberIdSet,
-					...newMembers.map((member) => member.id)
-				].forEach((memberId) => {
+				[...existingMemberIdSet, ...newMembers.map((member) => member.id)].forEach((memberId) => {
 					this._socketService.emitToClient(memberId, 'tasks:changed', null);
 				});
-
 			} catch (error) {
 				this.logger.error(`Error while sending tasks changed event: ${error}`);
 			}
@@ -302,13 +298,54 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	 */
 	async findAll(options: PaginationParams<Task> & IAdvancedTaskFiltering): Promise<IPagination<Task>> {
 		try {
-			const { filters } = options;
-			let advancedFilters: FindOptionsWhere<Task> = {};
-			if (filters) {
-				advancedFilters = this.buildAdvancedWhereCondition(filters, options.where);
+			const { filters, where } = options;
+
+			if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)) {
+				const userEmployeeId = RequestContext.currentUser().employeeId;
+				const assignedProjects = await this._organizationProjectService.findByEmployee(userEmployeeId, {
+					tenantId: RequestContext.currentTenantId(),
+					organizationId: where?.organizationId as string
+				});
+
+				// If no projects assigned to the current user, return empty result
+				if (isEmpty(assignedProjects)) {
+					return { items: [], total: 0 };
+				}
+
+				const assignedProjectIds = new Set(assignedProjects.map((p) => p.id));
+
+				if (isNotEmpty(where?.projectId) && !assignedProjectIds.has(where.projectId as string)) {
+					return { items: [], total: 0 };
+				}
+
+				if (isNotEmpty(filters?.projects)) {
+					const projects = filters.projects.filter((project) => assignedProjectIds.has(project));
+
+					// If the project filter is set and the projects are not assigned to the current user, return empty result
+					if (isEmpty(projects)) {
+						return { items: [], total: 0 };
+					}
+
+					// Only filter by projects that are assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: projects
+					};
+				} else {
+					// If no project filter is set, filter by all projects assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: Array.from(assignedProjectIds)
+					};
+				}
 			}
 
-			return super.findAll({ ...options, where: { ...advancedFilters, ...options.where } });
+			let advancedFilters: FindOptionsWhere<Task> = {};
+			if (isNotEmpty(options) && isNotEmpty(options.filters)) {
+				advancedFilters = this.buildAdvancedWhereCondition(options.filters, where);
+			}
+
+			return super.findAll({ ...options, where: { ...advancedFilters, ...where } });
 		} catch (error) {
 			console.log(error);
 			throw new BadRequestException(error);
@@ -492,84 +529,66 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	 */
 	async getEmployeeTasks(options: PaginationParams<Task> & IAdvancedTaskFiltering) {
 		try {
-			const { where } = options;
-			const { members } = where;
+			const { where, filters } = options;
+			const { members, organizationId } = where;
 
-			const hasPermission =
-				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
-				!RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
-			const isManager =
-				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
-				RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
+			if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)) {
+				const userEmployeeId = RequestContext.currentUser().employeeId;
+
+				const assignedProjects = await this._organizationProjectService.findByEmployee(userEmployeeId, {
+					tenantId: RequestContext.currentTenantId(),
+					organizationId: organizationId as string
+				});
+
+				// If no projects assigned to the current user, return empty result
+				if (isEmpty(assignedProjects)) {
+					return { items: [], total: 0 };
+				}
+
+				const assignedProjectIds = new Set(assignedProjects.map((p) => p.id));
+
+				// If project filter is set and not assigned to the current user, return empty result
+				if (isNotEmpty(where?.projectId) && !assignedProjectIds.has(where.projectId as string)) {
+					return { items: [], total: 0 };
+				}
+
+				if (isNotEmpty(filters?.projects)) {
+					const projects = filters.projects.filter((project) => assignedProjectIds.has(project));
+
+					// If the project filter is set and the projects are not assigned to the current user, return empty result
+					if (isEmpty(projects)) {
+						return { items: [], total: 0 };
+					}
+
+					// Only filter by projects that are assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: projects
+					};
+				} else {
+					// If no project filter is set, filter by all projects assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: Array.from(assignedProjectIds)
+					};
+				}
+			}
 
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
 			query.innerJoin(`${query.alias}.members`, 'members');
 
-			if (!hasPermission || isManager) {
-				// Employee without permission: get their projects first
-				const employeeId = RequestContext.currentEmployeeId() ?? RequestContext.currentUser().employeeId;
-				if (isNotEmpty(employeeId)) {
-					const tenantId = RequestContext.currentTenantId();
-					const organizationId = where?.organizationId as string;
-
-					const projects = await this._organizationProjectService.findByEmployee(employeeId, {
-						tenantId,
-						organizationId,
-						relations: ['members']
-					});
-
-					const projectIds = projects.map((p) => p.id);
-
-					if (projectIds.length === 0) {
-						// No projects -> return empty
-						return { items: [], total: 0 };
-					}
-
-					query.innerJoin(`${query.alias}.project`, 'project');
-					query.andWhere('project.id IN (:...projectIds)', { projectIds });
-				}
-			}
-
-			// Now add the task_employee filter (sync)
 			query.andWhere((qb: SelectQueryBuilder<Task>) => {
 				const subQuery = qb.subQuery();
 				subQuery.select(p('"task_employee"."taskId"')).from(p('task_employee'), p('task_employee'));
 
-				if (hasPermission) {
-					if (isNotEmpty(members) && isNotEmpty(members['id'])) {
-						const employeeId = members['id'];
-						subQuery.andWhere(p('"task_employee"."employeeId" = :employeeId'), { employeeId });
-					}
-				} else if (isManager) {
-					const selectedEmployeeId = members?.['id'];
-					const managerId = RequestContext.currentUser().employeeId;
+				// If user have permission to change employee get the employee id from the members filter
+				// If employee has login and don't have permission to change employee get the current employee id
+				const employeeId = RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE)
+					? members?.['id']
+					: RequestContext.currentEmployeeId();
 
-					if (isNotEmpty(selectedEmployeeId) && selectedEmployeeId !== managerId) {
-						subQuery
-							.andWhere(p('"task_employee"."employeeId" = :employeeId'), {
-								employeeId: selectedEmployeeId
-							})
-							.andWhere(
-								`EXISTS (
-					SELECT 1 FROM "task_employee" te2
-					WHERE te2."taskId" = "task_employee"."taskId"
-					AND te2."employeeId" = :managerId
-				)`
-							)
-							.setParameters({ managerId });
-					} else {
-						if (isNotEmpty(managerId)) {
-							subQuery.andWhere(p('"task_employee"."employeeId" = :employeeId'), {
-								employeeId: managerId
-							});
-						}
-					}
-				} else {
-					// If employee has login and don't have permission to change employee
-					const employeeId = RequestContext.currentEmployeeId();
-					if (isNotEmpty(employeeId)) {
-						subQuery.andWhere(p('"task_employee"."employeeId" = :employeeId'), { employeeId });
-					}
+				if (isNotEmpty(employeeId)) {
+					subQuery.andWhere(p('"task_employee"."employeeId" = :employeeId'), { employeeId });
 				}
 
 				return p('"task_members"."taskId" IN ') + subQuery.distinct(true).getQuery();
@@ -596,15 +615,58 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	 */
 	async getAllTasksByEmployee(employeeId: IEmployee['id'], options: PaginationParams<Task> & IAdvancedTaskFiltering) {
 		try {
+			const { filters, where } = options;
+			const { isScreeningTask = false } = where;
+
+			// Force to see only assigned projects if user have permission to see only assigned projects
+			if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)) {
+				const userEmployeeId = RequestContext.currentUser().employeeId;
+				const assignedProjects = await this._organizationProjectService.findByEmployee(userEmployeeId, {
+					tenantId: RequestContext.currentTenantId(),
+					organizationId: where?.organizationId as string
+				});
+
+				// If no projects assigned to the current user, return empty result
+				if (isEmpty(assignedProjects)) {
+					return [];
+				}
+
+				const assignedProjectIds = new Set(assignedProjects.map((p) => p.id));
+
+				// If project filter is set and not assigned to the current user, return empty result
+				if (isNotEmpty(where?.projectId) && !assignedProjectIds.has(where.projectId as string)) {
+					return [];
+				}
+
+				if (isNotEmpty(filters?.projects)) {
+					const projects = filters.projects.filter((project) => assignedProjectIds.has(project));
+
+					// If the project filter is set and the projects are not assigned to the current user, return empty result
+					if (isEmpty(projects)) {
+						return [];
+					}
+
+					// Only filter by projects that are assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: projects
+					};
+				} else {
+					// If no project filter is set, filter by all projects assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: Array.from(assignedProjectIds)
+					};
+				}
+			}
+
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
 			query.leftJoin(`${query.alias}.members`, 'members');
 			query.leftJoin(`${query.alias}.teams`, 'teams');
-			const { isScreeningTask = false } = options.where;
-			const { filters } = options;
 
 			// Apply advanced filters
-			if (filters) {
-				const advancedWhere = this.buildAdvancedWhereCondition(filters, options.where);
+			if (isNotEmpty(options) && isNotEmpty(options.filters)) {
+				const advancedWhere = this.buildAdvancedWhereCondition(options.filters, where);
 				query.setFindOptions({ where: advancedWhere });
 			}
 
@@ -612,14 +674,8 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			 * If additional options found
 			 */
 			query.setFindOptions({
-				...(isNotEmpty(options) &&
-					isNotEmpty(options.where) && {
-						where: options.where
-					}),
-				...(isNotEmpty(options) &&
-					isNotEmpty(options.relations) && {
-						relations: options.relations
-					})
+				...(isNotEmpty(where) && { where }),
+				...(isNotEmpty(options?.relations) && { relations: options.relations })
 			});
 
 			query.andWhere(
@@ -675,15 +731,58 @@ export class TaskService extends TenantAwareCrudService<Task> {
 		options: PaginationParams<Task> & IAdvancedTaskFiltering
 	) {
 		try {
+			const { filters, where } = options;
+			const { isScreeningTask = false } = where;
+
+			// Force to see only assigned projects if user have permission to see only assigned projects
+			if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)) {
+				const userEmployeeId = RequestContext.currentUser().employeeId;
+				const assignedProjects = await this._organizationProjectService.findByEmployee(userEmployeeId, {
+					tenantId: RequestContext.currentTenantId(),
+					organizationId: where?.organizationId as string
+				});
+
+				// If no projects assigned to the current user, return empty result
+				if (isEmpty(assignedProjects)) {
+					return [];
+				}
+
+				const assignedProjectIds = new Set(assignedProjects.map((p) => p.id));
+
+				// If project filter is set and not assigned to the current user, return empty result
+				if (isNotEmpty(where?.projectId) && !assignedProjectIds.has(where.projectId as string)) {
+					return [];
+				}
+
+				if (isNotEmpty(filters?.projects)) {
+					const projects = filters.projects.filter((project) => assignedProjectIds.has(project));
+
+					// If the project filter is set and the projects are not assigned to the current user, return empty result
+					if (isEmpty(projects)) {
+						return [];
+					}
+
+					// Only filter by projects that are assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: projects
+					};
+				} else {
+					// If no project filter is set, filter by all projects assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: Array.from(assignedProjectIds)
+					};
+				}
+			}
+
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
 			query.leftJoin(`${query.alias}.members`, 'members');
 			query.leftJoin(`${query.alias}.teams`, 'teams');
-			const { isScreeningTask = false } = options.where;
-			const { filters } = options;
 
 			// Apply advanced filters
-			if (filters) {
-				const advancedWhere = this.buildAdvancedWhereCondition(filters, options.where);
+			if (isNotEmpty(options) && isNotEmpty(options.filters)) {
+				const advancedWhere = this.buildAdvancedWhereCondition(options.filters, where);
 				query.setFindOptions({ where: advancedWhere });
 			}
 
@@ -691,14 +790,8 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			 * If additional options found
 			 */
 			query.setFindOptions({
-				...(isNotEmpty(options) &&
-					isNotEmpty(options.where) && {
-						where: options.where
-					}),
-				...(isNotEmpty(options) &&
-					isNotEmpty(options.relations) && {
-						relations: options.relations
-					})
+				...(isNotEmpty(where) && { where }),
+				...(isNotEmpty(options?.relations) && { relations: options.relations })
 			});
 
 			query.andWhere(
@@ -754,45 +847,53 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	 */
 	async findTeamTasks(options: PaginationParams<Task> & IAdvancedTaskFiltering): Promise<IPagination<ITask>> {
 		try {
-			const { where } = options;
+			const { where, filters } = options;
 			const { teams = [] } = where;
 			const { members } = where;
 
-			const hasPermission =
-				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
-				!RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
-			const isManager =
-				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
-				RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
-			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
-			query.leftJoin(`${query.alias}.teams`, 'teams');
+			const userEmployeeId = RequestContext.currentUser().employeeId;
+			if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)) {
+				const assignedProjects = await this._organizationProjectService.findByEmployee(userEmployeeId, {
+					tenantId: RequestContext.currentTenantId(),
+					organizationId: where?.organizationId as string
+				});
 
-			let projectIds: string[] = [];
+				// If no projects assigned to the current user, return empty result
+				if (isEmpty(assignedProjects)) {
+					return { items: [], total: 0 };
+				}
 
-			if (!hasPermission || isManager) {
-				const employeeId = RequestContext.currentEmployeeId() ?? RequestContext.currentUser().employeeId;
-				if (isNotEmpty(employeeId)) {
-					const tenantId = RequestContext.currentTenantId();
-					const organizationId = where?.organizationId as string;
+				const assignedProjectIds = new Set(assignedProjects.map((p) => p.id));
 
-					const projects = await this._organizationProjectService.findByEmployee(employeeId, {
-						tenantId,
-						organizationId,
-						relations: ['members']
-					});
+				// If project filter is set and not assigned to the current user, return empty result
+				if (isNotEmpty(where?.projectId) && !assignedProjectIds.has(where.projectId as string)) {
+					return { items: [], total: 0 };
+				}
 
-					projectIds = projects.map((p) => p.id);
+				if (isNotEmpty(filters?.projects)) {
+					const projects = filters.projects.filter((project) => assignedProjectIds.has(project));
 
-					if (projectIds.length === 0) {
-						// No projects - return empty result early
+					// If the project filter is set and the projects are not assigned to the current user, return empty result
+					if (isEmpty(projects)) {
 						return { items: [], total: 0 };
 					}
 
-					// Join project relation and filter by allowed project IDs
-					query.innerJoin(`${query.alias}.project`, 'project');
-					query.andWhere('project.id IN (:...projectIds)', { projectIds });
+					// Only filter by projects that are assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: projects
+					};
+				} else {
+					// If no project filter is set, filter by all projects assigned to the current user
+					options.filters = {
+						...(filters ?? {}),
+						projects: Array.from(assignedProjectIds)
+					};
 				}
 			}
+
+			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
+			query.leftJoin(`${query.alias}.teams`, 'teams');
 
 			query.andWhere((qb: SelectQueryBuilder<Task>) => {
 				const subQuery = qb.subQuery();
@@ -803,41 +904,18 @@ export class TaskService extends TenantAwareCrudService<Task> {
 					p('"organization_team_employee"."organizationTeamId" = "task_team"."organizationTeamId"')
 				);
 
-				if (hasPermission) {
+				// If user have permission to change employee
+				if (RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE)) {
 					if (isNotEmpty(members) && isNotEmpty(members['id'])) {
 						const employeeId = members['id'];
 						subQuery.andWhere(p('"organization_team_employee"."employeeId" = :employeeId'), { employeeId });
 					}
-				} else if (isManager) {
-					const selectedEmployeeId = members?.['id'];
-					const managerId = RequestContext.currentUser().employeeId;
-
-					if (isNotEmpty(selectedEmployeeId) && selectedEmployeeId !== managerId) {
-						subQuery
-							.andWhere(p('"organization_team_employee"."employeeId" = :employeeId'), {
-								employeeId: selectedEmployeeId
-							})
-							.andWhere(
-								`EXISTS (
-						SELECT 1
-						FROM "organization_team_employee" te
-						WHERE te."organizationTeamId" = "organization_team_employee"."organizationTeamId"
-						  AND te."employeeId" = :managerId
-					)`
-							)
-							.setParameters({ managerId });
-					} else {
-						if (isNotEmpty(managerId)) {
-							subQuery.andWhere(p('"organization_team_employee"."employeeId" = :employeeId'), {
-								employeeId: managerId
-							});
-						}
-					}
 				} else {
 					// If employee has login and don't have permission to change employee
-					const employeeId = RequestContext.currentEmployeeId();
-					if (isNotEmpty(employeeId)) {
-						subQuery.andWhere(p('"organization_team_employee"."employeeId" = :employeeId'), { employeeId });
+					if (isNotEmpty(userEmployeeId)) {
+						subQuery.andWhere(p('"organization_team_employee"."employeeId" = :employeeId'), {
+							employeeId: userEmployeeId
+						});
 					}
 				}
 
@@ -868,8 +946,49 @@ export class TaskService extends TenantAwareCrudService<Task> {
 	 * @returns A Promise that resolves to a paginated list of tasks.
 	 */
 	public async pagination(options: PaginationParams<Task> & IAdvancedTaskFiltering): Promise<IPagination<ITask>> {
-		const filters = options?.filters;
-		const where = options?.where;
+		const { where, filters } = options;
+
+		// Force to see only assigned projects if user have permission to see only assigned projects
+		if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY)) {
+			const userEmployeeId = RequestContext.currentUser().employeeId;
+			const assignedProjects = await this._organizationProjectService.findByEmployee(userEmployeeId, {
+				tenantId: RequestContext.currentTenantId(),
+				organizationId: where?.organizationId as string
+			});
+
+			// If no projects assigned to the current user, return empty result
+			if (isEmpty(assignedProjects)) {
+				return { items: [], total: 0 };
+			}
+
+			const assignedProjectIds = new Set(assignedProjects.map((p) => p.id));
+
+			// If project filter is set and not assigned to the current user, return empty result
+			if (isNotEmpty(where?.projectId) && !assignedProjectIds.has(where.projectId as string)) {
+				return { items: [], total: 0 };
+			}
+
+			if (isNotEmpty(filters?.projects)) {
+				const projects = filters.projects.filter((project) => assignedProjectIds.has(project));
+
+				// If the project filter is set and the projects are not assigned to the current user, return empty result
+				if (isEmpty(projects)) {
+					return { items: [], total: 0 };
+				}
+
+				// Only filter by projects that are assigned to the current user
+				options.filters = {
+					...(filters ?? {}),
+					projects: projects
+				};
+			} else {
+				// If no project filter is set, filter by all projects assigned to the current user
+				options.filters = {
+					...(filters ?? {}),
+					projects: Array.from(assignedProjectIds)
+				};
+			}
+		}
 
 		// Check if there are any filters in the options
 		if (where) {
@@ -920,7 +1039,7 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			}
 
 			// Apply filters for organizationSprintId, setting null if not a valid UUID
-			if (isNotEmpty(organizationSprintId) && !isUUID(organizationSprintId)) {
+			if ((isNotEmpty(organizationSprintId) && !isUUID(organizationSprintId)) || organizationSprintId === 'null') {
 				options.where.organizationSprintId = IsNull();
 			}
 
@@ -931,38 +1050,14 @@ export class TaskService extends TenantAwareCrudService<Task> {
 				};
 			}
 
-			const employeeId = RequestContext.currentEmployeeId();
-			const tenantId = RequestContext.currentTenantId();
-			const organizationId = where.organizationId as string;
-			const hasPermission =
-				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
-				!RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
-			const isManager =
-				RequestContext.hasPermission(PermissionsEnum.ORG_EMPLOYEES_EDIT) &&
-				RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY);
-			const userProvidedProjectId = !!options.where?.projectId;
-
-			if (!userProvidedProjectId && (isManager || !hasPermission)) {
-				const emplId = employeeId ?? RequestContext.currentUser().employeeId;
-				const projects = await this._organizationProjectService.findByEmployee(emplId, {
-					tenantId,
-					organizationId,
-					relations: ['members']
-				});
-
-				const projectIds = projects.map((p) => p.id);
-
-				options.where.projectId = In(projectIds);
-			}
-
 			// Apply filter for isScreeningTask
 			where.isScreeningTask = isScreeningTask;
 		}
 
 		// Apply Advanced filters
 		let advancedFilters: FindOptionsWhere<Task> = {};
-		if (filters) {
-			advancedFilters = this.buildAdvancedWhereCondition(filters, where);
+		if (isNotEmpty(options) && isNotEmpty(options.filters)) {
+			advancedFilters = this.buildAdvancedWhereCondition(options.filters, options.where);
 		}
 
 		if (options.order?.taskNumber) {
@@ -972,7 +1067,7 @@ export class TaskService extends TenantAwareCrudService<Task> {
 		}
 
 		// Call the base paginate method
-		return await super.paginate({ ...options, where: { ...advancedFilters, ...where } });
+		return await super.paginate({ ...options, where: { ...advancedFilters, ...options.where } });
 	}
 
 	/**
