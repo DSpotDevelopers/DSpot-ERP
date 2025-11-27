@@ -27,9 +27,9 @@ export class TimerWeeklyLimitService {
 			timeZone = 'UTC';
 			throw new Error(`TimeZone is undefined`);
 		}
+
 		const currentUser = RequestContext.currentUser();
-		const isCurrentEmployee = employee.id === currentUser.employeeId;
-		const isOnlyMe = isCurrentEmployee;
+		const isOnlyMe = employee.id === currentUser.employeeId;
 
 		const refMomentLocal = moment.utc(refDate).tz(timeZone);
 
@@ -53,6 +53,7 @@ export class TimerWeeklyLimitService {
 		if (remainWeeklyTime <= 0 && !ignoreException) {
 			throw new ConflictException(TimeErrorsEnum.WEEKLY_LIMIT_REACHED);
 		}
+		
 		return { remainWeeklyTime, workedThisWeek: statistics.duration };
 	}
 
