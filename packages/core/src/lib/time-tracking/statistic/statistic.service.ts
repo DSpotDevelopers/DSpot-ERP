@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Brackets, SelectQueryBuilder, WhereExpressionBuilder } from 'typeorm';
 import { reduce, pluck, pick, mapObject, groupBy, chain } from 'underscore';
 import * as moment from 'moment';
@@ -22,7 +22,7 @@ import {
 	IWeeklyStatisticsActivities,
 	ITodayStatisticsActivities
 } from '@gauzy/contracts';
-import { ArraySum, isNotEmpty } from '@gauzy/utils';
+import { ArraySum, isEmpty, isNotEmpty } from '@gauzy/utils';
 import {
 	ConfigService,
 	DatabaseTypeEnum,
@@ -394,6 +394,8 @@ export class StatisticService {
 	async getPeriodStatisticsDuration(request: IGetCountsStatistics): Promise<{ duration: number }> {
 		const {
 			organizationId,
+			employeeId = [],
+			employeeIds = [],
 			startDate,
 			endDate,
 			projectIds = [],
@@ -403,19 +405,31 @@ export class StatisticService {
 			onlyMe: isOnlyMeSelected
 		} = request;
 
-		let employeeIds = request.employeeIds || [];
-
 		const user = RequestContext.currentUser();
 		const tenantId = RequestContext.currentTenantId() ?? request.tenantId;
 
-		// Check if the user has permission to view/change other employees
-		const hasChangeSelectedEmployeePermission: boolean = RequestContext.hasPermission(
+		// Check if the user only can see himself
+		const onlyCanSeeHimself: boolean = isOnlyMeSelected || !RequestContext.hasPermission(
 			PermissionsEnum.CHANGE_SELECTED_EMPLOYEE
 		);
 
-		// If the user does not have permission (or selected "only me"), restrict to their own employeeId
-		if (user.employeeId && (isOnlyMeSelected || !hasChangeSelectedEmployeePermission)) {
-			employeeIds = [user.employeeId];
+		const filteredEmployeeIds = [];
+
+		if (onlyCanSeeHimself) {
+			if (isEmpty(user.employeeId)) {
+				// If not throw an error, the query will return all employees
+				throw new NotFoundException(
+					'No employee profile associated with your user account. Please contact your administrator.'
+				);
+			}
+
+			filteredEmployeeIds.push(user.employeeId);
+		} else {
+			if (isNotEmpty(employeeId)) {
+				filteredEmployeeIds.push(employeeId);
+			} else if (isNotEmpty(employeeIds)) {
+				filteredEmployeeIds.push(...employeeIds);
+			}
 		}
 
 		// Format the date range (default: current ISO week)
@@ -444,8 +458,8 @@ export class StatisticService {
 			);
 
 		// Apply filters conditionally
-		if (isNotEmpty(employeeIds)) {
-			query.andWhere('time_log.employeeId IN (:...employeeIds)', { employeeIds });
+		if (isNotEmpty(filteredEmployeeIds)) {
+			query.andWhere('time_log.employeeId IN (:...employeeIds)', { employeeIds: filteredEmployeeIds });
 		}
 
 		if (isNotEmpty(projectIds)) {
