@@ -5,7 +5,6 @@ import { InvoicesPageData } from '../support/Base/pagedata/InvoicesPageData';
 import * as dashboardPage from '../support/Base/pages/Dashboard.po';
 import { CustomCommands } from '../support/commands';
 
-//! waitToLoad
 describe('Invoices test', { testIsolation: false }, () => {
 	before(() => {
 		CustomCommands.login(loginPage, LoginInvoicePageData, dashboardPage);
@@ -14,9 +13,6 @@ describe('Invoices test', { testIsolation: false }, () => {
 	it('Should be able to add new invoice', () => {
 		invoicesPage.addButtonVisible();
 		invoicesPage.clickAddButton();
-		//invoicesPage.tagsDropdownVisible();
-		//invoicesPage.clickTagsDropdown();
-		//invoicesPage.selectTagFromDropdown(0);
 		invoicesPage.clickCardBody();
 		invoicesPage.discountInputVisible();
 		invoicesPage.enterDiscountData(InvoicesPageData.discountValue);
