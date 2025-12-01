@@ -51,6 +51,7 @@ export const ManageEmployeesPage = {
 	tagsFilterDropdownOptionCss: 'div.ng-option',
 	expirationDropdownCss: '#invitationExpirationPeriod button',
 	expirationDropdownOptionCss: 'ul nb-option',
+	searchInputCss: 'input[placeholder="Full Name"]',
 	// testing library
 	actionsBarCss: '.actions-container',
 	editButtonName: 'Edit',
