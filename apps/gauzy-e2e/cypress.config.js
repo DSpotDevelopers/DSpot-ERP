@@ -28,10 +28,15 @@ module.exports = defineConfig({
         }
     },
     e2e: {
-        baseUrl: "http://localhost:4200",
+        // Use environment variable for baseUrl, fallback to localhost for local development
+        baseUrl: process.env.WEBAPP_URL || "http://localhost:4200",
         specPattern: "./src/e2e/**/*.{ts,tsx}",
         supportFile: "./src/support/index.ts",
         setupNodeEvents(on, config) {
+            // Update baseUrl from environment variable if present
+            if (process.env.WEBAPP_URL) {
+                config.baseUrl = process.env.WEBAPP_URL;
+            }
             return require('./src/plugins/index')(on, config);
         }
     }

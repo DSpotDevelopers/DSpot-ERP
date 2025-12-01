@@ -84,7 +84,7 @@
 		"test": "yarn run postinstall.web && yarn run config:dev && yarn ng test",
 		"lint": "yarn run config:dev && yarn ng lint && yarn ng lint",
 		"e2e": "yarn run postinstall.web && yarn run config:dev && yarn ng e2e --browser chrome",
-		"e2e:ci": "yarn run postinstall.web && yarn run config:prod && yarn --frozen-lockfile --cache-folder ~/.cache/yarn ng:ci e2e -c=production --prod --headless",
+		"e2e:ci": "cross-env NODE_ENV=production NODE_OPTIONS=--max-old-space-size=12288 yarn run postinstall.web && yarn run config:prod && yarn --frozen-lockfile --cache-folder ~/.cache/yarn ng:ci e2e gauzy-e2e -c=production --prod --headless --browser chrome",
 		"affected:apps": "yarn nx affected:apps",
 		"affected:libs": "yarn nx affected:libs",
 		"affected:build": "yarn nx affected:build",
