@@ -85,7 +85,8 @@ describe('Manage employees test', { testIsolation: false }, () => {
 		manageEmployeesPage.lastStepButtonVisible();
 		manageEmployeesPage.clickLastStepButton();
 		manageEmployeesPage.waitMessageToHide();
-		manageEmployeesPage.verifyEmployeeExists(`${firstName} ${lastName}`);
+		manageEmployeesPage.searchEmployee(`${firstName} ${lastName}`);
+		manageEmployeesPage.verifyEmployeeExcists(`${firstName} ${lastName}`);
 	});
 	it('Should be able to edit employee', () => {
 		manageEmployeesPage.tableRowVisible();

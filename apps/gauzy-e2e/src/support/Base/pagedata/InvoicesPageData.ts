@@ -13,7 +13,6 @@ export const InvoicesPageData = {
 	viewButton: 'View',
 	emailButton: 'Email',
 	status: 'Fully Paid',
-	emptyTableText: 'No data for the currently selected employee.',
 	invoiceNumber: 1,
 	secondInvoiceNumber: 2
 };

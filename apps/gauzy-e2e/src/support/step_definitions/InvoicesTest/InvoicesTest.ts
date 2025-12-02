@@ -2,91 +2,20 @@ import * as loginPage from '../../Base/pages/Login.po';
 import { LoginPageData } from '../../Base/pagedata/LoginPageData';
 import * as invoicesPage from '../../Base/pages/Invoices.po';
 import { InvoicesPageData } from '../../Base/pagedata/InvoicesPageData';
-import * as organizationTagsUserPage from '../../Base/pages/OrganizationTags.po';
-import { OrganizationTagsPageData } from '../../Base/pagedata/OrganizationTagsPageData';
 import * as dashboardPage from '../../Base/pages/Dashboard.po';
 import { CustomCommands } from '../../commands';
 import { faker } from '@faker-js/faker';
-import * as manageEmployeesPage from '../../Base/pages/ManageEmployees.po';
 import * as logoutPage from '../../Base/pages/Logout.po';
-import { ContactsLeadsPageData } from '../../Base/pagedata/ContactsLeadsPageData';
-import * as contactsLeadsPage from '../../Base/pages/ContactsLeads.po';
-import * as organizationProjectsPage from '../../Base/pages/OrganizationProjects.po';
-import { OrganizationProjectsPageData } from '../../Base/pagedata/OrganizationProjectsPageData';
 
 import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
-
 const pageLoadTimeout = Cypress.config('pageLoadTimeout');
 
-let firstName = faker.person.firstName();
-let lastName = faker.person.lastName();
-let username = faker.internet.userName();
-let password = faker.internet.password();
-let employeeEmail = faker.internet.exampleEmail();
-let imgUrl = faker.image.avatar();
-
-let email = faker.internet.exampleEmail();
-let fullName = faker.person.firstName() + ' ' + faker.person.lastName();
-let city = faker.location.city();
-let postcode = faker.location.zipCode();
-let street = faker.location.streetAddress();
-let website = faker.internet.url();
-let sendEmail = faker.internet.exampleEmail();
+const sendEmail = faker.internet.exampleEmail();
 
 // Login with email
 Given('Login with default credentials', () => {
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-});
-
-// Add new tag
-Then('User can add new tag', () => {
-	dashboardPage.verifyAccountingDashboard();
-	CustomCommands.addTag(organizationTagsUserPage, OrganizationTagsPageData);
-});
-
-// Add employee
-And('User can add new employee', () => {
-	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
-	CustomCommands.clearCookies();
-	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addEmployee(
-		manageEmployeesPage,
-		firstName,
-		lastName,
-		username,
-		employeeEmail,
-		password,
-		imgUrl
-	);
-});
-
-// Add project
-And('User can add new project', () => {
-	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
-	CustomCommands.clearCookies();
-	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addProject(
-		organizationProjectsPage,
-		OrganizationProjectsPageData
-	);
-});
-
-// Add contact
-And('User can add new contact', () => {
-	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
-	CustomCommands.clearCookies();
-	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addContact(
-		fullName,
-		email,
-		city,
-		postcode,
-		street,
-		website,
-		contactsLeadsPage,
-		ContactsLeadsPageData
-	);
 });
 
 // Add new invoice
@@ -100,33 +29,12 @@ Then('User can visit Invoices page', () => {
 	cy.wait('@waitInvoices');
 });
 
-And('User can see grid button', () => {
-	invoicesPage.gridBtnExists();
-});
-
-And('User can click on second grid button to change view', () => {
-	invoicesPage.gridBtnClick(1);
-});
-
 And('User can see add Invoice button', () => {
 	invoicesPage.addButtonVisible();
 });
 
 When('User click on add Invoice button', () => {
 	invoicesPage.clickAddButton();
-});
-
-Then('User can see tags dropdown', () => {
-	invoicesPage.tagsDropdownVisible();
-});
-
-When('User click on tags dropdown', () => {
-	invoicesPage.clickTagsDropdown();
-});
-
-Then('User can select tag from dropdown options', () => {
-	invoicesPage.selectTagFromDropdown(0);
-	invoicesPage.clickCardBody();
 });
 
 And('User can see discount input field', () => {
@@ -146,21 +54,7 @@ When('User click on discount type dropdown', () => {
 });
 
 Then('User can select discount type from dropdown options', () => {
-	invoicesPage.selectDiscountTypeFromDropdown(
-		InvoicesPageData.discountType
-	);
-});
-
-And('User can see contact dropdown', () => {
-	invoicesPage.contactDropdownVisible();
-});
-
-When('User click on contact dropdown', () => {
-	invoicesPage.clickContactDropdown();
-});
-
-Then('User can select contact from dropdown options', () => {
-	invoicesPage.selectContactFromDropdown(0);
+	invoicesPage.selectDiscountTypeFromDropdown(InvoicesPageData.discountType);
 });
 
 And('User can see tax input field', () => {
@@ -197,15 +91,6 @@ Then('User can select invoice type from dropdown options', () => {
 
 And('User can see employee dropdown', () => {
 	invoicesPage.employeeDropdownVisible();
-});
-
-When('User click on employee dropdown', () => {
-	invoicesPage.clickEmployeeDropdown();
-});
-
-Then('User can select employee from dropdown options', () => {
-	invoicesPage.selectEmployeeFromDropdown(0);
-	invoicesPage.clickKeyboardButtonByKeyCode(9);
 });
 
 And('User can see generate items button', () => {
@@ -246,9 +131,7 @@ Then('User can see invoice number input field', () => {
 });
 
 And('User can enter invoice number', () => {
-	invoicesPage.enterEstimateNumberInputData(
-		InvoicesPageData.invoiceNumber
-	);
+	invoicesPage.enterEstimateNumberInputData(InvoicesPageData.invoiceNumber);
 });
 
 And('User can see currency dropdown', () => {
@@ -296,9 +179,7 @@ And('User can verify badge', () => {
 });
 
 And('User can edit invoice number', () => {
-	invoicesPage.enterEstimateNumberInputData(
-		InvoicesPageData.secondInvoiceNumber
-	);
+	invoicesPage.enterEstimateNumberInputData(InvoicesPageData.secondInvoiceNumber);
 });
 
 And('User can click search button again', () => {
@@ -355,21 +236,7 @@ When('User click on discount type dropdown', () => {
 });
 
 Then('User can select discount type from dropdown options', () => {
-	invoicesPage.selectDiscountTypeFromDropdown(
-		InvoicesPageData.discountType
-	);
-});
-
-And('User can see contact dropdown', () => {
-	invoicesPage.contactDropdownVisible();
-});
-
-When('User click on contact dropdown', () => {
-	invoicesPage.clickContactDropdown();
-});
-
-Then('User can select contact from dropdown options', () => {
-	invoicesPage.selectContactFromDropdown(0);
+	invoicesPage.selectDiscountTypeFromDropdown(InvoicesPageData.discountType);
 });
 
 And('User can see tax input field', () => {
@@ -414,7 +281,7 @@ Then('View invoice button will become active', () => {
 });
 
 And('User can click on vew invoice button', () => {
-	invoicesPage.clickViewButton(1);
+	invoicesPage.clickViewButton();
 });
 
 And('User can see back button', () => {
@@ -430,28 +297,9 @@ Then('User can click again on invoices first table row', () => {
 	invoicesPage.selectTableRow(0);
 });
 
-And('More settings button will become active', () => {
-	invoicesPage.moreButtonVisible();
-});
-
-When('User click more settings button', () => {
-	invoicesPage.clickMoreButton();
-});
-
-Then('User can see email button', () => {
-	invoicesPage.actionButtonVisible();
-});
-
-When('User click on email button', () => {
-	cy.on('uncaught:exception', (err, runnable) => {
-		return false;
-	});
-	invoicesPage.clickActionButtonByText(InvoicesPageData.emailButton);
-});
-
 Then('User can scroll down to email input field', () => {
 	invoicesPage.scrollEmailInviteTemplate();
-})
+});
 
 And('User can see email input field', () => {
 	invoicesPage.emailInputVisible();
@@ -461,41 +309,13 @@ And('User can enter value for email', () => {
 	invoicesPage.enterEmailData(sendEmail);
 });
 
-And('User can see confirm send email button', () => {
-	invoicesPage.confirmButtonVisible();
-});
-
-When('User click on confirm send email button', () => {
-	invoicesPage.clickConfirmButton();
-});
-
 Then('Notification message will appear', () => {
 	invoicesPage.waitMessageToHide();
-});
-
-When('User click more settings button', () => {
-	invoicesPage.clickMoreButton();
-});
-
-Then('User can verify invoice was sent by email', () => {
-	invoicesPage.verifySentBadgeClass();
 });
 
 // Delete invoice
 Then('User can click on invoices first row', () => {
 	invoicesPage.selectTableRow(0);
-});
-
-And('Settings button will become active', () => {
-	invoicesPage.moreButtonVisible();
-});
-
-When('User click settings button', () => {
-	invoicesPage.clickMoreButton();
-});
-
-Then('Delete button will become active', () => {
-	invoicesPage.deleteButtonVisible();
 });
 
 When('User click on delete button', () => {

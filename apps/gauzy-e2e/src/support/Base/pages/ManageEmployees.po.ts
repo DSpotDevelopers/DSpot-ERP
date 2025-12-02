@@ -388,8 +388,12 @@ export const waitMessageToHide = () => {
 	waitElementToHide(ManageEmployeesPage.toastrMessageCss);
 };
 
-export const verifyEmployeeExists = (text) => {
-	verifyText(ManageEmployeesPage.verifyEmployeeCss, text);
+export const searchEmployee = (name: string) => {
+	cy.get(ManageEmployeesPage.searchInputCss).clear().type(name);
+};
+
+export const verifyEmployeeExcists = (text: string) => {
+	cy.contains('td', text).should('be.visible');
 };
 
 export const verifyEmployeeIsDeleted = (employeeName: string) => {

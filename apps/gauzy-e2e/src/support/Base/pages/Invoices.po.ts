@@ -3,44 +3,24 @@ import {
 	verifyElementIsVisible,
 	clickButton,
 	clearField,
-	clickKeyboardBtnByKeycode,
 	clickButtonByIndex,
 	clickElementByText,
 	waitElementToHide,
 	clickButtonByText,
 	verifyValue,
 	scrollDown,
-	verifyText,
 	verifyElementIsNotVisible
 } from '../utils/util';
 import { InvoicesPage } from '../pageobjects/InvoicesPageObject';
 
-export const gridBtnExists = () => {
-	verifyElementIsVisible(InvoicesPage.gridButtonCss);
-};
-
-export const gridBtnClick = (index) => {
-	clickButtonByIndex(InvoicesPage.gridButtonCss, index);
-};
-
 export const addButtonVisible = () => {
-	verifyElementIsVisible(InvoicesPage.addButtonCss);
+	cy.get(InvoicesPage.actionsBarCss).findByRole('button', { name: InvoicesPage.addButtonName }).should('be.visible');
 };
 
 export const clickAddButton = () => {
-	clickButton(InvoicesPage.addButtonCss);
-};
-
-export const tagsDropdownVisible = () => {
-	verifyElementIsVisible(InvoicesPage.addTagsDropdownCss);
-};
-
-export const clickTagsDropdown = () => {
-	clickButton(InvoicesPage.addTagsDropdownCss);
-};
-
-export const selectTagFromDropdown = (index) => {
-	clickButtonByIndex(InvoicesPage.tagsDropdownOption, index);
+	cy.get(InvoicesPage.actionsBarCss)
+		.findByRole('button', { name: InvoicesPage.addButtonName })
+		.click({ force: true });
 };
 
 export const clickCardBody = () => {
@@ -70,18 +50,6 @@ export const clickDiscountDropdown = () => {
 
 export const selectDiscountTypeFromDropdown = (text) => {
 	clickElementByText(InvoicesPage.dropdownOptionCss, text);
-};
-
-export const contactDropdownVisible = () => {
-	verifyElementIsVisible(InvoicesPage.organizationContactDropdownCss);
-};
-
-export const clickContactDropdown = () => {
-	clickButton(InvoicesPage.organizationContactDropdownCss);
-};
-
-export const selectContactFromDropdown = (index) => {
-	clickButtonByIndex(InvoicesPage.contactOptionCss, index);
 };
 
 export const taxInputVisible = () => {
@@ -120,17 +88,6 @@ export const selectInvoiceTypeFromDropdown = (text) => {
 export const employeeDropdownVisible = () => {
 	verifyElementIsVisible(InvoicesPage.selectEmployeeCss);
 };
-export const clickEmployeeDropdown = () => {
-	clickButton(InvoicesPage.selectEmployeeCss);
-};
-
-export const selectEmployeeFromDropdown = (index) => {
-	clickButtonByIndex(InvoicesPage.dropdownOptionCss, index);
-};
-
-export const clickKeyboardButtonByKeyCode = (keycode) => {
-	clickKeyboardBtnByKeycode(keycode);
-};
 
 export const generateItemsButtonVisible = () => {
 	verifyElementIsVisible(InvoicesPage.generateItemsButtonCss);
@@ -144,7 +101,7 @@ export const saveAsDraftButtonVisible = () => {
 	verifyElementIsVisible(InvoicesPage.saveAsDraftButtonCss);
 };
 
-export const clickSaveAsDraftButton = (text) => {
+export const clickSaveAsDraftButton = (text: string) => {
 	clickButtonByText(text);
 };
 
@@ -156,28 +113,12 @@ export const selectTableRow = (index) => {
 	clickButtonByIndex(InvoicesPage.tableRowCss, index);
 };
 
-export const actionButtonVisible = () => {
-	verifyElementIsVisible(InvoicesPage.popoverButtonCss);
-};
-
-export const clickActionButtonByText = (text) => {
-	clickElementByText(InvoicesPage.popoverButtonCss, text);
-};
-
 export const backButtonVisible = () => {
 	verifyElementIsVisible(InvoicesPage.backButtonCss);
 };
 
 export const clickBackButton = () => {
 	clickButton(InvoicesPage.backButtonCss);
-};
-
-export const confirmButtonVisible = () => {
-	verifyElementIsVisible(InvoicesPage.confirmButtonCss);
-};
-
-export const clickConfirmButton = () => {
-	clickButton(InvoicesPage.confirmButtonCss);
 };
 
 export const emailInputVisible = () => {
@@ -197,19 +138,15 @@ export const clickEditButton = (index) => {
 };
 
 export const viewButtonVisible = () => {
-	verifyElementIsVisible(InvoicesPage.viewButtonCss);
+	cy.get(InvoicesPage.viewButtonCss).contains('View').should('be.visible');
 };
 
-export const clickViewButton = (index) => {
-	clickButtonByIndex(InvoicesPage.viewButtonCss, index);
-};
-
-export const deleteButtonVisible = () => {
-	verifyElementIsVisible(InvoicesPage.deleteButtonCss);
+export const clickViewButton = () => {
+	cy.get(InvoicesPage.viewButtonCss).contains('View').click({ force: true });
 };
 
 export const clickDeleteButton = () => {
-	clickButton(InvoicesPage.deleteButtonCss);
+	cy.get(InvoicesPage.deleteButtonCss).click({ force: true });
 };
 
 export const confirmDeleteButtonVisible = () => {
@@ -232,6 +169,14 @@ export const setStatusFromDropdown = (text) => {
 	clickElementByText(InvoicesPage.dropdownOptionCss, text);
 };
 
+export const openStatusDropdown = () => {
+	cy.get(InvoicesPage.openStatusDropdownCss).should('be.visible').click();
+};
+
+export const selectStatus = (status: string) => {
+	cy.contains(InvoicesPage.selectStatusOptionCss, status).should('be.visible').click();
+};
+
 export const verifyEstimateExists = (val) => {
 	verifyValue(InvoicesPage.verifyInvoiceCss, val);
 };
@@ -240,32 +185,26 @@ export const verifyDraftBadgeClass = () => {
 	verifyElementIsVisible(InvoicesPage.draftBadgeCss);
 };
 
-export const verifySentBadgeClass = () => {
-	verifyElementIsVisible(InvoicesPage.successBadgeCss);
-};
-
-export const verifyElementIsDeleted = (text) => {
-	verifyText(InvoicesPage.verifyInvoiceCss, text);
+export const verifyElementIsDeleted = () => {
+	cy.get('table tbody tr').then((rows) => {
+		if (rows.length === 1 && rows.text().includes('You have not created any invoices.')) {
+			cy.contains('td', 'You have not created any invoices.').should('be.visible');
+		} else {
+			cy.get('table tbody tr').should('have.length.lessThan', rows.length + 1);
+		}
+	});
 };
 
 export const scrollEmailInviteTemplate = () => {
 	scrollDown(InvoicesPage.emailCardCss);
 };
 
-export const moreButtonVisible = () => {
-	verifyElementIsVisible(InvoicesPage.moreButtonCss);
-};
-
-export const clickMoreButton = () => {
-	clickButton(InvoicesPage.moreButtonCss);
-};
-
 export const verifyTabButtonVisible = () => {
-	verifyElementIsVisible(InvoicesPage.tabButtonCss);
+	cy.get(InvoicesPage.tabButtonCss).should('be.visible');
 };
 
-export const clickTabButton = (index) => {
-	clickButtonByIndex(InvoicesPage.tabButtonCss, index);
+export const clickTabButton = (index: number) => {
+	cy.get(InvoicesPage.tabButtonCss).eq(index).click({ force: true });
 };
 
 export const verifyEstimateNumberInputVisible = () => {

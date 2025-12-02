@@ -9,7 +9,7 @@ import {
 	waitElementToHide,
 	verifyText,
 	verifyTextNotExisting,
-	vefiryByLength,
+	verifyByLength,
 	verifyByText
 } from '../utils/util';
 import { ContactsLeadsPage } from '../pageobjects/ContactsLeadsPageObject';
@@ -263,12 +263,12 @@ export const clickFinishButton = () => {
 };
 
 export const lastStepBtnVisible = () => {
-	verifyElementIsVisible(ContactsLeadsPage.lastStepBtnCss)
-}
+	verifyElementIsVisible(ContactsLeadsPage.lastStepBtnCss);
+};
 
 export const clickLastStepBtn = () => {
-	clickButton(ContactsLeadsPage.lastStepBtnCss)
-}
+	clickButton(ContactsLeadsPage.lastStepBtnCss);
+};
 
 export const budgetInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.budgetInputCss);
@@ -289,7 +289,7 @@ export const searchClientName = (name: string) => {
 };
 
 export const verifySearchResult = (length: number) => {
-	vefiryByLength(ContactsLeadsPage.selectTableRowCss, length);
+	verifyByLength(ContactsLeadsPage.selectTableRowCss, length);
 };
 
 export const clearSearchInput = () => {
@@ -297,6 +297,6 @@ export const clearSearchInput = () => {
 };
 
 export const verifyClientNameInTable = (name: string) => {
-	vefiryByLength(ContactsLeadsPage.clientsTableRow, 1)
-	verifyByText(ContactsLeadsPage.clientsTableData, name)
+	verifyByLength(ContactsLeadsPage.clientsTableRow, 1);
+	verifyByText(ContactsLeadsPage.clientsTableData, name);
 };
