@@ -12,7 +12,6 @@ import {
 	ngClearField
 } from '../utils/util';
 import { GoalsPage } from '../pageobjects/GoalsPageObject';
-import { waitToLoad } from './AddTasks.po';
 
 export const visit = () => {
 	cy.intercept('GET', '/api/**/goals*').as('getGoals');
@@ -261,7 +260,6 @@ export const clearGoalsTable = () => {
 				clickViewModalDeleteButton();
 				clickConfirmButton();
 				waitMessageToHide();
-
 				deleteAllRows();
 			}
 		});

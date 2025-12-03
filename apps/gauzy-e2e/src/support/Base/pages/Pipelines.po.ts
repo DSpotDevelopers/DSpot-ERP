@@ -10,8 +10,7 @@ import {
 	enterInputByIndex,
 	verifyElementIsVisibleByIndex,
 	clearFieldByIndex,
-	vefiryByLength
-
+	verifyByLength
 } from '../utils/util';
 import { PipelinesPage } from '../pageobjects/PipelinesPageObject';
 
@@ -69,11 +68,11 @@ export const countTableRowsWithText = (text) => {
 		});
 };
 
-export const selectTableRow = (index) => {
+export const selectTableRow = (index: number) => {
 	clickButtonByIndex(PipelinesPage.selectTableRowCss, index);
 };
 
-export const selectFirstTableRowByText = (text) => {
+export const selectFirstTableRowByText = (text: string) => {
 	cy.get(PipelinesPage.selectTableRowCss).filter(`:contains(${text})`).first().click();
 };
 
@@ -127,7 +126,7 @@ export const verifyOnePipelineIsDeleted = (text) => {
 	});
 };
 
-export const verifyPipelineExists = (text) => {
+export const verifyPipelineExists = (text: string) => {
 	verifyText(PipelinesPage.verifyPipelineCss, text);
 };
 
@@ -154,7 +153,7 @@ export const enterDescriptionInputDataByIndex = (data: string, index: number) =>
 };
 
 export const verifySearchResult = (length: number) => {
-	vefiryByLength(PipelinesPage.selectTableRowCss, length);
+	verifyByLength(PipelinesPage.selectTableRowCss, length);
 };
 
 export const verifyNamePlaceholder = () => {
@@ -211,7 +210,7 @@ export const clickOnProbabilityInput = () => {
 };
 
 export const clickDropdownOption = (index: number) => {
-	clickButtonByIndex(PipelinesPage.dropdownOptionCss, index)
+	clickButtonByIndex(PipelinesPage.dropdownOptionCss, index);
 };
 
 export const verifyBackButton = () => {

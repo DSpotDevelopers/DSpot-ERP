@@ -11,7 +11,6 @@ import { OrganizationTagsPageData } from '../support/Base/pagedata/OrganizationT
 import * as organizationTeamsPage from '../support/Base/pages/OrganizationTeams.po';
 import { OrganizationTeamsPageData } from '../support/Base/pagedata/OrganizationTeamsPageData';
 
-//! waitToLoad. No request ever occurred.
 describe('Add teams tasks test', { testIsolation: false }, () => {
 	before(() => {
 		CustomCommands.login(loginPage, LoginPageData, dashboardPage);
@@ -61,7 +60,7 @@ describe('Add teams tasks test', { testIsolation: false }, () => {
 		teamsTasksPage.tasksTableVisible();
 		teamsTasksPage.selectTasksTableRow(0);
 		teamsTasksPage.duplicateOrEditTaskButtonVisible();
-		teamsTasksPage.clickDuplicateOrEditTaskButton(1);
+		teamsTasksPage.clickDuplicateOrEditTaskButton();
 		teamsTasksPage.confirmDuplicateOrEditTaskButtonVisible();
 		teamsTasksPage.clickConfirmDuplicateOrEditTaskButton();
 		teamsTasksPage.waitMessageToHide();
@@ -71,7 +70,7 @@ describe('Add teams tasks test', { testIsolation: false }, () => {
 		teamsTasksPage.tasksTableVisible();
 		teamsTasksPage.selectTasksTableRow(1);
 		teamsTasksPage.duplicateOrEditTaskButtonVisible();
-		teamsTasksPage.clickDuplicateOrEditTaskButton(0);
+		teamsTasksPage.clickDuplicateOrEditTaskButton();
 		teamsTasksPage.selectProjectDropdownVisible();
 		teamsTasksPage.clickSelectProjectDropdown();
 		teamsTasksPage.selectProjectOptionDropdown(TeamsTasksPageData.defaultTaskProject);

@@ -129,7 +129,7 @@ describe('Manage employees test', { testIsolation: false }, () => {
 	});
 	it('Should be able to copy invite link', () => {
 		manageEmployeesPage.clickManageInviteButton();
-		manageEmployeesPage.selectTableRowsWithProject(ManageEmployeesPageData.defaultProject);
+		manageEmployeesPage.selectTableRowsWithProject(ManageEmployeesPageData.status);
 		manageEmployeesPage.copyLinkButtonVisible();
 		manageEmployeesPage.clickCopyLinkButton();
 		manageEmployeesPage.waitMessageToHide();
@@ -137,7 +137,7 @@ describe('Manage employees test', { testIsolation: false }, () => {
 	});
 	it('Should be able to resend invite', () => {
 		manageEmployeesPage.clickManageInviteButton();
-		manageEmployeesPage.selectTableRowsWithProject(ManageEmployeesPageData.defaultProject);
+		manageEmployeesPage.selectTableRowsWithProject(ManageEmployeesPageData.status);
 		manageEmployeesPage.resendInviteButtonVisible();
 		manageEmployeesPage.clickResendInviteButton();
 		manageEmployeesPage.confirmResendInviteButtonVisible();

@@ -196,8 +196,8 @@ export const selectLastTableRow = () => {
 	clickLastButton(ManageEmployeesPage.selectTableRowCss);
 };
 
-export const selectTableRowsWithProject = (projectName, index = 0) => {
-	cy.get(ManageEmployeesPage.selectTableRowCss).contains(projectName).eq(index).click();
+export const selectTableRowsWithProject = (status, index = 0) => {
+	cy.get(ManageEmployeesPage.selectTableRowCss).contains(status).eq(index).click();
 };
 
 export const editButtonVisible = () => {

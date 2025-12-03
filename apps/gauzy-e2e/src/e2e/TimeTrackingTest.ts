@@ -5,7 +5,6 @@ import { TimeTrackingPageData } from '../support/Base/pagedata/TimeTrackingPageD
 import * as dashboardPage from '../support/Base/pages/Dashboard.po';
 import { CustomCommands } from '../support/commands';
 
-//!  Expected to find element: nb-card-header > h4, but never found it.
 describe('Time tracking page test', () => {
 	before(() => {
 		CustomCommands.login(loginPage, LoginPageData, dashboardPage);

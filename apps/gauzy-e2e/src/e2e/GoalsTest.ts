@@ -5,7 +5,6 @@ import { GoalsPageData } from '../support/Base/pagedata/GoalsPageData';
 import * as dashboardPage from '../support/Base/pages/Dashboard.po';
 import { CustomCommands } from '../support/commands';
 
-//! Expected to find element: nb-actions > nb-action[icon="plus-circle"], but never found it.
 describe('Goals test', { testIsolation: false }, () => {
 	before(() => {
 		CustomCommands.login(loginPage, LoginPageData, dashboardPage);

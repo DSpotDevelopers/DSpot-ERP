@@ -7,26 +7,31 @@ import {
 	clearField,
 	enterInput,
 	clickKeyboardBtnByKeycode,
-	waitElementToHide,
 	verifyText,
 	verifyTextNotExisting,
-	clickButtonDouble
+	clickButtonDouble,
+	waitElementToShowAndHide
 } from '../utils/util';
 import { TimeOffPage } from '../pageobjects/TimeOffPageObject';
 
+export const visit = (options = {}) => {
+	cy.intercept('GET', '/api/time-off-request/*').as('getTimeOffRequest');
+	cy.visit('/#/pages/employees/time-off', options);
+	cy.wait('@getTimeOffRequest');
+};
+
 export const requestButtonVisible = () => {
-	verifyElementIsVisible(TimeOffPage.requestButtonCss);
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.requestTimeOffButtonName).should('be.visible');
 };
 
 export const clickRequestButton = () => {
-	clickButton(TimeOffPage.requestButtonCss);
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.requestTimeOffButtonName).click();
 };
 
 export const employeeSelectorVisible = () => {
 	cy.intercept('GET', '/api/employee/working*').as('getUsersXhr');
 	verifyElementIsVisible(TimeOffPage.employeeDropdownCss);
 	cy.wait('@getUsersXhr');
-
 };
 
 export const clickEmployeeSelector = () => {
@@ -75,7 +80,8 @@ export const endDateInputVisible = () => {
 export const enterEndDateData = () => {
 	clearField(TimeOffPage.endDateInputCss);
 	const date = dayjs().add(5, 'days').format('MMM D, YYYY');
-	enterInput(TimeOffPage.endDateInputCss, date);
+	enterInput(TimeOffPage.endDateInputCss, `${date}`);
+	cy.press(Cypress.Keyboard.Keys.TAB);
 };
 
 export const descriptionInputVisible = () => {
@@ -88,20 +94,20 @@ export const enterDescriptionInputData = (data) => {
 };
 
 export const saveRequestButtonVisible = () => {
-	verifyElementIsVisible(TimeOffPage.saveRequestButtonCss);
+	cy.get(TimeOffPage.dialogCardActionsCss).contains(TimeOffPage.saveButtonName).should('be.visible');
 };
 
 export const clickSaveRequestButton = () => {
-	clickButton(TimeOffPage.saveRequestButtonCss);
+	cy.get(TimeOffPage.dialogCardActionsCss).contains(TimeOffPage.saveButtonName).click();
 };
 
-export const addHolidayButtonVisible = () => {
-	verifyElementIsVisible(TimeOffPage.addHolidayButtonCss);
+export const addHolidaysButtonVisible = () => {
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.addHolidaysButtonName).should('be.visible');
 };
 
-export const clickAddHolidayButton = () => {
+export const clickAddHolidaysButton = () => {
 	cy.intercept('GET', '/api/employee*').as('waitForm');
-	clickButton(TimeOffPage.addHolidayButtonCss);
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.addHolidaysButtonName).click();
 	cy.wait('@waitForm');
 };
 
@@ -113,8 +119,8 @@ export const clickSelectHolidayName = () => {
 	clickButton(TimeOffPage.holidayNameSelectCss);
 };
 
-export const selectHolidayOption = (index) => {
-	clickButtonByIndex(TimeOffPage.selectHolidayDropdownOptionCss, index);
+export const selectHolidayOption = (text: string) => {
+	clickElementByText(TimeOffPage.selectHolidayDropdownOptionCss, text);
 };
 
 export const selectEmployeeDropdownVisible = () => {
@@ -125,7 +131,7 @@ export const clickSelectEmployeeDropdown = () => {
 	clickButton(TimeOffPage.selectEmployeeCss);
 };
 
-export const selectEmployeeFromHolidayDropdown = (index) => {
+export const selectEmployeeFromHolidayDropdown = (index: number) => {
 	clickButtonByIndex(TimeOffPage.selectEmployeeDropdownOptionCss, index);
 };
 
@@ -135,10 +141,7 @@ export const startHolidayDateInputVisible = () => {
 
 export const enterStartHolidayDate = () => {
 	clearField(TimeOffPage.startHolidayDateCss);
-	const date = dayjs()
-		.add(1, 'years')
-		.startOf('year')
-		.format('MMM D, YYYY');
+	const date = dayjs().add(1, 'years').startOf('year').format('MMM D, YYYY');
 	enterInput(TimeOffPage.startHolidayDateCss, date);
 };
 
@@ -148,11 +151,7 @@ export const endHolidayDateInputVisible = () => {
 
 export const enterEndHolidayDate = () => {
 	clearField(TimeOffPage.endHolidayDateCss);
-	const date = dayjs()
-		.add(1, 'years')
-		.startOf('year')
-		.add(1, 'days')
-		.format('MMM D, YYYY');
+	const date = dayjs().add(1, 'years').startOf('year').add(1, 'days').format('MMM D, YYYY');
 	enterInput(TimeOffPage.endHolidayDateCss, date);
 };
 
@@ -192,20 +191,37 @@ export const clickDeleteTimeOffButton = () => {
 	clickButton(TimeOffPage.deleteTimeOfRequestButtonCss);
 };
 
+export const seeMoreButtonVisible = () => {
+	verifyElementIsVisible(TimeOffPage.seeMoreButtonCss);
+};
+
+export const clickSeeMoreButton = () => {
+	clickButton(TimeOffPage.seeMoreButtonCss);
+};
+
+export const clickSeeMoreButtonIfVisible = () => {
+	cy.document().then((doc) => {
+		const seeMoreButton = doc.querySelector(TimeOffPage.seeMoreButtonCss);
+		if (seeMoreButton) {
+			clickButton(seeMoreButton);
+		}
+	});
+};
+
 export const denyTimeOffButtonVisible = () => {
-	verifyElementIsVisible(TimeOffPage.denyTimeOffRequestButtonCss);
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.denyButtonName).should('be.visible');
 };
 
 export const clickDenyTimeOffButton = () => {
-	clickButton(TimeOffPage.denyTimeOffRequestButtonCss);
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.denyButtonName).click();
 };
 
 export const approveTimeOffButtonVisible = () => {
-	verifyElementIsVisible(TimeOffPage.approveTimeOffRequestButtonCss);
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.approveButtonName).should('be.visible');
 };
 
 export const clickApproveTimeOffButton = () => {
-	clickButton(TimeOffPage.approveTimeOffRequestButtonCss);
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.approveButtonName).click();
 };
 
 export const confirmDeleteTimeOffBtnVisible = () => {
@@ -220,16 +236,16 @@ export const timeOffSettingsButtonVisible = () => {
 	verifyElementIsVisible(TimeOffPage.timeOffSettingsButtonCss);
 };
 
-export const clickTimeOffSettingsButton = (index) => {
-	clickButtonByIndex(TimeOffPage.timeOffSettingsButtonCss, index);
+export const clickTimeOffSettingsButton = () => {
+	clickButton(TimeOffPage.timeOffSettingsButtonCss);
 };
 
 export const addNewPolicyButtonVisible = () => {
-	verifyElementIsVisible(TimeOffPage.addNewPolicyButtonCss);
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.addNewPolicyButtonName).should('be.visible');
 };
 
 export const clickAddNewPolicyButton = () => {
-	clickButton(TimeOffPage.addNewPolicyButtonCss);
+	cy.get(TimeOffPage.actionsBarCss).contains(TimeOffPage.addNewPolicyButtonName).click();
 };
 
 export const policyInputFieldVisible = () => {
@@ -242,15 +258,29 @@ export const enterNewPolicyName = (data) => {
 };
 
 export const waitMessageToHide = () => {
-	waitElementToHide(TimeOffPage.toastrMessageCss);
+	waitElementToShowAndHide(TimeOffPage.toastrMessageCss);
 };
 
-export const verifyPolicyExists = (text) => {
+export const verifyPolicyExists = (text: string) => {
 	verifyText(TimeOffPage.verifyPolicyCss, text);
 };
 
-export const verifyPolicyIsDeleted = (text) => {
+export const verifyPolicyIsDeleted = (text: string) => {
 	verifyTextNotExisting(TimeOffPage.verifyPolicyCss, text);
+};
+
+export const verifyRowIsDenied = (index: number) => {
+	cy.get(TimeOffPage.selectTableRowCss)
+		.eq(index)
+		.contains(/denied/i)
+		.should('be.visible');
+};
+
+export const verifyRowIsApproved = (index) => {
+	cy.get(TimeOffPage.selectTableRowCss)
+		.eq(index)
+		.contains(/approved/i)
+		.should('be.visible');
 };
 
 export const backButtonVisible = () => {
@@ -279,4 +309,17 @@ export const clickTimeOffPolicySelector = () => {
 
 export const employeeSelectorVisibleAgain = () => {
 	verifyElementIsVisible(TimeOffPage.employeeDropdownCss);
+};
+
+export const countRows = () => {
+	cy.document().then((doc) => {
+		const rows = doc.querySelectorAll(TimeOffPage.selectTableRowCss);
+		cy.wrap(rows.length).as('lastRowsCount');
+	});
+};
+
+export const verifyARowWasDeleted = () => {
+	cy.get('@lastRowsCount').then((lastRowsCount: any) => {
+		cy.get(TimeOffPage.selectTableRowCss).should('have.length', lastRowsCount - 1);
+	});
 };

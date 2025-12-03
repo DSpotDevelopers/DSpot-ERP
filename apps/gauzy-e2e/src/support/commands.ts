@@ -176,7 +176,7 @@ export const CustomCommands = {
 		organizationProjectsPage.waitMessageToShowAndHide();
 	},
 	addTask: (addTaskPage: any, AddTasksPageData: any, employeeFullName?: string) => {
-		cy.visit('/#/pages/tasks/dashboard', { timeout: pageLoadTimeout });
+		cy.visitAndWait('/#/pages/tasks/dashboard');
 		addTaskPage.gridBtnExists();
 		addTaskPage.gridBtnClick(1);
 		addTaskPage.addTaskButtonVisible();
@@ -275,12 +275,12 @@ export const CustomCommands = {
 		clientsPage.selectProjectFromDropdown(ClientsData.defaultProject);
 		clientsPage.tagsMultiSelectVisible();
 		clientsPage.clickTagsMultiSelect();
-		clientsPage.selectTagsFromDropdown(0);
+		clientsPage.selectTagsFromDropdown(1);
 		clientsPage.clickCardBody();
 		clientsPage.websiteInputVisible();
 		clientsPage.enterWebsiteInputData(website);
-		clientsPage.saveButtonVisible();
-		clientsPage.clickSaveButton();
+		clientsPage.nextButtonVisible();
+		clientsPage.clickNextButton();
 		clientsPage.countryDropdownVisible();
 		clientsPage.clickCountryDropdown();
 		clientsPage.selectCountryFromDropdown(ClientsData.country);
@@ -290,12 +290,12 @@ export const CustomCommands = {
 		clientsPage.enterPostcodeInputData(postcode);
 		clientsPage.streetInputVisible();
 		clientsPage.enterStreetInputData(street);
-		clientsPage.nextButtonVisible();
-		clientsPage.clickNextButton();
+		clientsPage.nextGroupButtonVisible();
+		clientsPage.clickGroupNextButton();
 		clientsPage.budgetInputVisible();
 		clientsPage.enterBudgetData(ClientsData.hours);
-		clientsPage.lastStepBtnVisible();
-		clientsPage.clickLastStepBtn();
+		clientsPage.nextGroupButtonVisible();
+		clientsPage.clickGroupNextButton();
 		clientsPage.selectEmployeeDropdownVisible();
 		clientsPage.clickSelectEmployeeDropdown();
 		if (!employeeFullName) {
@@ -304,8 +304,8 @@ export const CustomCommands = {
 			clientsPage.selectEmployeeFromDropdownByName(employeeFullName);
 		}
 		clientsPage.clickKeyboardButtonByKeyCode(9);
-		clientsPage.nextButtonVisible();
-		clientsPage.clickNextButton();
+		clientsPage.saveButtonVisible();
+		clientsPage.clickSaveButton();
 		clientsPage.waitMessageToHide();
 		clientsPage.verifyNameInput();
 		clientsPage.searchClientName(fullName);
@@ -412,7 +412,6 @@ export const CustomCommands = {
 		// inviteCandidatePage.verifyCandidateExists(`${firstName} ${lastName}`);
 	},
 	clearCookies: () => {
-		// @ts-ignore
 		cy.clearCookies({ domain: null });
 		cy.clearLocalStorage();
 		cy.window().then((win) => {

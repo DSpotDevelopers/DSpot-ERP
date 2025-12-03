@@ -89,7 +89,7 @@ describe('Invoices test', { testIsolation: false }, () => {
 	it('Should be able to set invoice status', () => {
 		invoicesPage.selectTableRow(0);
 		invoicesPage.openStatusDropdown();
-		invoicesPage.selectStatus('Paid');
+		invoicesPage.selectStatus(InvoicesPageData.status);
 	});
 	it('Should be able to delete invoice', () => {
 		invoicesPage.waitMessageToHide();
