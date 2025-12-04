@@ -18,19 +18,19 @@ import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
 const pageLoadTimeout = Cypress.config('pageLoadTimeout');
 
-let email = faker.internet.exampleEmail();
-let fullName = faker.person.firstName() + ' ' + faker.person.lastName();
-let city = faker.location.city();
-let postcode = faker.location.zipCode();
-let employeeStreet = faker.location.streetAddress();
-let website = faker.internet.url();
+const email = faker.internet.exampleEmail();
+const fullName = faker.person.firstName() + ' ' + faker.person.lastName();
+const city = faker.location.city();
+const postcode = faker.location.zipCode();
+const employeeStreet = faker.location.streetAddress();
+const website = faker.internet.url();
 
-let firstName = faker.person.firstName();
-let lastName = faker.person.lastName();
-let username = faker.internet.userName();
-let password = faker.internet.password();
-let employeeEmail = faker.internet.exampleEmail();
-let imgUrl = faker.image.avatar();
+const firstName = faker.person.firstName();
+const lastName = faker.person.lastName();
+const username = faker.internet.userName();
+const password = faker.internet.password();
+const employeeEmail = faker.internet.exampleEmail();
+const imgUrl = faker.image.avatar();
 
 // Login with email
 Given('Login with default credentials', () => {
@@ -47,15 +47,7 @@ And('User can add new employee', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addEmployee(
-		manageEmployeesPage,
-		firstName,
-		lastName,
-		username,
-		employeeEmail,
-		password,
-		imgUrl
-	);
+	CustomCommands.addEmployee(manageEmployeesPage, firstName, lastName, username, employeeEmail, password, imgUrl);
 });
 
 // Add project
@@ -63,10 +55,7 @@ And('User can add new project', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addProject(
-		organizationProjectsPage,
-		OrganizationProjectsPageData
-	);
+	CustomCommands.addProject(organizationProjectsPage, OrganizationProjectsPageData);
 });
 
 // Add contact
@@ -99,7 +88,7 @@ And('User can see add goal button', () => {
 });
 
 When('User click on add goal button', () => {
-	goalsPage.clickAddButton(0);
+	goalsPage.clickAddButton();
 });
 
 Then('User can select first option from a dropdown', () => {
@@ -168,7 +157,7 @@ Then('Add button will become active', () => {
 });
 
 When('User click on add button', () => {
-	goalsPage.clickAddButton(1);
+	goalsPage.clickAddButton();
 });
 
 Then('User can see key result input field', () => {
@@ -229,7 +218,7 @@ And('User can see edit goal button', () => {
 });
 
 When('User click on edit goal button', () => {
-	goalsPage.clickEditButton(0);
+	goalsPage.clickEditButton();
 });
 
 Then('User can see owner dropdown', () => {
@@ -262,15 +251,15 @@ And('View button will become active', () => {
 });
 
 When('User click on view button', () => {
-	goalsPage.clickViewButton(0);
+	goalsPage.clickViewButton();
 });
 
 Then('Delete button will become active', () => {
-	goalsPage.deleteButtonVisible();
+	goalsPage.viewModalDeleteButtonVisible();
 });
 
 When('User click on delete button', () => {
-	goalsPage.clickDeleteButton();
+	goalsPage.clickViewModalDeleteButton();
 });
 
 And('User can see confirm button', () => {

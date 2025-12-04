@@ -18,23 +18,22 @@ import { OrganizationProjectsPageData } from '../../Base/pagedata/OrganizationPr
 
 import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
-
 const pageLoadTimeout = Cypress.config('pageLoadTimeout');
 
-let email = faker.internet.exampleEmail();
-let fullName = faker.person.firstName() + ' ' + faker.person.lastName();
-let city = faker.location.city();
-let postcode = faker.location.zipCode();
-let street = faker.location.streetAddress();
-let website = faker.internet.url();
-let projectName = faker.person.jobTitle();
+const email = faker.internet.exampleEmail();
+const fullName = faker.person.firstName() + ' ' + faker.person.lastName();
+const city = faker.location.city();
+const postcode = faker.location.zipCode();
+const street = faker.location.streetAddress();
+const website = faker.internet.url();
+const projectName = faker.person.jobTitle();
 
-let firstName = faker.person.firstName();
-let lastName = faker.person.lastName();
-let username = faker.internet.userName();
-let password = faker.internet.password();
-let employeeEmail = faker.internet.exampleEmail();
-let imgUrl = faker.image.avatar();
+const firstName = faker.person.firstName();
+const lastName = faker.person.lastName();
+const username = faker.internet.userName();
+const password = faker.internet.password();
+const employeeEmail = faker.internet.exampleEmail();
+const imgUrl = faker.image.avatar();
 
 // Login with email
 Given('Login with default credentials', () => {
@@ -52,16 +51,13 @@ And('User can add new project', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addProject(
-		organizationProjectsPage,
-		{
-			name: projectName,
-			hours: OrganizationProjectsPageData.hours,
-			editName: OrganizationProjectsPageData.editName,
-			description: OrganizationProjectsPageData.description,
-			color: OrganizationProjectsPageData.color
-		}
-	);
+	CustomCommands.addProject(organizationProjectsPage, {
+		name: projectName,
+		hours: OrganizationProjectsPageData.hours,
+		editName: OrganizationProjectsPageData.editName,
+		description: OrganizationProjectsPageData.description,
+		color: OrganizationProjectsPageData.color
+	});
 });
 
 // Add employee
@@ -69,15 +65,7 @@ And('User can add new employee', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addEmployee(
-		manageEmployeesPage,
-		firstName,
-		lastName,
-		username,
-		employeeEmail,
-		password,
-		imgUrl
-	);
+	CustomCommands.addEmployee(manageEmployeesPage, firstName, lastName, username, employeeEmail, password, imgUrl);
 });
 
 // Add new client
@@ -85,21 +73,12 @@ And('User can add new client', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addClient(
-		clientsPage,
-		fullName,
-		email,
-		website,
-		city,
-		postcode,
-		street,
-		{
-			defaultProject: projectName,
-			country: ClientsData.country,
-			defaultPhone: ClientsData.defaultPhone,
-			hours: ClientsData.hours
-		}
-	);
+	CustomCommands.addClient(clientsPage, fullName, email, website, city, postcode, street, {
+		defaultProject: projectName,
+		country: ClientsData.country,
+		defaultPhone: ClientsData.defaultPhone,
+		hours: ClientsData.hours
+	});
 });
 
 // Add new task
@@ -107,17 +86,15 @@ And('User can add new task', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addTask(
-		addTaskPage,
-		{
-			defaultTaskProject: projectName,
-			defaultTaskTitle: AddTasksPageData.defaultTaskTitle,
-			editTaskTitle: AddTasksPageData.editTaskTitle,
-			defaultTaskEstimateDays: AddTasksPageData.defaultTaskEstimateDays,
-			defaultTaskEstimateHours: AddTasksPageData.defaultTaskEstimateHours,
-			defaultTaskEstimateMinutes: AddTasksPageData.defaultTaskEstimateMinutes,
-			defaultTaskDescription: AddTasksPageData.defaultTaskDescription
-		});
+	CustomCommands.addTask(addTaskPage, {
+		defaultTaskProject: projectName,
+		defaultTaskTitle: AddTasksPageData.defaultTaskTitle,
+		editTaskTitle: AddTasksPageData.editTaskTitle,
+		defaultTaskEstimateDays: AddTasksPageData.defaultTaskEstimateDays,
+		defaultTaskEstimateHours: AddTasksPageData.defaultTaskEstimateHours,
+		defaultTaskEstimateMinutes: AddTasksPageData.defaultTaskEstimateMinutes,
+		defaultTaskDescription: AddTasksPageData.defaultTaskDescription
+	});
 });
 
 // Add time
@@ -160,9 +137,8 @@ When('User click on client dropdown', () => {
 });
 
 Then('User can select client from dropdown options', () => {
-	timesheetsPage.selectClientFromDropdown(fullName);
+	timesheetsPage.selectClientFromDropdown();
 });
-
 
 And('User can see task dropdown', () => {
 	timesheetsPage.taskDropdownVisible();
@@ -173,19 +149,7 @@ When('User click on task dropdown', () => {
 });
 
 Then('User can select task from dropdown options', () => {
-	timesheetsPage.selectTaskFromDropdown(0);
-});
-
-And('User can see start time dropdown', () => {
-	timesheetsPage.startTimeDropdownVisible();
-});
-
-When('User click on start time dropdown', () => {
-	timesheetsPage.clickStartTimeDropdown();
-});
-
-Then('User can select time from dropdown options', () => {
-	timesheetsPage.selectTimeFromDropdown(0);
+	timesheetsPage.selectTaskFromDropdown();
 });
 
 Then('User can see date input field', () => {
@@ -214,9 +178,7 @@ And('User can see time log description input field', () => {
 });
 
 And('User can enter time log description', () => {
-	timesheetsPage.enterTimeLogDescriptionData(
-		TimesheetsPageData.defaultDescription
-	);
+	timesheetsPage.enterTimeLogDescriptionData(TimesheetsPageData.defaultDescription);
 });
 
 And('User can see save time log button', () => {
@@ -232,6 +194,11 @@ Then('Notification message will appear', () => {
 });
 
 // View time
+And('User selects first timesheet row', () => {
+	timesheetsPage.timesheetTableVisible();
+	timesheetsPage.selectTimesheetTableRow(0);
+});
+
 And('User can see view time log button', () => {
 	timesheetsPage.viewEmployeeTimeLogButtonVisible();
 });
@@ -249,6 +216,11 @@ When('User click on close time log popover button', () => {
 });
 
 // Delete time
+And('User selects first timesheet row', () => {
+	timesheetsPage.timesheetTableVisible();
+	timesheetsPage.selectTimesheetTableRow(0);
+});
+
 And('User can see delete time log button', () => {
 	timesheetsPage.deleteEmployeeTimeLogButtonVisible();
 });

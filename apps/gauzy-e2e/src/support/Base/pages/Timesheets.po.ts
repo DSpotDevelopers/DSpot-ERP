@@ -10,10 +10,17 @@ import {
 	waitElementToHide,
 	verifyText,
 	verifyTextNotExisting,
-	clickByText,
-	clickButtonDouble
+	clickButtonDouble,
+	clickButtonWithDelay,
+	clickFirst
 } from '../utils/util';
 import { TimesheetsPage } from '../pageobjects/TimesheetsPageObject';
+
+export const visit = (options = {}) => {
+	cy.intercept('GET', /api\/timesheet\/time-log\/pagination.*/).as('getTimeLogsRequest');
+	cy.visit('/#/pages/employees/timesheets/daily', options);
+	cy.wait('@getTimeLogsRequest');
+};
 
 export const addTimeButtonVisible = () => {
 	verifyElementIsVisible(TimesheetsPage.addTimeButtonCss);
@@ -28,7 +35,7 @@ export const selectEmployeeDropdownVisible = () => {
 };
 
 export const clickSelectEmployeeDropdown = () => {
-	clickButton(TimesheetsPage.selectEmployeeCss);
+	clickButtonWithDelay(TimesheetsPage.selectEmployeeCss);
 };
 
 export const selectEmployeeFromDropdown = (index) => {
@@ -49,18 +56,6 @@ export const enterDateData = () => {
 	enterInput(TimesheetsPage.dateInputCss, date);
 };
 
-export const startTimeDropdownVisible = () => {
-	verifyElementIsVisible(TimesheetsPage.startTimeDropdownCss);
-};
-
-export const clickStartTimeDropdown = () => {
-	clickButton(TimesheetsPage.startTimeDropdownCss);
-};
-
-export const selectTimeFromDropdown = (index) => {
-	clickButtonByIndex(TimesheetsPage.dropdownOptionCss, index);
-};
-
 export const clientDropdownVisible = () => {
 	verifyElementIsVisible(TimesheetsPage.clientDropdownCss);
 };
@@ -69,8 +64,8 @@ export const clickClientDropdown = () => {
 	clickButton(TimesheetsPage.clientDropdownCss);
 };
 
-export const selectClientFromDropdown = (text: string) => {
-	clickByText(TimesheetsPage.dropdownOptionCss, text);
+export const selectClientFromDropdown = () => {
+	clickFirst(TimesheetsPage.clientDropdownOptionCss);
 };
 
 export const selectProjectDropdownVisible = () => {
@@ -81,7 +76,7 @@ export const clickSelectProjectDropdown = () => {
 	clickButton(TimesheetsPage.projectDropdownCss);
 };
 
-export const selectProjectFromDropdown = (text) => {
+export const selectProjectFromDropdown = (text: string) => {
 	clickElementByText(TimesheetsPage.dropdownOptionCss, text);
 };
 
@@ -93,8 +88,8 @@ export const clickTaskDropdown = () => {
 	clickButton(TimesheetsPage.taskDropdownCss);
 };
 
-export const selectTaskFromDropdown = (index) => {
-	clickButtonByIndex(TimesheetsPage.dropdownOptionCss, index);
+export const selectTaskFromDropdown = () => {
+	clickFirst(TimesheetsPage.clientDropdownOptionCss);
 };
 
 export const addTimeLogDescriptionVisible = () => {
@@ -119,14 +114,14 @@ export const closeAddTimeLogPopoverButtonVisible = () => {
 };
 
 export const clickCloseAddTimeLogPopoverButton = () => {
-	clickButton(TimesheetsPage.closeAddTimeLogPopoverCss);
+	cy.get(TimesheetsPage.closeAddTimeLogPopoverCss).last().click({ force: true });
 };
 
 export const viewEmployeeTimeLogButtonVisible = () => {
 	verifyElementIsVisible(TimesheetsPage.viewEmployeeTimeCss);
 };
 
-export const clickViewEmployeeTimeLogButton = (index) => {
+export const clickViewEmployeeTimeLogButton = (index: number) => {
 	clickButtonByIndex(TimesheetsPage.viewEmployeeTimeCss, index);
 };
 
@@ -134,8 +129,8 @@ export const editEmployeeTimeLogButtonVisible = () => {
 	verifyElementIsVisible(TimesheetsPage.editEmployeeTimeCss);
 };
 
-export const clickEditEmployeeTimeLogButton = (index) => {
-	clickButtonByIndex(TimesheetsPage.editEmployeeTimeCss, index);
+export const clickEditEmployeeTimeLogButton = () => {
+	clickButton(TimesheetsPage.editEmployeeTimeCss);
 };
 
 export const deleteEmployeeTimeLogButtonVisible = () => {
@@ -168,4 +163,16 @@ export const verifyTimeIsDeleted = (text) => {
 
 export const doubleClickClientDropdown = () => {
 	clickButtonDouble(TimesheetsPage.clientDropdownCss);
+};
+
+export const timesheetTableVisible = () => {
+	verifyElementIsVisible(TimesheetsPage.selectTableRowCss);
+};
+
+export const selectTimesheetTableRow = (index: number) => {
+	clickButtonByIndex(TimesheetsPage.selectTableRowCss, index);
+};
+
+export const selectTimesheetTableRowByText = (text: string) => {
+	clickElementByText(TimesheetsPage.selectTableRowCss, text);
 };

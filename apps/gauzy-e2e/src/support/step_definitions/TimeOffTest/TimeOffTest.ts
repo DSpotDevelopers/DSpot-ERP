@@ -12,12 +12,12 @@ import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
 const pageLoadTimeout = Cypress.config('pageLoadTimeout');
 
-let firstName = faker.person.firstName();
-let lastName = faker.person.lastName();
-let username = faker.internet.userName();
-let password = faker.internet.password();
-let employeeEmail = faker.internet.exampleEmail();
-let imgUrl = faker.image.avatar();
+const firstName = faker.person.firstName();
+const lastName = faker.person.lastName();
+const username = faker.internet.userName();
+const password = faker.internet.password();
+const employeeEmail = faker.internet.exampleEmail();
+const imgUrl = faker.image.avatar();
 
 // Login with email
 Given('Login with default credentials', () => {
@@ -27,15 +27,7 @@ Given('Login with default credentials', () => {
 // Add employee
 And('User can add new employee', () => {
 	dashboardPage.verifyAccountingDashboardIfVisible();
-	CustomCommands.addEmployee(
-		manageEmployeesPage,
-		firstName,
-		lastName,
-		username,
-		employeeEmail,
-		password,
-		imgUrl
-	);
+	CustomCommands.addEmployee(manageEmployeesPage, firstName, lastName, username, employeeEmail, password, imgUrl);
 });
 
 // Add new policy
@@ -51,7 +43,7 @@ And('User can see time off settings button', () => {
 });
 
 When('User click on time off settings button', () => {
-	timeOffPage.clickTimeOffSettingsButton(1);
+	timeOffPage.clickTimeOffSettingsButton();
 });
 
 Then('User can see add new policy button', () => {
@@ -319,11 +311,11 @@ Then('Notification message will appear', () => {
 
 // Add holiday
 And('User can see add holiday button', () => {
-	timeOffPage.addHolidayButtonVisible();
+	timeOffPage.addHolidaysButtonVisible();
 });
 
 When('User click on add holiday button', () => {
-	timeOffPage.clickAddHolidayButton();
+	timeOffPage.clickAddHolidaysButton();
 });
 
 Then('User can see holiday name select', () => {
@@ -335,7 +327,7 @@ When('User click on holiday select', () => {
 });
 
 Then('User can select holiday from dropdown options', () => {
-	timeOffPage.selectHolidayOption(0);
+	timeOffPage.selectHolidayOption(TimeOffPageData.defaultHoliday);
 });
 
 And('User can see select employee dropdown', () => {

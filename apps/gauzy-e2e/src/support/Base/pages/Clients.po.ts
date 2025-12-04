@@ -10,12 +10,13 @@ import {
 	verifyText,
 	verifyTextNotExisting,
 	verifyByText,
-	vefiryByLength
+	verifyByLength,
+	clickFirst
 } from '../utils/util';
 import { ClientsPage } from '../pageobjects/ClientsPageObject';
 
 export const gridBtnExists = () => {
-	cy.intercept('/api/organization-contact*').as('waitClient');
+	cy.intercept('/api/organization-contact/**').as('waitClient');
 	verifyElementIsVisible(ClientsPage.gridButtonCss);
 	cy.wait('@waitClient');
 };
@@ -67,7 +68,7 @@ export const clickCountryDropdown = () => {
 	clickButton(ClientsPage.countryDropdownCss);
 };
 
-export const selectCountryFromDropdown = (text) => {
+export const selectCountryFromDropdown = (text: string) => {
 	clickElementByText(ClientsPage.dropdownOptionCss, text);
 };
 
@@ -77,6 +78,14 @@ export const nextButtonVisible = () => {
 
 export const clickNextButton = () => {
 	clickButton(ClientsPage.nextButtonCss);
+};
+
+export const nextGroupButtonVisible = () => {
+	verifyElementIsVisible(ClientsPage.nextGroupButtonCss);
+};
+
+export const clickGroupNextButton = () => {
+	clickButton(ClientsPage.nextGroupButtonCss);
 };
 
 export const cityInputVisible = () => {
@@ -114,7 +123,7 @@ export const clickProjectDropdown = () => {
 	clickButton(ClientsPage.projectsDropdownCss);
 };
 
-export const selectProjectFromDropdown = (text) => {
+export const selectProjectFromDropdown = (text: string) => {
 	clickElementByText(ClientsPage.projectsDropdownOptionCss, text);
 };
 
@@ -126,15 +135,12 @@ export const clickSelectEmployeeDropdown = () => {
 	clickButton(ClientsPage.usersMultiSelectCss);
 };
 
-export const selectEmployeeDropdownOption = (index) => {
-	clickButtonByIndex(ClientsPage.dropdownOptionCss, index);
+export const selectEmployeeDropdownOption = () => {
+	clickFirst(ClientsPage.usersDropdownOptionCss);
 };
 
-export const selectEmployeeFromDropdownByName = (name) => {
-	clickElementByText(
-		ClientsPage.dropdownOptionCss,
-		name
-	);
+export const selectEmployeeFromDropdownByName = (name: string) => {
+	clickElementByText(ClientsPage.dropdownOptionCss, name);
 };
 
 export const tagsMultiSelectVisible = () => {
@@ -266,12 +272,12 @@ export const verifyElementIsDeleted = (text) => {
 };
 
 export const lastStepBtnVisible = () => {
-	verifyElementIsVisible(ClientsPage.lastStepBtnCss)
-}
+	verifyElementIsVisible(ClientsPage.lastStepBtnCss);
+};
 
 export const clickLastStepBtn = () => {
-	clickButton(ClientsPage.lastStepBtnCss)
-}
+	clickButton(ClientsPage.lastStepBtnCss);
+};
 
 export const budgetInputVisible = () => {
 	verifyElementIsVisible(ClientsPage.budgetInputCss);
@@ -292,8 +298,8 @@ export const searchClientName = (name: string) => {
 };
 
 export const verifyClientNameInTable = (name: string) => {
-	vefiryByLength(ClientsPage.clientsTableRow, 1)
-	verifyByText(ClientsPage.clientsTableData, name)
+	verifyByLength(ClientsPage.clientsTableRow, 1);
+	verifyByText(ClientsPage.clientsTableData, name);
 };
 
 export const clearSearchInput = () => {
@@ -307,19 +313,19 @@ export const viewButtonVisible = () => {
 export const clickViewButton = () => {
 	cy.intercept('GET', '/api/employee*').as('waitClient');
 	clickButton(ClientsPage.viewButtonCss);
-	cy.wait('@waitClient')
+	cy.wait('@waitClient');
 };
 
 export const verifyClientNameView = (name: string) => {
-	verifyByText(ClientsPage.clientNameViewCss, name)
+	verifyByText(ClientsPage.clientNameViewCss, name);
 };
 
 export const verifyContactType = (type: string) => {
-	verifyByText(ClientsPage.clientTypeViewCss, type)
+	verifyByText(ClientsPage.clientTypeViewCss, type);
 };
 
 export const verifyBackBtn = () => {
-	verifyElementIsVisible(ClientsPage.backBtn)
+	verifyElementIsVisible(ClientsPage.backBtn);
 };
 
 export const clickOnBackBtn = () => {
@@ -327,5 +333,5 @@ export const clickOnBackBtn = () => {
 };
 
 export const verifySearchResult = (length: number) => {
-	vefiryByLength(ClientsPage.selectTableRowCss, length);
+	verifyByLength(ClientsPage.selectTableRowCss, length);
 };

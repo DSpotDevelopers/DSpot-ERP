@@ -38,11 +38,13 @@ Feature: Time sheet test
     When User click on save time log button
     Then Notification message will appear
   Scenario: View time
+    And User selects first timesheet row
     And User can see view time log button
     When User click on view time log button
     Then User can see close time log popover button
     When User click on close time log popover button
   Scenario: Delete time
+    And User selects first timesheet row
     And User can see delete time log button
     When User click on delete time log button
     Then User can see confirm delete button

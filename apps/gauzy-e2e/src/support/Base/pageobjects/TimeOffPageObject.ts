@@ -1,3 +1,5 @@
+const ACTIONS_BAR_CSS = '.actions-container';
+
 export const TimeOffPage = {
 	requestButtonCss: 'div.col-4 > button[status="primary"]',
 	employeeDropdownCss: 'ngx-time-off-request-mutation > nb-card.main ga-employee-selector.employees',
@@ -10,18 +12,19 @@ export const TimeOffPage = {
 	saveRequestButtonCss: 'nb-card-footer.text-right > button[status="success"]',
 	addHolidayButtonCss: 'div.col-4 > button[status="info"]',
 	selectHolidayDropdownOptionCss: '.option-list nb-option',
-	selectEmployeeCss: 'button[class="select-button placeholder"]',
+	selectEmployeeCss: '[ng-reflect-placeholder="Add or Remove Employees"] button',
 	selectEmployeeDropdownOptionCss: '.option-list nb-option',
 	startHolidayDateCss: '[formControlName="start"]',
 	endHolidayDateCss: '[formControlName="end"]',
 	saveButtonCss: 'nb-card-footer > button[status="success"]',
 	selectTableRowCss: 'table > tbody > tr.angular2-smart-row',
-	deleteTimeOfRequestButtonCss: 'div.actions-container > button[status="danger"]',
+	deleteTimeOfRequestButtonCss: `${ACTIONS_BAR_CSS} button:has([icon*="trash"])`,
 	confirmDeleteTimeOfButtonCss: 'nb-card-footer > button[status="danger"]',
+	seeMoreButtonCss: `${ACTIONS_BAR_CSS} button:has([icon*="more-horizontal"])`,
 	editTimeOfRequestButtonCss: 'div.actions-container > button[status="primary"]',
 	denyTimeOffRequestButtonCss: 'div.actions-container > button[status="warning"]',
 	approveTimeOffRequestButtonCss: 'div.actions-container > button[status="success"]',
-	timeOffSettingsButtonCss: 'div.mb-3 > div > button[status="primary"]',
+	timeOffSettingsButtonCss: '.card-header-title button[routerLink*="settings"]',
 	addNewPolicyButtonCss: 'div.mb-3 > button[status="success"]',
 	editPolicyButtonCss: 'div.mb-3 > button[status="info"]',
 	deletePolicyButtonCss: 'div.mb-3 > button[status="danger"]',
@@ -31,5 +34,14 @@ export const TimeOffPage = {
 	verifyPolicyCss: 'div.ng-star-inserted',
 	holidayNameSelectCss: 'nb-select[ng-reflect-placeholder="Select Holiday name"]',
 	employeeSelectorCss: 'nb-select[ng-reflect-placeholder="Add or Remove Employees"]',
-	timeOffPolicySelectorCss: 'nb-select[ng-reflect-placeholder="Select Time-off Policy"]'
+	timeOffPolicySelectorCss: 'nb-select[ng-reflect-placeholder="Select Time-off Policy"]',
+	// testing library
+	actionsBarCss: ACTIONS_BAR_CSS,
+	dialogCardActionsCss: 'nb-dialog-container nb-card-footer',
+	requestTimeOffButtonName: 'Add',
+	addNewPolicyButtonName: 'Add',
+	saveButtonName: 'Save',
+	denyButtonName: 'Deny',
+	approveButtonName: 'Approve',
+	addHolidaysButtonName: 'Add Holidays'
 };

@@ -287,3 +287,7 @@ export const closeCkeNotification = () => {
 		}
 	});
 };
+
+export const clickFirst = (selector) => {
+	cy.get(selector, { timeout: defaultCommandTimeout }).first().click({ force: true });
+};

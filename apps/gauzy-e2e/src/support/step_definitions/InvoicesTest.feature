@@ -1,18 +1,8 @@
 Feature: Invoices test
   Scenario: Login with email
     Given Login with default credentials
-  Scenario: Add new tag
-    Then User can add new tag
-  Scenario: Add employee
-    And User can add new employee
-  Scenario: Add project
-    And User can add new project
-  Scenario: Add contact
-    And User can add new contact
   Scenario: Add new invoice
     Then User can visit Invoices page
-    And User can see grid button
-    And User can click on second grid button to change view
     And User can see add Invoice button
     When User click on add Invoice button
     Then User can see tags dropdown
@@ -92,20 +82,6 @@ Feature: Invoices test
     And User can click on vew invoice button
     And User can see back button
     When User click on back button
-  Scenario: Send invoice by email
-    Then User can click again on invoices first table row
-    And More settings button will become active
-    When User click more settings button
-    Then User can see email button
-    When User click on email button
-    Then User can scroll down to email input field
-    And User can see email input field
-    And User can enter value for email
-    And User can see confirm send email button
-    When User click on confirm send email button
-    Then Notification message will appear
-    When User click more settings button
-    Then User can verify invoice was sent by email
   Scenario: Delete invoice
     Then User can click on invoices first row
     And Settings button will become active

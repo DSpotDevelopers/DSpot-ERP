@@ -18,7 +18,7 @@ export const gridBtnExists = () => {
 	verifyElementIsVisible(TeamsTasksPage.gridButtonCss);
 };
 
-export const gridBtnClick = (index) => {
+export const gridBtnClick = (index: number) => {
 	clickButtonByIndex(TeamsTasksPage.gridButtonCss, index);
 };
 
@@ -42,7 +42,7 @@ export const clickSelectProjectDropdown = () => {
 	clickButton(TeamsTasksPage.projectDropdownCss);
 };
 
-export const selectProjectOptionDropdown = (text) => {
+export const selectProjectOptionDropdown = (text: string) => {
 	clickElementByText(TeamsTasksPage.dropdownOptionCss, text);
 };
 
@@ -54,7 +54,7 @@ export const clickStatusDropdown = () => {
 	clickButton(TeamsTasksPage.statusDropdownCss);
 };
 
-export const selectStatusFromDropdown = (text) => {
+export const selectStatusFromDropdown = (text: string) => {
 	clickElementByText(TeamsTasksPage.dropdownOptionCss, text);
 };
 
@@ -66,7 +66,7 @@ export const clickSelectTeamDropdown = () => {
 	clickButton(TeamsTasksPage.selectTeamMultiSelectCss);
 };
 
-export const selectTeamDropdownOption = (index) => {
+export const selectTeamDropdownOption = (index: number) => {
 	clickButtonByIndex(TeamsTasksPage.selectTeamDropdownOptionCss, index);
 };
 
@@ -74,7 +74,7 @@ export const addTitleInputVisible = () => {
 	verifyElementIsVisible(TeamsTasksPage.addTitleInputCss);
 };
 
-export const enterTitleInputData = (data) => {
+export const enterTitleInputData = (data: string) => {
 	clearField(TeamsTasksPage.addTitleInputCss);
 	enterInput(TeamsTasksPage.addTitleInputCss, data);
 };
@@ -87,7 +87,7 @@ export const clickTagsMultiSelect = () => {
 	clickButton(TeamsTasksPage.tagsSelectCss);
 };
 
-export const selectTagsFromDropdown = (index) => {
+export const selectTagsFromDropdown = (index: number) => {
 	clickButtonByIndex(TeamsTasksPage.tagsSelectOptionCss, index);
 };
 
@@ -152,7 +152,7 @@ export const clickSaveTaskButton = () => {
 	clickButton(TeamsTasksPage.saveNewTaskButtonCss);
 };
 
-export const countTasksWithText = (text) => {
+export const countTasksWithText = (text: string) => {
 	cy.get(TeamsTasksPage.selectTableRowCss)
 		.filter(`:contains(${text})`)
 		.then((rows) => {
@@ -164,11 +164,11 @@ export const tasksTableVisible = () => {
 	verifyElementIsVisible(TeamsTasksPage.selectTableRowCss);
 };
 
-export const selectTasksTableRow = (index) => {
+export const selectTasksTableRow = (index: number) => {
 	clickButtonByIndex(TeamsTasksPage.selectTableRowCss, index);
 };
 
-export const selectTaskTableRowByText = (text) => {
+export const selectTaskTableRowByText = (text: string) => {
 	clickElementByText(TeamsTasksPage.selectTableRowCss, text);
 };
 
@@ -194,7 +194,7 @@ export const duplicateOrEditTaskButtonVisible = () => {
 		.should('be.visible');
 };
 
-export const clickDuplicateOrEditTaskButton = (index) => {
+export const clickDuplicateOrEditTaskButton = () => {
 	interceptAllApiRequests();
 	cy.get(TeamsTasksPage.actionsBarCss)
 		.findByRole('button', { name: TeamsTasksPage.duplicateButtonName })
@@ -218,7 +218,7 @@ export const waitMessageToHide = () => {
 	waitElementToHide(TeamsTasksPage.toastrMessageCss);
 };
 
-export const verifyTaskExists = (text) => {
+export const verifyTaskExists = (text: string) => {
 	verifyText(TeamsTasksPage.verifyTextCss, text);
 };
 
@@ -226,7 +226,7 @@ export const verifyTaskIsDeleted = () => {
 	verifyElementNotExist(TeamsTasksPage.verifyTextCss);
 };
 
-export const verifyOneTaskWasDeleted = (text) => {
+export const verifyOneTaskWasDeleted = (text: string) => {
 	cy.get('@tasksCount').then((count) => {
 		cy.document().then((doc) => {
 			const rows = doc.querySelectorAll(TeamsTasksPage.selectTableRowCss);

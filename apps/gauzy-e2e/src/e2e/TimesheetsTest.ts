@@ -29,8 +29,7 @@ let postcode = ' ';
 let street = ' ';
 let website = ' ';
 
-//! (0 , util_1.vefiryByLength) is not a function
-describe.skip('Timesheets test', () => {
+describe('Timesheets test', { testIsolation: false }, () => {
 	before(() => {
 		email = faker.internet.exampleEmail();
 		fullName = faker.person.firstName() + ' ' + faker.person.lastName();
@@ -47,68 +46,40 @@ describe.skip('Timesheets test', () => {
 		imgUrl = faker.image.avatar();
 
 		CustomCommands.login(loginPage, LoginPageData, dashboardPage);
+		CustomCommands.addProject(organizationProjectsPage, OrganizationProjectsPageData);
+		CustomCommands.addTag(organizationTagsUserPage, OrganizationTagsPageData);
+		CustomCommands.addEmployee(manageEmployeesPage, firstName, lastName, username, employeeEmail, password, imgUrl);
+		CustomCommands.addClient(clientsPage, fullName, email, website, city, postcode, street, ClientsData);
+		CustomCommands.addTask(addTaskPage, AddTasksPageData);
+		timesheetsPage.visit();
 	});
 	it('Should be able to add time', () => {
-		CustomCommands.addProject(
-			organizationProjectsPage,
-			OrganizationProjectsPageData
-		);
-		CustomCommands.addTag(
-			organizationTagsUserPage,
-			OrganizationTagsPageData
-		);
-		CustomCommands.addEmployee(
-			manageEmployeesPage,
-			firstName,
-			lastName,
-			username,
-			employeeEmail,
-			password,
-			imgUrl
-		);
-		CustomCommands.addClient(
-			clientsPage,
-			fullName,
-			email,
-			website,
-			city,
-			postcode,
-			street,
-			ClientsData
-		);
-		CustomCommands.addTask(addTaskPage, AddTasksPageData);
-		cy.visit('/#/pages/employees/timesheets/daily');
 		timesheetsPage.addTimeButtonVisible();
 		timesheetsPage.clickAddTimeButton();
-		timesheetsPage.dateInputVisible();
-		timesheetsPage.enterDateData();
-		timesheetsPage.clickKeyboardButtonByKeyCode(9);
-		timesheetsPage.startTimeDropdownVisible();
-		timesheetsPage.clickStartTimeDropdown();
-		timesheetsPage.selectTaskFromDropdown(0);
-		timesheetsPage.selectProjectDropdownVisible();
-		timesheetsPage.clickSelectProjectDropdown();
-		timesheetsPage.selectProjectFromDropdown(
-			TimesheetsPageData.defaultProjectName
-		);
-		timesheetsPage.clientDropdownVisible();
-		timesheetsPage.clickClientDropdown();
-		timesheetsPage.selectClientFromDropdown(0);
-		timesheetsPage.taskDropdownVisible();
-		timesheetsPage.clickTaskDropdown();
-		timesheetsPage.selectTaskFromDropdown(0);
 		timesheetsPage.selectEmployeeDropdownVisible();
 		timesheetsPage.clickSelectEmployeeDropdown();
 		timesheetsPage.selectEmployeeFromDropdown(0);
+		timesheetsPage.dateInputVisible();
+		timesheetsPage.enterDateData();
+		timesheetsPage.clickKeyboardButtonByKeyCode(9);
+		timesheetsPage.selectProjectDropdownVisible();
+		timesheetsPage.clickSelectProjectDropdown();
+		timesheetsPage.selectProjectFromDropdown(TimesheetsPageData.defaultProjectName);
+		timesheetsPage.clientDropdownVisible();
+		timesheetsPage.clickClientDropdown();
+		timesheetsPage.selectClientFromDropdown();
+		timesheetsPage.taskDropdownVisible();
+		timesheetsPage.clickTaskDropdown();
+		timesheetsPage.selectTaskFromDropdown();
 		timesheetsPage.addTimeLogDescriptionVisible();
-		timesheetsPage.enterTimeLogDescriptionData(
-			TimesheetsPageData.defaultDescription
-		);
+		timesheetsPage.enterTimeLogDescriptionData(TimesheetsPageData.defaultDescription);
 		timesheetsPage.saveTimeLogButtonVisible();
 		timesheetsPage.clickSaveTimeLogButton();
+		timesheetsPage.waitMessageToHide();
 	});
 	it('Should be able to view time', () => {
-		timesheetsPage.waitMessageToHide();
+		timesheetsPage.timesheetTableVisible();
+		timesheetsPage.selectTimesheetTableRow(0);
 		timesheetsPage.viewEmployeeTimeLogButtonVisible();
 		timesheetsPage.clickViewEmployeeTimeLogButton(0);
 		timesheetsPage.closeAddTimeLogPopoverButtonVisible();
@@ -116,19 +87,19 @@ describe.skip('Timesheets test', () => {
 	});
 	it('Should be able to edit time', () => {
 		timesheetsPage.editEmployeeTimeLogButtonVisible();
-		timesheetsPage.clickEditEmployeeTimeLogButton(0);
+		timesheetsPage.clickEditEmployeeTimeLogButton();
 		timesheetsPage.dateInputVisible();
 		timesheetsPage.enterDateData();
 		timesheetsPage.clickKeyboardButtonByKeyCode(9);
 		timesheetsPage.addTimeLogDescriptionVisible();
-		timesheetsPage.enterTimeLogDescriptionData(
-			TimesheetsPageData.defaultDescription
-		);
+		timesheetsPage.enterTimeLogDescriptionData(TimesheetsPageData.defaultDescription);
 		timesheetsPage.saveTimeLogButtonVisible();
 		timesheetsPage.clickSaveTimeLogButton();
 	});
 	it('Should be able to delete time', () => {
 		timesheetsPage.waitMessageToHide();
+		timesheetsPage.timesheetTableVisible();
+		timesheetsPage.selectTimesheetTableRow(0);
 		timesheetsPage.deleteEmployeeTimeLogButtonVisible();
 		timesheetsPage.clickDeleteEmployeeTimeLogButton(0);
 		timesheetsPage.confirmDeleteButtonVisible();

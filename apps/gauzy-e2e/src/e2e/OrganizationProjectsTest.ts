@@ -8,7 +8,6 @@ import { CustomCommands } from '../support/commands';
 const nameTag = Date.now().toString().slice(0, 5);
 const editName = `${OrganizationProjectsPageData.editName}-${nameTag}`;
 
-//! waitToLoad. No request ever occurred.
 describe('Organization projects test', { testIsolation: false }, () => {
 	before(() => {
 		CustomCommands.login(loginPage, LoginPageData, dashboardPage);
