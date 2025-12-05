@@ -36,6 +36,7 @@ import {
 	InvoiceApplyTaxDiscountComponent,
 	InvoiceExpensesSelectorComponent,
 	InvoiceProductsSelectorComponent,
+	InvoiceProjectFilterComponent,
 	InvoiceProjectsSelectorComponent,
 	InvoiceTasksSelectorComponent
 } from '../../table-components';
@@ -282,6 +283,16 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 					},
 					valuePrepareFunction: (project: IOrganizationProject) => {
 						return project?.name || '';
+					},
+					filter: {
+						type: 'custom',
+						component: InvoiceProjectFilterComponent
+					},
+					filterFunction: (value, search) => {
+						if (!search || !value) {
+							return true;
+						}
+						return value.name.toLowerCase().includes(search.toLowerCase());
 					}
 				};
 				break;

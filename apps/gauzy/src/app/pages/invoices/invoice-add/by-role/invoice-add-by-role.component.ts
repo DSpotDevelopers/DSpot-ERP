@@ -21,7 +21,8 @@ import {
 	IReportDayData,
 	IReportDayGroupByEmployee,
 	IGetEmployeeHourlyRateInput,
-	IEmployeeHourlyRate
+	IEmployeeHourlyRate,
+	IReportDayGroupByProject
 } from '@gauzy/contracts';
 import { filter, tap } from 'rxjs/operators';
 import { compareDate, distinctUntilChange, extractNumber, isEmpty, isNotEmpty } from '@gauzy/ui-core/common';
@@ -52,6 +53,7 @@ import { InvoiceExpensesSelectorComponent } from '../../table-components/invoice
 import {
 	InvoiceApplyTaxDiscountComponent,
 	InvoiceProductsSelectorComponent,
+	InvoiceProjectFilterComponent,
 	InvoiceProjectsSelectorComponent,
 	InvoiceTasksSelectorComponent
 } from '../../table-components';
@@ -231,6 +233,26 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 			selectedEmployee: [{ value: this.selectedEmployee?.name, disabled: true }],
 			tags: []
 		});
+
+		this.subscribeInvoiceTypeChanges();
+	}
+
+	private subscribeInvoiceTypeChanges() {
+		this.form
+			.get('invoiceType')
+			?.valueChanges.pipe(untilDestroyed(this))
+			.subscribe((value) => {
+				const projectControl = this.form.get('project');
+
+				if (value === InvoiceTypeEnum.BY_PROJECT_HOURS) {
+					projectControl?.setValidators(Validators.required);
+				} else {
+					projectControl?.clearValidators();
+					projectControl?.setValue(null);
+				}
+
+				projectControl?.updateValueAndValidity();
+			});
 	}
 
 	loadSmartTable() {
@@ -286,8 +308,17 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 						component: InvoiceProjectsSelectorComponent
 					},
 					valuePrepareFunction: (cell) => {
-						const project = cell;
-						return `${project.name}`;
+						return cell?.name ?? '';
+					},
+					filter: {
+						type: 'custom',
+						component: InvoiceProjectFilterComponent
+					},
+					filterFunction: (value, search) => {
+						if (!search || !value) {
+							return true;
+						}
+						return value.name.toLowerCase().includes(search.toLowerCase());
 					}
 				};
 				break;
@@ -714,7 +745,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		}
 	}
 
-	private loadInvoiceTimeLogsData(): Observable<number> {
+	private loadInvoiceTimeLogsDataByEmployee(): Observable<number> {
 		const request: IGetInvoiceTimeLogs = {
 			organizationId: this.organization?.id,
 			tenantId: this.store.user.tenantId,
@@ -734,6 +765,35 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				return isEmployeeValid
 					? this.hoursDurationFormatPipe.transform(data.reduce((acc, item) => acc + item.sum, 0))
 					: 0;
+			}),
+			untilDestroyed(this)
+		);
+	}
+
+	private loadInvoiceTimeLogsDataByProjects(): Observable<{
+		[projectId: string]: number;
+	}> {
+		const request: IGetInvoiceTimeLogs = {
+			organizationId: this.organization?.id,
+			tenantId: this.store.user.tenantId,
+			startDate: this.selectedDateRange.startDate.toISOString(),
+			endDate: this.selectedDateRange.endDate.toISOString(),
+			employeeIds: [this.selectedEmployee?.employee?.id],
+			groupBy: 'project',
+			relations: ['project']
+		};
+
+		return this.invoiceTimeLogsService.getInvoiceTimeLogs(request).pipe(
+			map((data: IReportDayGroupByProject[]) => {
+				const projectSums: { [projectId: string]: number } = {};
+
+				data.forEach((item) => {
+					if (item.project) {
+						projectSums[item.project.id] = this.hoursDurationFormatPipe.transform(item.sum);
+					}
+				});
+
+				return projectSums;
 			}),
 			untilDestroyed(this)
 		);
@@ -785,15 +845,6 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		this._getInvoiceNumber();
 	}
 
-	private getAllProjects() {
-		const { id: organizationId } = this.organization;
-		const { tenantId } = this.store.user;
-
-		this.organizationProjectsService.getAll([], { organizationId, tenantId }).then(({ items }) => {
-			this.projects = JSON.parse(JSON.stringify(items));
-		});
-	}
-
 	private getAllProducts() {
 		const { id: organizationId } = this.organization;
 		const { tenantId } = this.store.user;
@@ -820,7 +871,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 			});
 	}
 
-	onTypeChange($event) {
+	async onTypeChange($event) {
 		this.invoiceType = $event;
 
 		this.isEmployeeHourTable = false;
@@ -835,7 +886,11 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				break;
 			case InvoiceTypeEnum.BY_PROJECT_HOURS:
 				this.isProjectHourTable = true;
-				this.getAllProjects();
+				this.projects = await this.organizationProjectsService.getAssignedProjects(
+					this.organization?.id,
+					this.store.user?.tenantId,
+					this.store.user?.employee?.id
+				);
 				break;
 			case InvoiceTypeEnum.BY_TASK_HOURS:
 				this.isTaskHourTable = true;
@@ -887,11 +942,11 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 					break;
 				case InvoiceTypeEnum.BY_PROJECT_HOURS:
 					if (isNotEmpty(this.selectedProjects)) {
+						const { timeMap, rate } = await this.getProjectsData();
 						for (const project of this.selectedProjects) {
-							const data = this.createInvoiceData(project, fakePrice, fakeQuantity);
+							const time = timeMap[project.id] ?? 0;
+							const data = this.createInvoiceData(project, rate, time);
 							invoiceData.push(data);
-							fakePrice++;
-							fakeQuantity++;
 						}
 					}
 					break;
@@ -953,13 +1008,37 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 	private getEmployeeData() {
 		return new Promise<{ time: number; rate: number }>((resolve, reject) => {
 			forkJoin({
-				time: this.loadInvoiceTimeLogsData(),
+				time: this.loadInvoiceTimeLogsDataByEmployee(),
 				rate: this.loadInvoiceEmployeeRateData()
 			})
 				.pipe(untilDestroyed(this))
 				.subscribe({
 					next: ({ time, rate }) => {
 						resolve({ time, rate });
+					},
+					error: (err) => {
+						this.toastrService.error(err?.message || 'An unknown error occurred');
+						reject(new Error(`Error: ${err?.message || 'An unknown error occurred'}`));
+					}
+				});
+		});
+	}
+
+	private getProjectsData() {
+		return new Promise<{
+			timeMap: {
+				[projectId: string]: number;
+			};
+			rate: number;
+		}>((resolve, reject) => {
+			forkJoin({
+				timeMap: this.loadInvoiceTimeLogsDataByProjects(),
+				rate: this.loadInvoiceEmployeeRateData()
+			})
+				.pipe(untilDestroyed(this))
+				.subscribe({
+					next: ({ timeMap, rate }) => {
+						resolve({ timeMap, rate });
 					},
 					error: (err) => {
 						this.toastrService.error(err?.message || 'An unknown error occurred');
@@ -1098,7 +1177,6 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 			selectedItem: newData.selectedItem !== undefined ? newData.selectedItem : lastSourceData.selectedItem
 		};
 		const quantityIsValid = /^\d*\.?\d+$/.test(newData.quantity) && !/^0\d+/.test(newData.quantity);
-
 		if (
 			quantityIsValid &&
 			Number.isFinite(+newData.quantity) &&
@@ -1107,6 +1185,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		) {
 			newData = { ...newData, price: extractNumber(newData.price) };
 			const itemTotal = +newData.quantity * +extractNumber(newData.price);
+			newData.totalValue = itemTotal;
 			this.subtotal += itemTotal;
 			await event.confirm.resolve(newData);
 			await this.calculateTotal();

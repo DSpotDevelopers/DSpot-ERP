@@ -2905,6 +2905,16 @@
 		}
 	},
 	"INVOICES_PAGE": {
+		"STATUS_WARNING": "Vous n'avez pas la permission de modifier ce statut",
+		"EDIT_STATUS_WARNING": "Vous n'avez pas la permission de modifier une facture avec ce statut",
+		"DELETE_STATUS_WARNING": "Vous n'avez pas la permission de supprimer une facture avec ce statut",
+		"VALIDATION": {
+			"REQUIRED_CONTACT": "Veuillez sélectionner un contact",
+			"REQUIRED_INVOICE_NUMBER": "Le numéro de facture est requis",
+			"REQUIRED_INVOICE_TYPE": "Veuillez sélectionner un type de facture",
+			"REQUIRED_PROJECT": "Veuillez sélectionner au moins un projet"
+		},
+		"SELECT_DATE_RANGE": "Sélectionner une plage de dates",
 		"SENDER": "Expéditeur",
 		"BROWSE": "Parcourir",
 		"COMMENT": "Comme",

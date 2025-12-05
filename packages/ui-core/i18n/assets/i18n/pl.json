@@ -3052,7 +3052,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "Wybierz kontakt",
 			"REQUIRED_INVOICE_NUMBER": "Numer faktury jest wymagany",
-			"REQUIRED_INVOICE_TYPE": "Wybierz typ faktury"
+			"REQUIRED_INVOICE_TYPE": "Wybierz typ faktury",
+			"REQUIRED_PROJECT": "Wybierz co najmniej jeden projekt"
 		},
 		"SELECT_DATE_RANGE": "Wybierz zakres dat",
 		"SENDER": "Nadawca",

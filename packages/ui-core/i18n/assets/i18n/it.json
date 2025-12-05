@@ -3053,7 +3053,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "Seleziona contatto",
 			"REQUIRED_INVOICE_NUMBER": "Numero fattura obbligatorio",
-			"REQUIRED_INVOICE_TYPE": "Seleziona tipo fattura"
+			"REQUIRED_INVOICE_TYPE": "Seleziona tipo fattura",
+			"REQUIRED_PROJECT": "Seleziona almeno un progetto"
 		},
 		"SELECT_DATE_RANGE": "Seleziona intervallo date",
 		"SENDER": "Mittente",

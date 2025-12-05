@@ -3053,7 +3053,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "Selecteer contact",
 			"REQUIRED_INVOICE_NUMBER": "Factuurnummer is verplicht",
-			"REQUIRED_INVOICE_TYPE": "Selecteer factuurtype"
+			"REQUIRED_INVOICE_TYPE": "Selecteer factuurtype",
+			"REQUIRED_PROJECT": "Selecteer minstens één project"
 		},
 		"SELECT_DATE_RANGE": "Selecteer datumbereik",
 		"SENDER": "Afzender",

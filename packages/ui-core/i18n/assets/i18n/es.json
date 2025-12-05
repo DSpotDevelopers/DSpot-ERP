@@ -3053,7 +3053,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "Por favor seleccione contacto",
 			"REQUIRED_INVOICE_NUMBER": "El número de factura es obligatorio",
-			"REQUIRED_INVOICE_TYPE": "Por favor seleccione el tipo de factura"
+			"REQUIRED_INVOICE_TYPE": "Por favor seleccione el tipo de factura",
+			"REQUIRED_PROJECT": "Por favor selecciona al menos un proyecto"
 		},
 		"SELECT_DATE_RANGE": "Seleccionar rango de fechas",
 		"SENDER": "Remitente",

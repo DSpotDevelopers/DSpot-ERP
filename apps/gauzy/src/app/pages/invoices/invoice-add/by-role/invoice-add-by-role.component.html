@@ -189,7 +189,41 @@
 							</div>
 						</ng-container>
 
-						<ng-container *ngIf="isEmployeeHourTable && selectedEmployee">
+						<div class="col-sm-6" *ngIf="isProjectHourTable">
+							<div class="form-group">
+								<label for="inputProject" class="label required-asterisk">
+									{{ 'INVOICES_PAGE.INVOICE_TYPE.SELECT_PROJECTS' | translate }}
+								</label>
+								<ng-select
+									[(items)]="projects"
+									bindName="name"
+									placeholder="{{ 'INVOICES_PAGE.INVOICE_TYPE.SELECT_PROJECTS' | translate }}"
+									formControlName="project"
+									id="inputProject"
+									(change)="selectProject($event)"
+									[multiple]="true"
+									appendTo="body"
+									class="project-hours"
+								>
+									<ng-template ng-option-tmp let-item="item" let-index="index">
+										{{ item.name }}
+									</ng-template>
+									<ng-template ng-label-tmp let-item="item">
+										<div class="selector-template">
+											<span>{{ item.name }}</span>
+										</div>
+									</ng-template>
+								</ng-select>
+								<div
+									*ngIf="form.get('project')?.errors?.required && form.get('project')?.touched"
+									class="invalid-feedback d-block"
+								>
+									{{ 'INVOICES_PAGE.VALIDATION.REQUIRED_PROJECT' | translate }}
+								</div>
+							</div>
+						</div>
+
+						<ng-container *ngIf="(isEmployeeHourTable || isProjectHourTable) && selectedEmployee">
 							<div class="col-sm-6">
 								<div class="form-group">
 									<label for="selectedDateRange" class="label"
@@ -204,32 +238,6 @@
 							</div>
 						</ng-container>
 
-						<div class="col-sm-6" *ngIf="isProjectHourTable">
-							<div class="form-group">
-								<label for="inputProject" class="label">
-									{{ 'INVOICES_PAGE.INVOICE_TYPE.SELECT_PROJECTS' | translate }}
-								</label>
-								<ng-select
-									[(items)]="projects"
-									bindName="name"
-									placeholder="{{ 'INVOICES_PAGE.INVOICE_TYPE.SELECT_PROJECTS' | translate }}"
-									formControlName="project"
-									id="inputProject"
-									(change)="selectProject($event)"
-									[multiple]="true"
-									appendTo="body"
-								>
-									<ng-template ng-option-tmp let-item="item" let-index="index">
-										{{ item.name }}
-									</ng-template>
-									<ng-template ng-label-tmp let-item="item">
-										<div class="selector-template">
-											<span>{{ item.name }}</span>
-										</div>
-									</ng-template>
-								</ng-select>
-							</div>
-						</div>
 						<div class="col-sm-6" *ngIf="isTaskHourTable">
 							<div class="form-group">
 								<label for="inputTask" class="label">

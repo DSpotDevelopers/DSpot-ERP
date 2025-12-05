@@ -3049,7 +3049,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "Пожалуйста, выберите контакт",
 			"REQUIRED_INVOICE_NUMBER": "Требуется номер счета",
-			"REQUIRED_INVOICE_TYPE": "Пожалуйста, выберите тип счета"
+			"REQUIRED_INVOICE_TYPE": "Пожалуйста, выберите тип счета",
+			"REQUIRED_PROJECT": "Пожалуйста, выберите как минимум один проект"
 		},
 		"SELECT_DATE_RANGE": "Выберите диапазон дат",
 		"SENDER": "Отправитель",
