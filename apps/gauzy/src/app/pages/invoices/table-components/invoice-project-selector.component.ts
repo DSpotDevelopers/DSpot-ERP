@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IOrganization, IOrganizationProject } from '@gauzy/contracts';
 import { filter, tap } from 'rxjs/operators';
 import { DefaultEditor } from 'angular2-smart-table';
@@ -7,7 +7,7 @@ import { OrganizationProjectsService, Store } from '@gauzy/ui-core/core';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    template: `
+	template: `
 		<nb-select
 			fullWidth
 			[placeholder]="'INVOICES_PAGE.SELECT_PROJECT' | translate"
@@ -19,10 +19,10 @@ import { OrganizationProjectsService, Store } from '@gauzy/ui-core/core';
 			</nb-option>
 		</nb-select>
 	`,
-    styles: [],
-    standalone: false
+	styles: [],
+	standalone: false
 })
-export class InvoiceProjectsSelectorComponent extends DefaultEditor implements OnInit, OnDestroy {
+export class InvoiceProjectsSelectorComponent extends DefaultEditor implements OnInit {
 	public project: IOrganizationProject;
 	public projects: IOrganizationProject[];
 	public organization: IOrganization;
@@ -45,16 +45,16 @@ export class InvoiceProjectsSelectorComponent extends DefaultEditor implements O
 			.subscribe();
 	}
 
-	private _loadProjects() {
-		const tenantId = this.store.user.tenantId;
-		const { id: organizationId } = this.organization;
-		this.organizationProjectsService.getAll([], { organizationId, tenantId }).then(({ items }) => {
-			this.projects = items;
-			//
-			const project: any = this.cell.getValue();
-			//
-			this.project = this.projects.find((p) => p.id === project['id']);
-		});
+	private async _loadProjects() {
+		const response = await this.organizationProjectsService.getAssignedProjects(
+			this.organization?.id,
+			this.store.user?.tenantId,
+			this.store.user?.employee?.id
+		);
+
+		this.projects = JSON.parse(JSON.stringify(response));
+		const project = this.cell.getValue();
+		this.project = this.projects.find((p) => p.id === project['id']);
 	}
 
 	/**
@@ -64,6 +64,4 @@ export class InvoiceProjectsSelectorComponent extends DefaultEditor implements O
 	selectProject($event) {
 		this.cell.setValue($event);
 	}
-
-	ngOnDestroy() {}
 }

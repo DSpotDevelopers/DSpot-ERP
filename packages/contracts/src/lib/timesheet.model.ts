@@ -611,6 +611,7 @@ export interface IGetInvoiceTimeLogs {
 	employeeIds?: string[];
 	groupBy?: string;
 	relations?: string[];
+	timeZone?: string;
 }
 
 export enum TimeLogPartialStatus {

@@ -3053,7 +3053,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "Моля, изберете контакт",
 			"REQUIRED_INVOICE_NUMBER": "Номер на фактурата е задължителен",
-			"REQUIRED_INVOICE_TYPE": "Моля, изберете тип фактура"
+			"REQUIRED_INVOICE_TYPE": "Моля, изберете тип фактура",
+			"REQUIRED_PROJECT": "Моля, изберете поне един проект"
 		},
 		"SELECT_DATE_RANGE": "Изберете период",
 		"SENDER": "Изпращач",

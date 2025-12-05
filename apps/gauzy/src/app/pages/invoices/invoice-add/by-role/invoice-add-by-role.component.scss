@@ -31,3 +31,14 @@ $shadow: 0 0 0 nb-theme(button-outline-width)
   color: nb-theme(button-outline-basic-disabled-text-color);
   box-shadow: unset;
 }
+
+:host ::ng-deep .ng-select.project-hours.ng-select-multiple {
+  .ng-select-container {
+    min-height: 42px !important;
+    height: auto !important;
+  }
+
+  input {
+    height: 100% !important;
+  }
+}

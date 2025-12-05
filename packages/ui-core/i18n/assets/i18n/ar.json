@@ -3042,7 +3042,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "يرجى اختيار جهة الاتصال",
 			"REQUIRED_INVOICE_NUMBER": "رقم الفاتورة مطلوب",
-			"REQUIRED_INVOICE_TYPE": "يرجى اختيار نوع الفاتورة"
+			"REQUIRED_INVOICE_TYPE": "يرجى اختيار نوع الفاتورة",
+			"REQUIRED_PROJECT": "يرجى اختيار مشروع واحد على الأقل"
 		},
 		"SELECT_DATE_RANGE": "اختر نطاق التاريخ",
 		"SENDER": "المرسل",

@@ -3055,7 +3055,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "Please select contact",
 			"REQUIRED_INVOICE_NUMBER": "Invoice number is required",
-			"REQUIRED_INVOICE_TYPE": "Please select invoice type"
+			"REQUIRED_INVOICE_TYPE": "Please select invoice type",
+			"REQUIRED_PROJECT": "Please select at least one project"
 		},
 		"SELECT_DATE_RANGE": "Select date range",
 		"SENDER": "Sender",

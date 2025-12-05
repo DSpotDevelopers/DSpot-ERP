@@ -3053,7 +3053,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "Bitte Kontakt auswählen",
 			"REQUIRED_INVOICE_NUMBER": "Rechnungsnummer ist erforderlich",
-			"REQUIRED_INVOICE_TYPE": "Bitte Rechnungstyp auswählen"
+			"REQUIRED_INVOICE_TYPE": "Bitte Rechnungstyp auswählen",
+			"REQUIRED_PROJECT": "Bitte wählen Sie mindestens ein Projekt aus"
 		},
 		"SELECT_DATE_RANGE": "Datumsbereich auswählen",
 		"SENDER": "Absender",

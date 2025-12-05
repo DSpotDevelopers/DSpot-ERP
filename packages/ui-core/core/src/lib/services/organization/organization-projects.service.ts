@@ -185,4 +185,40 @@ export class OrganizationProjectsService {
 			params: toParams({ where, relations })
 		});
 	}
+
+	/**
+	 * Retrieves organization projects.
+	 * If `employeeId` is provided, returns only projects assigned to that employee.
+	 * Otherwise, returns all projects for the given user.
+	 *
+	 * @param organizationId - ID of the organization
+	 * @param tenantId - ID of the tenant
+	 * @param employeeId - (Optional) employee ID to filter assigned projects
+	 */
+	async getAssignedProjects(
+		organizationId: string,
+		tenantId: string,
+		employeeId?: string
+	): Promise<IOrganizationProject[] | null> {
+		if (!organizationId || !tenantId) {
+			console.warn('Organization or tenant not available');
+			return null;
+		}
+
+		try {
+			const response = employeeId
+				? await this.getAllByEmployee(employeeId, {
+						organizationId,
+						tenantId
+				  })
+				: await this.getAll([], {
+						organizationId,
+						tenantId
+				  });
+
+			return JSON.parse(JSON.stringify(response));
+		} catch (error) {
+			console.error('Error fetching projects', error);
+		}
+	}
 }

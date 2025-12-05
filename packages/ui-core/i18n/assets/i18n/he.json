@@ -3047,7 +3047,8 @@
 		"VALIDATION": {
 			"REQUIRED_CONTACT": "אנא בחר איש קשר",
 			"REQUIRED_INVOICE_NUMBER": "נדרש מספר חשבונית",
-			"REQUIRED_INVOICE_TYPE": "אנא בחר סוג חשבונית"
+			"REQUIRED_INVOICE_TYPE": "אנא בחר סוג חשבונית",
+			"REQUIRED_PROJECT": "אנא בחר לפחות פרויקט אחד"
 		},
 		"SELECT_DATE_RANGE": "בחר טווח תאריכים",
 		"SENDER": "שולח",
