@@ -54,7 +54,7 @@ export class InvoiceProjectsSelectorComponent extends DefaultEditor implements O
 
 		this.projects = JSON.parse(JSON.stringify(response));
 		const project = this.cell.getValue();
-		this.project = this.projects.find((p) => p.id === project['id']);
+		this.project = this.projects.find((p) => p.name === project);
 	}
 
 	/**
