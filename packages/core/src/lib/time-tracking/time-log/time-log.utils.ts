@@ -1,8 +1,9 @@
 import * as moment from 'moment-timezone';
 import { reduce } from 'underscore';
-import { ArraySum } from '@gauzy/utils';
-import { ITimeLog, TimeLogPartialStatus, TimeLogType } from '@gauzy/contracts';
+import { ArraySum, isNotEmpty } from '@gauzy/utils';
+import { CurrenciesEnum, IInvoiceReport, ITimeLog, TimeLogPartialStatus, TimeLogType } from '@gauzy/contracts';
 import { getDateRangeFormat } from '../../core/utils';
+import { environment } from '@gauzy/config';
 
 /**
  * Calculates the average of an array of numbers.
@@ -184,4 +185,58 @@ export function calculateTotalDuration(
 ): number {
 	// Sum the clipped durations of all logs in the array
 	return logs.reduce((sum, log) => sum + calculateTimeLogDurationInRange(log, startDate, endDate, tz), 0);
+}
+
+export function transformInvoiceData(bills: {
+	employeeId: string,
+	employeeFirstName: string,
+	employeeLastName:string,
+	employeeUserName:string,
+	billRateCurrency: string | null,
+	billRateValue: string | null,
+	projectId: string,
+	projectName: string,
+	billAmount: string | null
+	totalDuration: string | null
+}[]): IInvoiceReport {
+
+	const billingSummaryMap = new Map<string, any>();
+
+	bills.forEach((bill) => {
+		if (!billingSummaryMap.has(bill.employeeId)) {
+			billingSummaryMap.set(bill.employeeId, {
+				id: bill.employeeId,
+				firstName: bill.employeeFirstName,
+				lastName: bill.employeeLastName,
+				userName: bill.employeeUserName,
+				billRateCurrency: isNotEmpty(bill.billRateCurrency) ? bill.billRateCurrency : environment.defaultCurrency as CurrenciesEnum,
+				billRateValue: isNotEmpty(bill.billRateValue) ? parseFloat(bill.billRateValue) : 0,
+				projects: [],
+				subTotalDuration: 0,
+				subTotalBillAmount: 0
+			});
+		}
+
+		const employee = billingSummaryMap.get(bill.employeeId);
+
+		employee.projects.push({
+			id: bill.projectId,
+			name: bill.projectName,
+			duration: isNotEmpty(bill.totalDuration) ? parseFloat(bill.totalDuration) : 0
+		});
+
+		employee.subTotalDuration += isNotEmpty(bill.totalDuration) ? parseFloat(bill.totalDuration) : 0;
+		employee.subTotalBillAmount += isNotEmpty(bill.billAmount) ? parseFloat(bill.billAmount) : 0;
+
+	})
+
+	const billingSummary = Array.from(billingSummaryMap.values());
+	const totalDuration = billingSummary.reduce((acc, curr) => acc + curr.subTotalDuration, 0);
+	const totalBillAmount = billingSummary.reduce((acc, curr) => acc + curr.subTotalBillAmount, 0);
+
+	return {
+		billingSummary,
+		totalDuration,
+		totalBillAmount
+	};
 }

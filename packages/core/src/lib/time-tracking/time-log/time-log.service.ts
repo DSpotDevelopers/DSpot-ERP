@@ -35,7 +35,10 @@ import {
 	TimeLogPartialStatus,
 	IDeleteTimeLogData,
 	TimeErrorsEnum,
-	IPagination
+	IPagination,
+	CurrenciesEnum,
+	IGetInvoiceReportInput,
+	IInvoiceReport
 } from '@gauzy/contracts';
 import { isEmpty, isNotEmpty } from '@gauzy/utils';
 import { PaginationParams, TenantAwareCrudService } from './../../core/crud';
@@ -53,7 +56,7 @@ import {
 import { getDateRangeFormat, getDaysBetweenDates } from './../../core/utils';
 import { RequestContext } from '../../core/context';
 import { moment } from './../../core/moment-extend';
-import { calculateAverage, calculateAverageActivity, calculateDuration, fixTimeLogsBoundary } from './time-log.utils';
+import { calculateAverage, calculateAverageActivity, calculateDuration, fixTimeLogsBoundary, transformInvoiceData } from './time-log.utils';
 import { prepareSQLQuery as p } from './../../database/database.helper';
 import { TypeOrmTimeLogRepository } from './repository/type-orm-time-log.repository';
 import { MikroOrmTimeLogRepository } from './repository/mikro-orm-time-log.repository';
@@ -64,6 +67,7 @@ import { TimeLog } from './time-log.entity';
 import { ActivityLogService } from '../../activity-log/activity-log.service';
 import { TimerWeeklyLimitService } from '../timer/timer-weekly-limit.service';
 import { SocketService } from '../../socket/socket.service';
+import { environment } from '@gauzy/config';
 
 @Injectable()
 export class TimeLogService extends TenantAwareCrudService<TimeLog> {
@@ -367,6 +371,99 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 		}
 
 		return invoiceData;
+	}
+
+	/**
+	 * Retrieves invoice data based on the provided input.
+	 * @param request The input parameters for fetching invoice data.
+	 * @returns A Promise that resolves to an invoice report.
+	 */
+	async getInvoice(request: IGetInvoiceReportInput): Promise<IInvoiceReport> {
+		const { employmentTypes } = request;
+
+		const timeLogsDuration = this.typeOrmRepository.createQueryBuilder(this.tableName);
+
+		if (isNotEmpty(employmentTypes)) {
+			timeLogsDuration.innerJoin(`${timeLogsDuration.alias}.employee.organizationEmploymentTypes`, 'organizationEmploymentTypes');
+		}
+
+		/**
+		 * STEP 1 — Build a subquery that normalizes the duration of each time log
+		 * within the requested date window.
+		 *
+		 * This subquery:
+		 *  - Selects employeeId and projectId
+		 *  - Computes the effective duration of each time log that overlaps the range
+		 *  - Ensures we only count the portion of the log that falls inside
+		 *    [startDate, endDate]
+		 */
+		timeLogsDuration.select([
+			p(`"${timeLogsDuration.alias}"."employeeId" AS "employeeId"`),
+			p(`"${timeLogsDuration.alias}"."projectId" AS "projectId"`),
+			p(`
+				EXTRACT(EPOCH FROM (
+					LEAST(COALESCE("${timeLogsDuration.alias}"."stoppedAt", :endDate), :endDate)
+					-
+					GREATEST(COALESCE("${timeLogsDuration.alias}"."startedAt", :startDate), :startDate)
+				)) AS duration`
+			),
+		]);
+
+		timeLogsDuration.where((qb: SelectQueryBuilder<TimeLog>) => {
+			this.getFilterTimeLogQuery(qb, request, true);
+		});
+
+		/**
+		 * STEP 2 — Aggregate the per-log durations into per-(employeeId, projectId).
+		 *
+		 * This query groups by employee and project to produce:
+		 *  - total duration per employee/project pair
+		 *
+		 * Using the subquery prevents recomputing the overlap logic
+		 * and guarantees that the grouping is applied on the normalized data.
+		 */
+		const workingDuration = this.typeOrmRepository.manager.createQueryBuilder()
+		.from(`(${timeLogsDuration.getQuery()})`, 'timeLogsDuration')
+		.select([
+			p(`"timeLogsDuration"."employeeId" AS "employeeId"`),
+            p(`"timeLogsDuration"."projectId" AS "projectId"`),
+            p(`SUM("timeLogsDuration"."duration") AS "totalDuration"`)
+		])
+		.setParameters(timeLogsDuration.getParameters())
+		.groupBy('"timeLogsDuration"."employeeId"')
+		.addGroupBy('"timeLogsDuration"."projectId"');
+
+		/**
+		 * STEP 3 — Join aggregated durations with employee, user, and project metadata.
+		 *
+		 * This produces the final invoice-ready dataset:
+		 *  - Employee info
+		 *  - Project info
+		 *  - Total duration per project
+		 *  - Billing rate data
+		 *  - Calculated bill amount
+		 */
+		const bills = await this.typeOrmRepository.manager.createQueryBuilder()
+		.from(`(${workingDuration.getQuery()})`, 'workingDuration')
+		.innerJoin('employee', 'employee', 'employee.id = "workingDuration"."employeeId"') // Join employee → retrieve billing rate and user reference
+		.innerJoin('user', 'user', 'user.id = employee.userId') // Join user → retrieve names and username
+		.innerJoin('organization_project', 'project', 'project.id = "workingDuration"."projectId"') // Join project → retrieve project name
+		.select([
+			p(`"workingDuration"."employeeId" AS "employeeId"`),
+            p(`"workingDuration"."projectId" AS "projectId"`),
+            p(`"workingDuration"."totalDuration" AS "totalDuration"`),
+            p(`"user"."firstName" AS "employeeFirstName"`),
+            p(`"user"."lastName" AS "employeeLastName"`),
+            p(`"user"."username" AS "employeeUserName"`),
+            p(`"employee"."billRateCurrency" AS "billRateCurrency"`),
+            p(`"employee"."billRateValue" AS "billRateValue"`),
+            p(`"project"."name" AS "projectName"`),
+            p(`(COALESCE("workingDuration"."totalDuration", 0) / 3600.0) * COALESCE("employee"."billRateValue", 0) AS "billAmount"`)
+		])
+		.setParameters(workingDuration.getParameters())
+		.getRawMany();
+
+		return transformInvoiceData(bills);
 	}
 
 	/**

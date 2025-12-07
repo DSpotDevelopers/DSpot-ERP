@@ -15,6 +15,7 @@ import { IRelationalOrganizationTeam } from './organization-team.model';
 import { IScreenshot } from './screenshot.model';
 import { TimeFormatEnum } from './organization.model';
 import { IOrganizationEmploymentType } from './organization-employment-type.model';
+import { CurrenciesEnum } from './currency.model';
 
 export interface ITimesheet extends IBasePerTenantAndOrganizationEntityModel {
 	employee: IEmployee;
@@ -391,6 +392,12 @@ export interface IGetTimeLogReportInput extends IGetTimeLogInput {
 	isEdited?: boolean;
 }
 
+export interface IGetInvoiceReportInput extends ITimeLogFilters {
+	isEdited?: boolean;
+	timesheetId?: ID;
+	onlyMe?: boolean;
+}
+
 export interface IGetTimeLogConflictInput extends IBasePerTenantAndOrganizationEntityModel, IBaseRelationsEntityModel {
 	ignoreId?: ID | ID[];
 	startDate: string | Date;
@@ -498,6 +505,30 @@ export type IReportDayData =
 	| IReportDayGroupByEmployee
 	| IReportDayGroupByProject
 	| IReportDayGroupByClient;
+
+export type IProjectBillSummary = {
+	id: ID;
+	name: string;
+	duration: number;
+}
+
+export type IEmployeeBillSummary = {
+	id: ID;
+	firstName: string;
+	lastName: string;
+	userName: string;
+	billRateCurrency: CurrenciesEnum;
+	billRateValue: number;
+	projects: IProjectBillSummary[];
+	subTotalDuration: number;
+	subTotalBillAmount: number;
+}
+
+export type IInvoiceReport = {
+	billingSummary: IEmployeeBillSummary[];
+	totalDuration: number;
+	totalBillAmount: number;
+}
 
 export interface IDailyReportChart {
 	date: string;

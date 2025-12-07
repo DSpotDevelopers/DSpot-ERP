@@ -26,14 +26,15 @@ import {
 	IAmountOwedReportChart,
 	IDailyReportChart,
 	IGetTimeLogReportInput,
-	IPagination
+	IPagination,
+	IInvoiceReport
 } from '@gauzy/contracts';
 import { TimeLogService } from './time-log.service';
 import { Permissions } from './../../shared/decorators';
 import { OrganizationPermissionGuard, PermissionGuard, TenantBaseGuard } from './../../shared/guards';
 import { UUIDValidationPipe, UseValidationPipe } from './../../shared/pipes';
 import { CreateManualTimeLogDTO, DeleteTimeLogDTO, UpdateManualTimeLogDTO } from './dto';
-import { TimeLogLimitQueryDTO, TimeLogQueryDTO } from './dto/query';
+import { TimeLogLimitQueryDTO, TimeLogQueryDTO, InvoiceQueryDTO } from './dto/query';
 import { TimeLogBodyTransformPipe } from './pipes';
 import { IGetConflictTimeLogCommand } from './commands';
 import { PaginationParams } from '../../core/crud';
@@ -245,6 +246,26 @@ export class TimeLogController {
 	@UseValidationPipe({ whitelist: true, transform: true })
 	async getInvoiceLogs(@Query() options: TimeLogQueryDTO): Promise<IReportDayData> {
 		return await this._timeLogService.getInvoiceLogs(options);
+	}
+
+	/**
+	 * Get invoice based on provided options.
+	 * @param options The options for querying invoice.
+	 * @returns The invoice based on the provided options.
+	 */
+	@ApiOperation({ summary: 'Get Invoice by filters' })
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: 'Successfully retrieved invoice',
+	})
+	@ApiResponse({
+		status: HttpStatus.BAD_REQUEST,
+		description: 'Invalid input. The response body may contain clues as to what went wrong.'
+	})
+	@Get('invoice/by')
+	@UseValidationPipe({ whitelist: true, transform: true })
+	async getInvoice(@Query() options: InvoiceQueryDTO): Promise<IInvoiceReport> {
+		return await this._timeLogService.getInvoice(options);
 	}
 
 	/**
