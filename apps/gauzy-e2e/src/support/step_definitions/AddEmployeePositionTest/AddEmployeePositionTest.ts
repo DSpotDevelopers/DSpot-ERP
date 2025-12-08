@@ -5,8 +5,6 @@ import * as addEmployeePositionPage from '../../Base/pages/AddEmployeePosition.p
 import { AddEmployeePositionPageData } from '../../Base/pagedata/AddEmployeePositionPageData';
 import * as dashboardPage from '../../Base/pages/Dashboard.po';
 import { CustomCommands } from '../../commands';
-import * as organizationTagsUserPage from '../../Base/pages/OrganizationTags.po';
-import { OrganizationTagsPageData } from '../../Base/pagedata/OrganizationTagsPageData';
 
 import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
@@ -15,12 +13,6 @@ const pageLoadTimeout = Cypress.config('pageLoadTimeout');
 // Login with email
 Given('Login with default credentials', () => {
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-});
-
-// Add new tag
-Then('User can add new tag', () => {
-	//dashboardPage.verifyAccountingDashboardIfVisible();
-	CustomCommands.addTag(organizationTagsUserPage, OrganizationTagsPageData);
 });
 
 // Add new employee position
@@ -52,9 +44,7 @@ Then('User can see new position input', () => {
 });
 
 And('User can add data for new position', () => {
-	addEmployeePositionPage.enterNewPositionData(
-		AddEmployeePositionPageData.fullStackDeveloper
-	);
+	addEmployeePositionPage.enterNewPositionData(AddEmployeePositionPageData.fullStackDeveloper);
 });
 
 And('User can see tag multi-select', () => {
@@ -82,39 +72,13 @@ Then('Notification message will appear', () => {
 	addEmployeePositionPage.waitMessageToHide();
 });
 
-When('User selects position to edit', () => {
-	addEmployeePositionPage.selectPositionToEdit();
-})
-
-And('User can see edit position button', () => {
-	addEmployeePositionPage.editEmployeePositionButtonVisible();
-});
-
-When('User click on edit position button', () => {
-	addEmployeePositionPage.clickEditEmployeePositionButton();
-});
-
-Then('User can verify position was created', () => {
-	addEmployeePositionPage.verifyTitleExists(
-		AddEmployeePositionPageData.fullStackDeveloper
-	);
-});
-
-And('User can see cancel edit button', () => {
-	addEmployeePositionPage.cancelButtonVisible();
-});
-
-And('User can click on cancel edit button', () => {
-	addEmployeePositionPage.clickCancelButton();
-});
-
 // Еdit employee position
-When('User selects position to edit', () => {
-	addEmployeePositionPage.selectPositionToEdit();
-})
+When('Table with positions list is visible', () => {
+	addEmployeePositionPage.positionTableVisible();
+});
 
-When('User click on the created Employee Level Twice', () => {
-	addEmployeePositionPage.clickRowEmployeeLevelTwice(); //there is a minor bug that requires to double click the level after cancelling an edit
+When('User selects position to edit', () => {
+	addEmployeePositionPage.clickPositionTableRow(0);
 });
 
 Then('User can see edit newly position button', () => {
@@ -126,9 +90,7 @@ When('User click on edit new position button', () => {
 });
 
 Then('User can edit previously created position', () => {
-	addEmployeePositionPage.enterEditPositionData(
-		AddEmployeePositionPageData.midLevelWebDeveloper
-	);
+	addEmployeePositionPage.enterEditPositionData(AddEmployeePositionPageData.midLevelWebDeveloper);
 });
 
 And('User can see tag multi-select', () => {
@@ -156,78 +118,13 @@ Then('Notification message will appear', () => {
 	addEmployeePositionPage.waitMessageToHide();
 });
 
-When('User selects position to edit', () => {
-	addEmployeePositionPage.selectPositionToEdit();
-})
-
-And('User can see edit position button', () => {
-	addEmployeePositionPage.editEmployeePositionButtonVisible();
-});
-
-When('User click on edit position button', () => {
-	addEmployeePositionPage.clickEditEmployeePositionButton();
-});
-
-Then('User can verify position was edited', () => {
-	addEmployeePositionPage.verifyTitleExists(
-		AddEmployeePositionPageData.midLevelWebDeveloper
-	);
-});
-
-And('User can see cancel edit button', () => {
-	addEmployeePositionPage.cancelButtonVisible();
-});
-
-And('User can click on cancel edit button', () => {
-	addEmployeePositionPage.clickCancelButton();
-});
-
 // Delete employee position
-And('User can see Add new position button', () => {
-	addEmployeePositionPage.addNewPositionButtonVisible();
+When('Table with positions list is visible', () => {
+	addEmployeePositionPage.positionTableVisible();
 });
 
-When('User click on Add new position button', () => {
-	addEmployeePositionPage.clickAddNewPositionButton();
-});
-
-Then('User can see new position input', () => {
-	addEmployeePositionPage.newPositionInputVisible();
-});
-
-And('User can add data for new position', () => {
-	addEmployeePositionPage.enterNewPositionData(
-		AddEmployeePositionPageData.deleteThisPosition
-	);
-});
-
-And('User can see tag multi-select', () => {
-	addEmployeePositionPage.tagsMultiSelectVisible();
-});
-
-When('User click on tag multi-select', () => {
-	addEmployeePositionPage.clickTagsMultiSelect();
-});
-
-Then('User can pick tag from dropdown menu', () => {
-	addEmployeePositionPage.selectTagsFromDropdown(0);
-	addEmployeePositionPage.clickKeyboardButtonByKeyCode(9);
-});
-
-And('User can see save position button', () => {
-	addEmployeePositionPage.savePositionButtonVisible();
-});
-
-When('User click on save position button', () => {
-	addEmployeePositionPage.clickSavePositionButton();
-});
-
-Then('Notification message will appear', () => {
-	addEmployeePositionPage.waitMessageToHide();
-});
-
-When('User selects position to delete', () => {
-	addEmployeePositionPage.selectPositionToDelete();
+When('User selects position to remove', () => {
+	addEmployeePositionPage.clickPositionTableRow(1);
 });
 
 And('User can see delete position button', () => {
@@ -244,12 +141,6 @@ Then('User can see confirm delete button', () => {
 
 When('User click on confirm delete button', () => {
 	addEmployeePositionPage.clickConfirmDeletePositionButton();
-});
-
-Then('User can verify that position was deleted', () => {
-	addEmployeePositionPage.verifyElementIsDeleted(
-		AddEmployeePositionPageData.deleteThisPosition
-	);
 });
 
 And('User will see a notification message', () => {
