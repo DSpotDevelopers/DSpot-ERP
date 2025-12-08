@@ -11,11 +11,6 @@ export const AddEmployeePositionPage = {
 	removeEmployeePositionButtonCss: 'button.action.appearance-filled',
 	confirmDeletePositionButtonCss: 'ga-delete-confirmation nb-card-footer button[status="danger"]',
 	editPositionInputCss: 'div.d-flex > input[type="text"]',
-	verifyTextCss: 'ga-notes-with-tags > div > div > div.ng-star-inserted',
-	cardBodyCss: 'nb-card-body',
 	toastrMessageCss: 'nb-toast.ng-trigger',
-	cancelButtonCss: 'button.delete.mr-3',
-	selectPositionToEditCss: 'ga-notes-with-tags',
-	selectPositionToDeleteCss: 'ga-notes-with-tags',
 	positionTableCss: 'nb-card-body.custom-table'
 };
