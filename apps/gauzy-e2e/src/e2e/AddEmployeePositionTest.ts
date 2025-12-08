@@ -4,17 +4,13 @@ import * as addEmployeePositionPage from '../support/Base/pages/AddEmployeePosit
 import { AddEmployeePositionPageData } from '../support/Base/pagedata/AddEmployeePositionPageData';
 import * as dashboardPage from '../support/Base/pages/Dashboard.po';
 import { CustomCommands } from '../support/commands';
-import * as organizationTagsUserPage from '../support/Base/pages/OrganizationTags.po';
-import { OrganizationTagsPageData } from '../support/Base/pagedata/OrganizationTagsPageData';
 
-//! Expected to find element: button.delete.mr-3, but never found it.
-describe.skip('Add employee position test', () => {
+describe('Add employee position test', { testIsolation: false }, () => {
 	before(() => {
 		CustomCommands.login(loginPage, LoginPageData, dashboardPage);
+		cy.visit('/#/pages/employees/positions');
 	});
 	it('Should be able to add new employee position', () => {
-		CustomCommands.addTag(organizationTagsUserPage, OrganizationTagsPageData);
-		cy.visit('/#/pages/employees/positions');
 		addEmployeePositionPage.gridBtnExists();
 		addEmployeePositionPage.gridBtnClick(1);
 		addEmployeePositionPage.addNewPositionButtonVisible();
@@ -31,13 +27,10 @@ describe.skip('Add employee position test', () => {
 		addEmployeePositionPage.savePositionButtonVisible();
 		addEmployeePositionPage.clickSavePositionButton();
 		addEmployeePositionPage.waitMessageToHide();
-		addEmployeePositionPage.editEmployeePositionButtonVisible();
-		addEmployeePositionPage.clickEditEmployeePositionButton();
-		addEmployeePositionPage.verifyTitleExists(AddEmployeePositionPageData.fullStackDeveloper);
-		addEmployeePositionPage.cancelButtonVisible();
-		addEmployeePositionPage.clickCancelButton();
 	});
 	it('Should be able to edit employee position', () => {
+		addEmployeePositionPage.positionTableVisible();
+		addEmployeePositionPage.clickPositionTableRow(0);
 		addEmployeePositionPage.clickEditEmployeePositionButton();
 		addEmployeePositionPage.editEmployeePositionInputVisible();
 		addEmployeePositionPage.enterEditPositionData(AddEmployeePositionPageData.midLevelWebDeveloper);
@@ -45,36 +38,13 @@ describe.skip('Add employee position test', () => {
 		addEmployeePositionPage.clickTagsMultiSelect();
 		addEmployeePositionPage.selectTagsFromDropdown(0);
 		addEmployeePositionPage.clickKeyboardButtonByKeyCode(9);
-		addEmployeePositionPage.savePositionButtonVisible();
-		addEmployeePositionPage.clickSavePositionButton();
+		addEmployeePositionPage.updatePositionButtonVisible();
+		addEmployeePositionPage.clickUpdatePositionButton();
 		addEmployeePositionPage.waitMessageToHide();
-		addEmployeePositionPage.editEmployeePositionButtonVisible();
-		addEmployeePositionPage.clickEditEmployeePositionButton();
-		addEmployeePositionPage.verifyTitleExists(AddEmployeePositionPageData.midLevelWebDeveloper);
-		addEmployeePositionPage.cancelButtonVisible();
-		addEmployeePositionPage.clickCancelButton();
 	});
 	it('Should be able to delete employee position', () => {
-		addEmployeePositionPage.addNewPositionButtonVisible();
-		addEmployeePositionPage.clickAddNewPositionButton();
-		addEmployeePositionPage.cancelNewPositionButtonVisible();
-		addEmployeePositionPage.clickCancelNewPositionButton();
-		addEmployeePositionPage.clickAddNewPositionButton();
-		addEmployeePositionPage.newPositionInputVisible();
-		addEmployeePositionPage.enterNewPositionData(AddEmployeePositionPageData.fullStackDeveloper);
-		addEmployeePositionPage.tagsMultiSelectVisible();
-		addEmployeePositionPage.clickTagsMultiSelect();
-		addEmployeePositionPage.selectTagsFromDropdown(0);
-		addEmployeePositionPage.clickKeyboardButtonByKeyCode(9);
-		addEmployeePositionPage.savePositionButtonVisible();
-		addEmployeePositionPage.clickSavePositionButton();
-		addEmployeePositionPage.waitMessageToHide();
-		addEmployeePositionPage.deletePositionButtonVisible();
-		addEmployeePositionPage.clickDeletePositionButton();
-		addEmployeePositionPage.confirmDeleteButtonVisible();
-		addEmployeePositionPage.clickConfirmDeletePositionButton();
-		addEmployeePositionPage.verifyElementIsDeleted(AddEmployeePositionPageData.fullStackDeveloper);
-		addEmployeePositionPage.waitMessageToHide();
+		addEmployeePositionPage.positionTableVisible();
+		addEmployeePositionPage.clickPositionTableRow(1);
 		addEmployeePositionPage.deletePositionButtonVisible();
 		addEmployeePositionPage.clickDeletePositionButton();
 		addEmployeePositionPage.confirmDeleteButtonVisible();

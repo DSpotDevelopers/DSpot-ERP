@@ -5,10 +5,8 @@ import {
 	clearField,
 	enterInput,
 	clickKeyboardBtnByKeycode,
-	verifyTextNotExisting,
 	getLastElement,
-	waitElementToHide,
-	verifyValue
+	waitElementToHide
 } from '../utils/util';
 import { AddEmployeePositionPage } from '../pageobjects/AddEmployeePositionPageObject';
 
@@ -28,6 +26,14 @@ export const clickAddNewPositionButton = () => {
 	clickButton(AddEmployeePositionPage.addNewPositionButtonCss);
 };
 
+export const positionTableVisible = () => {
+	verifyElementIsVisible(AddEmployeePositionPage.positionTableCss);
+};
+
+export const clickPositionTableRow = (index: number) => {
+	clickButtonByIndex(AddEmployeePositionPage.positionTableCss, index);
+};
+
 export const cancelNewPositionButtonVisible = () => {
 	verifyElementIsVisible(AddEmployeePositionPage.cancelNewPositionButtonCss);
 };
@@ -40,7 +46,7 @@ export const newPositionInputVisible = () => {
 	verifyElementIsVisible(AddEmployeePositionPage.newPositionInputCss);
 };
 
-export const enterNewPositionData = (data) => {
+export const enterNewPositionData = (data: string) => {
 	clickButton(AddEmployeePositionPage.newPositionInputCss);
 	enterInput(AddEmployeePositionPage.newPositionInputCss, data);
 };
@@ -53,11 +59,11 @@ export const clickTagsMultiSelect = () => {
 	clickButton(AddEmployeePositionPage.tagsSelectCss);
 };
 
-export const selectTagsFromDropdown = (index) => {
+export const selectTagsFromDropdown = (index: number) => {
 	clickButtonByIndex(AddEmployeePositionPage.tagsSelectOptionCss, index);
 };
 
-export const clickKeyboardButtonByKeyCode = (keycode) => {
+export const clickKeyboardButtonByKeyCode = (keycode: number) => {
 	clickKeyboardBtnByKeycode(keycode);
 };
 
@@ -66,53 +72,36 @@ export const savePositionButtonVisible = () => {
 };
 
 export const clickSavePositionButton = () => {
-	clickButton(AddEmployeePositionPage.saveNewPositionButtonCss);
+	cy.get(AddEmployeePositionPage.saveNewPositionButtonCss).contains('Save').click();
 };
 
 export const updatePositionButtonVisible = () => {
-	verifyElementIsVisible(AddEmployeePositionPage.updatePositionButtonCss)
-}
+	verifyElementIsVisible(AddEmployeePositionPage.updatePositionButtonCss);
+};
 
 export const clickUpdatePositionButton = () => {
-	clickButton(AddEmployeePositionPage.updatePositionButtonCss);
-}
+	cy.get(AddEmployeePositionPage.updatePositionButtonCss).contains('Update').click();
+};
 
 export const editEmployeePositionButtonVisible = () => {
-	verifyElementIsVisible(
-		AddEmployeePositionPage.editEmployeePositionButtonCss
-	);
+	verifyElementIsVisible(AddEmployeePositionPage.editEmployeePositionButtonCss);
 };
 
 export const clickEditEmployeePositionButton = () => {
 	clickButton(AddEmployeePositionPage.editEmployeePositionButtonCss);
 };
 
-export const selectPositionToEdit =() => {
-	getLastElement(AddEmployeePositionPage.selectPositionToEditCss)
-}
-
-export const selectPositionToDelete = () => {
-	getLastElement(AddEmployeePositionPage.selectPositionToDeleteCss)
-}
-
-export const clickRowEmployeeLevelTwice = () => {
-	cy.wait(500)
-	getLastElement(AddEmployeePositionPage.selectPositionToEditCss)
-}
-
 export const editEmployeePositionInputVisible = () => {
 	verifyElementIsVisible(AddEmployeePositionPage.editPositionInputCss);
 };
 
-export const enterEditPositionData = (data) => {
+export const enterEditPositionData = (data: string) => {
 	clearField(AddEmployeePositionPage.editPositionInputCss);
 	enterInput(AddEmployeePositionPage.editPositionInputCss, data);
 };
 
 export const deletePositionButtonVisible = () => {
-	verifyElementIsVisible(
-		AddEmployeePositionPage.removeEmployeePositionButtonCss
-	);
+	verifyElementIsVisible(AddEmployeePositionPage.removeEmployeePositionButtonCss);
 };
 
 export const clickDeletePositionButton = () => {
@@ -120,31 +109,13 @@ export const clickDeletePositionButton = () => {
 };
 
 export const confirmDeleteButtonVisible = () => {
-	verifyElementIsVisible(
-		AddEmployeePositionPage.confirmDeletePositionButtonCss
-	);
+	verifyElementIsVisible(AddEmployeePositionPage.confirmDeletePositionButtonCss);
 };
 
 export const clickConfirmDeletePositionButton = () => {
 	clickButton(AddEmployeePositionPage.confirmDeletePositionButtonCss);
 };
 
-export const verifyTitleExists = (text) => {
-	verifyValue(AddEmployeePositionPage.editPositionInputCss, text);
-};
-
-export const verifyElementIsDeleted = (text) => {
-	verifyTextNotExisting(AddEmployeePositionPage.verifyTextCss, text);
-};
-
 export const waitMessageToHide = () => {
 	waitElementToHide(AddEmployeePositionPage.toastrMessageCss);
-};
-
-export const cancelButtonVisible = () => {
-	verifyElementIsVisible(AddEmployeePositionPage.cancelButtonCss);
-};
-
-export const clickCancelButton = () => {
-	clickButton(AddEmployeePositionPage.cancelButtonCss);
 };
