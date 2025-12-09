@@ -22,7 +22,8 @@ import {
 	IReportDayGroupByEmployee,
 	IGetEmployeeHourlyRateInput,
 	IEmployeeHourlyRate,
-	IReportDayGroupByProject
+	IReportDayGroupByProject,
+	IInvoiceItem
 } from '@gauzy/contracts';
 import { filter, tap } from 'rxjs/operators';
 import { compareDate, distinctUntilChange, extractNumber, isEmpty, isNotEmpty } from '@gauzy/ui-core/common';
@@ -687,7 +688,24 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 			return;
 		}
 
-		const { invoiceNumber, invoiceDate, dueDate } = this.form.value;
+		if (!this.organization) {
+			return;
+		}
+		const { id: organizationId } = this.organization;
+		const { tenantId } = this.store.user;
+		const {
+			invoiceNumber,
+			invoiceDate,
+			dueDate,
+			discountValue,
+			discountType,
+			tax,
+			tax2,
+			taxType,
+			tax2Type,
+			notes,
+			tags
+		} = this.form.value;
 
 		if (!invoiceDate || !dueDate || compareDate(invoiceDate, dueDate)) {
 			this.toastrService.danger(
@@ -709,18 +727,88 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 			return;
 		}
 
-		const invoice = await this.createInvoiceEstimate(InvoiceStatusTypesEnum.SENT);
-		const invoiceItems = await this.createInvoiceEstimateItems();
+		const invoice: IInvoice = {
+			invoiceNumber,
+			invoiceDate: moment(invoiceDate).startOf('day').toDate(),
+			dueDate: moment(dueDate).endOf('day').toDate(),
+			currency: this.currency,
+			discountValue,
+			discountType,
+			tax,
+			tax2,
+			taxType,
+			tax2Type,
+			terms: notes,
+			paid: false,
+			totalValue: +this.total.toFixed(2),
+			fromUserId: this.selectedEmployee?.id,
+			fromUser: this.selectedEmployee,
+			fromOrganization: this.organization,
+			organizationId,
+			tenantId,
+			invoiceType: this.selectedInvoiceType,
+			tags,
+			isEstimate: this.isEstimate,
+			status: InvoiceStatusTypesEnum.SENT,
+			sentTo: this.organizationId,
+			isArchived: false
+		};
 
-		await firstValueFrom(
-			this.dialogService.open(InvoiceEmailMutationComponent, {
-				context: {
-					invoice: invoice,
-					invoiceItems: invoiceItems,
-					isEstimate: this.isEstimate
-				}
-			}).onClose
-		);
+		const invoiceItems: IInvoiceItem[] = [];
+
+		for (const invoiceItem of tableSources) {
+			const id = invoiceItem.selectedItem ? invoiceItem.selectedItem.id : null;
+			const itemToAdd = {
+				description: invoiceItem.description,
+				currency: invoiceItem.currency,
+				price: Number(invoiceItem.price),
+				quantity: Number(invoiceItem.quantity),
+				totalValue: Number(invoiceItem.totalValue),
+				invoiceId: invoiceNumber,
+				applyTax: invoiceItem.applyTax,
+				applyDiscount: invoiceItem.applyDiscount,
+				organizationId,
+				tenantId
+			};
+
+			switch (this.selectedInvoiceType) {
+				case InvoiceTypeEnum.BY_EMPLOYEE_HOURS:
+					itemToAdd['employeeId'] = this.selectedEmployee?.employee?.id;
+					break;
+				case InvoiceTypeEnum.BY_PROJECT_HOURS:
+					itemToAdd['projectId'] = id;
+					itemToAdd['project'] = {
+						id: invoiceItem.selectedItem?.id,
+						name: invoiceItem.selectedItem?.name
+					};
+					break;
+				case InvoiceTypeEnum.BY_TASK_HOURS:
+					itemToAdd['taskId'] = id;
+					break;
+				case InvoiceTypeEnum.BY_PRODUCTS:
+					itemToAdd['productId'] = id;
+					break;
+				case InvoiceTypeEnum.BY_EXPENSES:
+					itemToAdd['expenseId'] = id;
+					break;
+				default:
+					break;
+			}
+			invoiceItems.push(itemToAdd);
+		}
+
+		invoice.invoiceItems = invoiceItems;
+		const dialogRef = this.dialogService.open(InvoiceEmailMutationComponent, {
+			context: {
+				invoice,
+				invoiceItems,
+				isEstimate: this.isEstimate
+			}
+		});
+
+		const result = await firstValueFrom(dialogRef.onClose);
+
+		if (result !== 'ok') return;
 
 		if (this.isEstimate) {
 			this.toastrService.success(

@@ -1,16 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
-import { IInvoice, InvoiceStatusTypesEnum, IInvoiceItem } from '@gauzy/contracts';
+import { IInvoice, InvoiceStatusTypesEnum, IInvoiceItem, IInvoiceItemCreateInput } from '@gauzy/contracts';
 import { TranslateService } from '@ngx-translate/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { NbDialogRef } from '@nebular/theme';
-import { InvoiceEstimateHistoryService, InvoicesService, Store, ToastrService } from '@gauzy/ui-core/core';
+import {
+	InvoiceEstimateHistoryService,
+	InvoiceItemService,
+	InvoicesService,
+	Store,
+	ToastrService
+} from '@gauzy/ui-core/core';
+import moment from 'moment';
 
 @Component({
-    selector: 'ga-invoice-email',
-    templateUrl: './invoice-email-mutation.component.html',
-    styleUrls: ['./invoice-email-mutation.component.scss'],
-    standalone: false
+	selector: 'ga-invoice-email',
+	templateUrl: './invoice-email-mutation.component.html',
+	styleUrls: ['./invoice-email-mutation.component.scss'],
+	standalone: false
 })
 export class InvoiceEmailMutationComponent extends TranslationBaseComponent implements OnInit {
 	invoice: IInvoice;
@@ -26,7 +33,9 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 		private readonly toastrService: ToastrService,
 		private readonly invoiceService: InvoicesService,
 		private readonly store: Store,
-		private readonly invoiceEstimateHistoryService: InvoiceEstimateHistoryService
+		private readonly invoiceEstimateHistoryService: InvoiceEstimateHistoryService,
+		private readonly invoicesService: InvoicesService,
+		private readonly invoiceItemService: InvoiceItemService
 	) {
 		super(translateService);
 	}
@@ -46,6 +55,11 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 		const organizationId = this.invoice.fromOrganization?.id ?? this.invoice.organizationId;
 
 		const { email } = this.form.value;
+
+		if (!this.invoice.id) {
+			const createdInvoice = await this.createInvoiceEstimate(InvoiceStatusTypesEnum.SENT);
+			if (createdInvoice) await this.createInvoiceEstimateItems();
+		}
 
 		await this.invoiceService.sendEmail(
 			email,
@@ -88,6 +102,52 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 			organizationId,
 			tenantId
 		});
+	}
+
+	async createInvoiceEstimate(status: string, sendTo?: string) {
+		try {
+			const createdInvoice = await this.invoicesService.addOwn({
+				invoiceNumber: this.invoice.invoiceNumber,
+				invoiceDate: moment(this.invoice.invoiceDate).startOf('day').toDate(),
+				dueDate: moment(this.invoice.dueDate).endOf('day').toDate(),
+				currency: this.invoice.currency,
+				discountValue: this.invoice.discountValue,
+				discountType: this.invoice.discountType,
+				tax: this.invoice.tax,
+				tax2: this.invoice.tax2,
+				taxType: this.invoice.taxType,
+				tax2Type: this.invoice.tax2Type,
+				terms: this.invoice.terms,
+				paid: false,
+				totalValue: this.invoice.totalValue,
+				fromUserId: this.invoice.fromUserId,
+				fromOrganizationId: this.invoice.fromOrganization?.id,
+				organizationId: this.invoice.fromOrganization?.id,
+				tenantId: this.invoice.tenantId,
+				invoiceType: this.invoice.invoiceType,
+				tags: this.invoice.tags,
+				isEstimate: this.invoice.isEstimate,
+				status: status,
+				sentTo: sendTo,
+				isArchived: this.invoice.isArchived
+			});
+			this.createdInvoice = createdInvoice;
+			return createdInvoice;
+		} catch (error) {
+			this.toastrService.danger(error);
+		}
+	}
+
+	async createInvoiceEstimateItems() {
+		const invoiceItems: IInvoiceItemCreateInput[] = this.invoice.invoiceItems.map((item) => ({
+			...item,
+			invoiceId: this.createdInvoice.id
+		}));
+		try {
+			return await this.invoiceItemService.createBulk(this.createdInvoice?.id, invoiceItems);
+		} catch (error) {
+			this.toastrService.danger(error);
+		}
 	}
 
 	cancel() {

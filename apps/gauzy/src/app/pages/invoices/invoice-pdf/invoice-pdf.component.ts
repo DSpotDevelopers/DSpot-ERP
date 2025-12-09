@@ -5,6 +5,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { tap } from 'rxjs/operators';
 import { InvoicesService } from '@gauzy/ui-core/core';
 import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
+import { Observable } from 'rxjs';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
@@ -47,6 +48,7 @@ import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
 })
 export class InvoicePdfComponent extends TranslationBaseComponent implements OnInit {
 	@Input() invoice: IInvoice;
+	@Input() alreadyGeneratedInvoice?: boolean = true;
 	fileURL: string;
 	isLoading: boolean;
 	error: boolean;
@@ -62,15 +64,17 @@ export class InvoicePdfComponent extends TranslationBaseComponent implements OnI
 	}
 
 	loadInvoicePdf() {
-		if (!this.invoice?.id) {
-			this.isLoading = false;
-			return;
-		}
-
 		const { id: invoiceId } = this.invoice;
 
-		this.invoicesService
-			.downloadInvoicePdf(invoiceId)
+		let pdfObservable: Observable<Blob>;
+
+		if (this.alreadyGeneratedInvoice) {
+			pdfObservable = this.invoicesService.downloadInvoicePdf(invoiceId);
+		} else {
+			pdfObservable = this.invoicesService.downloadInvoicePdfByInvoice(this.invoice);
+		}
+
+		pdfObservable
 			.pipe(
 				tap((data) => {
 					if (data && data instanceof Blob) {

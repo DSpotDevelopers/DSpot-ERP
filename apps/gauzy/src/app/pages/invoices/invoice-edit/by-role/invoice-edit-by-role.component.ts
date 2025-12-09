@@ -638,7 +638,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				id: invoiceData.id,
 				invoiceNumber: invoiceData.invoiceNumber,
 				invoiceDate: invoiceData.invoiceDate,
-				currency: invoiceData.currency,
+				currency: this.invoice?.currency,
 				dueDate: invoiceData.dueDate,
 				discountValue: invoiceData.discountValue,
 				discountType: invoiceData.discountType,
@@ -650,6 +650,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				paid: false,
 				totalValue: +this.total.toFixed(2),
 				fromUserId: this.invoice.fromUser?.id,
+				fromUser: this.invoice?.fromUser,
 				toOrganization: this.invoice.toOrganization,
 				organizationId,
 				tenantId,
@@ -675,10 +676,13 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				};
 				switch (this.invoice.invoiceType) {
 					case InvoiceTypeEnum.BY_EMPLOYEE_HOURS:
-						itemToAdd['employeeId'] = invoiceItem.selectedItem;
+						itemToAdd['employeeId'] = this.invoice?.fromUser?.employee?.id;
 						break;
 					case InvoiceTypeEnum.BY_PROJECT_HOURS:
-						itemToAdd['projectId'] = invoiceItem.selectedItem;
+						itemToAdd['project'] = {
+							id: invoiceItem.selectedItem?.id,
+							name: invoiceItem.selectedItem?.name
+						};
 						break;
 					case InvoiceTypeEnum.BY_TASK_HOURS:
 						itemToAdd['taskId'] = invoiceItem.selectedItem;

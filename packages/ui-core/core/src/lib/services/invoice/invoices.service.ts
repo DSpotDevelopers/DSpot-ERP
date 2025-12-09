@@ -119,6 +119,12 @@ export class InvoicesService {
 		});
 	}
 
+	downloadInvoicePdfByInvoice(invoice: IInvoice) {
+		return this.http.post(`${API_PREFIX}/invoices/download-invoice-object`, invoice, {
+			responseType: 'blob'
+		});
+	}
+
 	downloadInvoicePaymentPdf(invoiceId: ID) {
 		return this.http.get(`${API_PREFIX}/invoices/payment/download/${invoiceId}`, {
 			responseType: 'blob'
