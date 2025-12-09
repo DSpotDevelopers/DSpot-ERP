@@ -34,7 +34,7 @@ export interface IInvoiceItemFindInput {
 export interface IInvoiceItemCreateInput extends IBasePerTenantAndOrganizationEntityModel {
 	price: number;
 	quantity: number;
-	totalValue: number;
+	totalValue?: number;
 	description?: string;
 	invoiceId?: string;
 	taskId?: string;

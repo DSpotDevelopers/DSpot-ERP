@@ -346,6 +346,75 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 		return await this.pdfmakerService.generatePdf(docDefinition);
 	}
 
+	async generateInvoicePdfByInvoiceData(invoice: IInvoice, language: string) {
+		const translatedText = {
+			item: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE_ITEM.ITEM', { lang: language }),
+			description: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE_ITEM.DESCRIPTION', {
+				lang: language
+			}),
+			quantity: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE_ITEM.QUANTITY', {
+				lang: language
+			}),
+			price: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE_ITEM.PRICE', { lang: language }),
+			totalValue: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE_ITEM.TOTAL_VALUE', {
+				lang: language
+			}),
+
+			invoice: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE', { lang: language }),
+			estimate: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ESTIMATE', { lang: language }),
+			number: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.NUMBER', { lang: language }),
+			from: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.FROM', { lang: language }),
+			to: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.TO', { lang: language }),
+			date: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.DATE', { lang: language }),
+			dueDate: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.DUE_DATE', { lang: language }),
+			discountValue: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICES_SELECT_DISCOUNT_VALUE', {
+				lang: language
+			}),
+			discountType: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.DISCOUNT_TYPE', {
+				lang: language
+			}),
+			taxValue: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.TAX_VALUE', { lang: language }),
+			taxType: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.TAX_TYPE', { lang: language }),
+			currency: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.CURRENCY', { lang: language }),
+			notes: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICES_SELECT_NOTES', {
+				lang: language
+			}),
+			paid: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.PAID', { lang: language }),
+			yes: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.YES', { lang: language }),
+			no: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.NO', { lang: language }),
+			alreadyPaid: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ALREADY_PAID', { lang: language }),
+			amountDue: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.AMOUNT_DUE', { lang: language }),
+			taxId: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.TAX_ID', { lang: language }),
+			address: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ADDRESS', { lang: language }),
+			address2: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ADDRESS_2', { lang: language }),
+			postcode: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.POSTCODE', { lang: language })
+		};
+		let countryName: string | null = null;
+
+		try {
+			const country = await this.countryService.findByIsoCode(
+				invoice.toOrganization?.contact?.country ??
+					invoice.toContact?.contact?.country ??
+					invoice.toOrganization.contact?.country ??
+					invoice.fromOrganization.contact?.country
+			);
+
+			countryName = country?.country ?? null;
+		} catch (error) {
+			this.logger.warn('Failed to fetch country by ISO code', error);
+			countryName = null;
+		}
+		const docDefinition = await generateInvoicePdfDefinition(
+			invoice,
+			invoice.toOrganization ?? invoice.fromOrganization,
+			invoice.toContact,
+			translatedText,
+			language,
+			countryName
+		);
+		return await this.pdfmakerService.generatePdf(docDefinition);
+	}
+
 	async generateInvoicePaymentPdf(invoiceId: string, language: string) {
 		const invoice: IInvoice = await this.findOneByIdString(invoiceId, {
 			relations: [

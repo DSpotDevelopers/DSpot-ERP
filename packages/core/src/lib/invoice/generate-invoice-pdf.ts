@@ -21,7 +21,7 @@ export async function generateInvoicePdfDefinition(
 		switch (invoice.invoiceType) {
 			case InvoiceTypeEnum.BY_EMPLOYEE_HOURS: {
 				const employee = item.employee;
-				currentItem[0] = `${employee.user.name}`;
+				currentItem[0] = `${employee?.user?.name ?? invoice.fromUser?.name}`;
 				break;
 			}
 			case InvoiceTypeEnum.BY_PROJECT_HOURS: {

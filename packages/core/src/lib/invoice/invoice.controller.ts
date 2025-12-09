@@ -1,4 +1,4 @@
-import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiQuery, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiPropertyOptional } from '@nestjs/swagger';
 import {
 	Controller,
 	UseGuards,
@@ -13,7 +13,8 @@ import {
 	Delete,
 	Res,
 	BadRequestException,
-	Headers
+	Headers,
+	NotFoundException
 } from '@nestjs/common';
 import { DeleteResult, FindOptionsWhere } from 'typeorm';
 import { Response } from 'express';
@@ -452,6 +453,50 @@ export class InvoiceController extends CrudController<Invoice> {
 			'Content-Type': 'application/pdf',
 			'Content-Length': buffer.length
 		});
+		stream.pipe(res);
+	}
+
+	@ApiOperation({ summary: 'Download Invoice PDF from IInvoice object' })
+	@ApiResponse({
+		status: HttpStatus.NO_CONTENT,
+		description: 'The invoice has been successfully downloaded'
+	})
+	@ApiResponse({
+		status: HttpStatus.NOT_FOUND,
+		description: 'Invoice not found'
+	})
+	@HttpCode(HttpStatus.ACCEPTED)
+	@Permissions(
+		PermissionsEnum.INVOICES_VIEW,
+		PermissionsEnum.ORG_INVOICES_VIEW,
+		PermissionsEnum.INVOICES_HANDLE,
+		PermissionsEnum.ALL_ORG_VIEW
+	)
+	@Post('download-invoice-object')
+	async downloadInvoicePdfFromObject(
+		@Body() invoice: IInvoice,
+		@I18nLang() locale: LanguagesEnum,
+		@Res() res: Response
+	) {
+		if (!invoice) {
+			throw new NotFoundException('Invoice object is required');
+		}
+
+		this.invoiceService.checkIfUserCanAccessInvoiceForRead({ fromUserId: invoice.fromUserId });
+
+		const buffer: Buffer = await this.invoiceService.generateInvoicePdfByInvoiceData(invoice, locale);
+
+		if (!buffer) {
+			throw new BadRequestException(InvoiceErrors.PDF_GENERATION_FAILED);
+		}
+
+		const stream = this.invoiceService.getReadableStream(buffer);
+
+		res.set({
+			'Content-Type': 'application/pdf',
+			'Content-Length': buffer.length
+		});
+
 		stream.pipe(res);
 	}
 
