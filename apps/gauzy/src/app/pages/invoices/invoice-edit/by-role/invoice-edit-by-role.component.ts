@@ -705,13 +705,25 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				this.dialogService.open(InvoiceEmailMutationComponent, {
 					context: {
 						invoice: invoice,
+						shouldSendEmail: false,
 						isEstimate: this.isEstimate
 					}
 				}).onClose
 			);
 
-			if (result) {
+			if (result?.success && result?.email) {
+				const email = result?.email;
 				await this.updateInvoice('SENT');
+				await this.invoicesService.sendEmail(
+					email,
+					this.invoice.invoiceNumber,
+					this.invoice.id,
+					this.isEstimate,
+					organizationId,
+					tenantId
+				);
+
+				this.toastrService.success('INVOICES_PAGE.EMAIL.EMAIL_SENT');
 			}
 		} else {
 			this.toastrService.danger('INVOICES_PAGE.INVOICE_ITEM.NO_ITEMS');

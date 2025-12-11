@@ -808,7 +808,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 
 		const result = await firstValueFrom(dialogRef.onClose);
 
-		if (result !== 'ok') return;
+		if (result?.success !== true) return;
 
 		if (this.isEstimate) {
 			this.toastrService.success(
