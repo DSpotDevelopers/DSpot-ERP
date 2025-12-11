@@ -25,6 +25,7 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 	isEstimate: boolean;
 	invoiceItems: IInvoiceItem[];
 	createdInvoice: IInvoice;
+	shouldSendEmail = true;
 
 	constructor(
 		public readonly translateService: TranslateService,
@@ -61,14 +62,18 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 			if (createdInvoice) await this.createInvoiceEstimateItems();
 		}
 
-		await this.invoiceService.sendEmail(
-			email,
-			this.invoice.invoiceNumber,
-			this.invoice.id ? this.invoice?.id : this.createdInvoice?.id,
-			this.isEstimate,
-			organizationId,
-			tenantId
-		);
+		if (this.shouldSendEmail) {
+			await this.invoiceService.sendEmail(
+				email,
+				this.invoice.invoiceNumber,
+				this.invoice.id ? this.invoice?.id : this.createdInvoice?.id,
+				this.isEstimate,
+				organizationId,
+				tenantId
+			);
+
+			this.toastrService.success('INVOICES_PAGE.EMAIL.EMAIL_SENT');
+		}
 
 		if (this.invoice.id) {
 			await this.invoiceService.updateAction(this.invoice.id, {
@@ -78,8 +83,10 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 
 		await this.invoiceEstimateSendHistory();
 
-		this.toastrService.success('INVOICES_PAGE.EMAIL.EMAIL_SENT');
-		this.dialogRef.close('ok');
+		this.dialogRef.close({
+			success: true,
+			email: this.shouldSendEmail ? null : email
+		});
 	}
 
 	async invoiceEstimateSendHistory() {
