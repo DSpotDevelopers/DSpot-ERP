@@ -13,17 +13,16 @@ import { CustomCommands } from '../../commands';
 
 import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
-
 const pageLoadTimeout = Cypress.config('pageLoadTimeout');
 
-let email = faker.internet.exampleEmail();
-let secEmail = faker.internet.exampleEmail();
-let firstName = faker.person.firstName();
-let lastName = faker.person.lastName();
-let username = faker.internet.userName();
-let password = faker.internet.password();
-let employeeEmail = faker.internet.exampleEmail();
-let imgUrl = faker.image.avatar();
+const email = faker.internet.exampleEmail();
+const secEmail = faker.internet.exampleEmail();
+const firstName = faker.person.firstName();
+const lastName = faker.person.lastName();
+const username = faker.internet.userName();
+const password = faker.internet.password();
+const employeeEmail = faker.internet.exampleEmail();
+const imgUrl = faker.image.avatar();
 
 // Login with email
 Given('Login with default credentials', () => {
@@ -41,10 +40,7 @@ And('User can add new project', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addProject(
-		organizationProjectsPage,
-		OrganizationProjectsPageData
-	);
+	CustomCommands.addProject(organizationProjectsPage, OrganizationProjectsPageData);
 });
 
 // Invite employees
@@ -98,9 +94,7 @@ When('User click on project dropdown', () => {
 });
 
 Then('User can select project from dropdown options', () => {
-	manageEmployeesPage.selectProjectFromDropdown(
-		ManageEmployeesPageData.defaultProject
-	);
+	manageEmployeesPage.selectProjectFromDropdown(ManageEmployeesPageData.defaultProject);
 });
 
 And('User can see send invite button', () => {
@@ -280,9 +274,7 @@ When('User click on preferred language dropdown', () => {
 });
 
 Then('User can select language from dropdown options', () => {
-	manageEmployeesPage.selectLanguageFromDropdown(
-		ManageEmployeesPageData.preferredLanguage
-	);
+	manageEmployeesPage.selectLanguageFromDropdown(ManageEmployeesPageData.preferredLanguage);
 });
 
 And('User can see save edit button', () => {

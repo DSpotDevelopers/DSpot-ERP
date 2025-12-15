@@ -9,7 +9,7 @@ import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
 const pageLoadTimeout = Cypress.config('pageLoadTimeout');
 
-let email = faker.internet.exampleEmail();
+const email = faker.internet.exampleEmail();
 
 // Login with email
 Given('Login with default credentials and visit Users page', () => {
@@ -39,11 +39,11 @@ And('User can click on second grid button to change view', () => {
 });
 
 And('User can see invite button', () => {
-	manageUserInvitesPage.inviteButtonVisible();
+	manageUserInvitesPage.addInviteButtonVisible();
 });
 
 When('User click on invite button', () => {
-	manageUserInvitesPage.clickInviteButton();
+	manageUserInvitesPage.clickAddInviteButton();
 });
 
 And('User can see email input field', () => {
@@ -73,51 +73,34 @@ Then('User click on roles select', () => {
 
 When('User can see roles dropdown', () => {
 	manageUserInvitesPage.verifyRolesDropdown();
-})
+});
 
 Then('User click see roles dropdown', () => {
 	manageUserInvitesPage.clickRolesDropdown(0);
-})
+});
+
+Then('User can see invitation expiration select', () => {
+	manageUserInvitesPage.verifyInvitationExpirationSelect();
+});
+
+When('User clicks invitation expiration select', () => {
+	manageUserInvitesPage.clickOnInvitationExpirationSelect();
+});
+
+Then('User can see invitation expiration dropdown', () => {
+	manageUserInvitesPage.verifyInvitationExpirationDropdown();
+});
+
+And('User selects invitation expiration option', () => {
+	manageUserInvitesPage.clickInvitationExpirationDropdown(0);
+});
 
 And('User can see save button', () => {
-	manageUserInvitesPage.saveButtonVisible();
+	manageUserInvitesPage.inviteButtonVisible();
 });
 
 When('User click on save button', () => {
-	manageUserInvitesPage.clickSaveButton();
-});
-
-Then('Notification message will appear', () => {
-	manageUserInvitesPage.waitMessageToHide();
-});
-
-When('User see email input field', () => {
-	manageUserInvitesPage.verifyEmailInput();
-});
-
-Then('User type email', () => {
-	manageUserInvitesPage.searchByEmail(email);
-});
-
-And('User can verify client name', () => {
-	manageUserInvitesPage.verifyInviteExist(email);
-})
-
-// Copy invite
-And('User can see invites table', () => {
-	manageUserInvitesPage.tableBodyExists();
-});
-
-When('User click on invites first table row', () => {
-	manageUserInvitesPage.clickTableRow(0);
-});
-
-Then('Copy invite button will become active', () => {
-	manageUserInvitesPage.copyLinkButtonVisible();
-});
-
-When('User click on copy invite button', () => {
-	manageUserInvitesPage.clickCopyLinkButton();
+	manageUserInvitesPage.clickInviteButton();
 });
 
 Then('Notification message will appear', () => {
@@ -125,8 +108,8 @@ Then('Notification message will appear', () => {
 });
 
 // Resend invite
-When('User click on invites first table row again', () => {
-	manageUserInvitesPage.clickTableRow(0);
+When('User click on invites table row with "INVITED" status', () => {
+	manageUserInvitesPage.clickWithCorrectStatusRow();
 });
 
 Then('Resend invite button will become active', () => {
@@ -143,6 +126,23 @@ Then('User can see confirm resend invite button', () => {
 
 When('User click on confirm resend invite button', () => {
 	manageUserInvitesPage.clickConfirmResendInviteButton();
+});
+
+Then('Notification message will appear', () => {
+	manageUserInvitesPage.waitMessageToHide();
+});
+
+// Copy invite
+When('User click on invites table row with "INVITED" status', () => {
+	manageUserInvitesPage.clickWithCorrectStatusRow();
+});
+
+Then('Copy invite button will become active', () => {
+	manageUserInvitesPage.copyLinkButtonVisible();
+});
+
+When('User click on copy invite button', () => {
+	manageUserInvitesPage.clickCopyLinkButton();
 });
 
 Then('Notification message will appear', () => {

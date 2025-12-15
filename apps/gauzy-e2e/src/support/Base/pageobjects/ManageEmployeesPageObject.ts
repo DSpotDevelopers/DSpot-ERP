@@ -39,7 +39,6 @@ export const ManageEmployeesPage = {
 	preferredLanguageOptionCss: 'ng-dropdown-panel.ng-dropdown-panel > div.ng-dropdown-panel-items div.ng-option',
 	cardBodyCss: 'ga-employee-mutation nb-card-body',
 	manageInvitesButtonCss: 'div.card-header-title > div.mr-2 > button[status="primary"]',
-	copyLinkButtonCss: 'button[status="success"]',
 	resendInviteButtonCss: 'button[status="warning"]',
 	confirmResendInviteButtonCss: 'nb-card-footer > button[status="success"]',
 	deleteInviteButtonCss: '.actions-container .actions.ng-star-inserted button:last-of-type',
