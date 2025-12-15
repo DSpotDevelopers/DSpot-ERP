@@ -43,7 +43,7 @@ export const emailInputVisible = () => {
 	verifyElementIsVisible(ManageEmployeesPage.emailsInputCss);
 };
 
-export const enterEmailData = (data) => {
+export const enterEmailData = (data: string) => {
 	enterInputConditionally(ManageEmployeesPage.emailsInputCss, data);
 };
 

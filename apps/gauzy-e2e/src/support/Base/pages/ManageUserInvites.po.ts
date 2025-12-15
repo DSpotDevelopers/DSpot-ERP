@@ -9,7 +9,7 @@ import {
 	enterInput,
 	clickKeyboardBtnByKeycode,
 	verifyByText,
-	vefiryByLength,
+	verifyByLength
 } from '../utils/util';
 import { ManageUserInvitesPage } from '../pageobjects/ManageUserInvitesPageObject';
 
@@ -26,10 +26,10 @@ export const clickManageInvitesButton = () => {
 export const gridButtonVisible = () => {
 	cy.intercept('GET', '/api/invite*').as('waitInvites');
 	verifyElementIsVisible(ManageUserInvitesPage.gridButtonCss);
-	cy.wait('@waitInvites')
+	cy.wait('@waitInvites');
 };
 
-export const clickGridButton = (index) => {
+export const clickGridButton = (index: number) => {
 	clickButtonByIndex(ManageUserInvitesPage.gridButtonCss, index);
 };
 
@@ -37,7 +37,7 @@ export const tableBodyExists = () => {
 	verifyElementIsVisible(ManageUserInvitesPage.selectTableRowCss);
 };
 
-export const clickTableRow = (index) => {
+export const clickTableRow = (index: number) => {
 	clickButtonByIndex(ManageUserInvitesPage.selectTableRowCss, index);
 };
 
@@ -49,20 +49,20 @@ export const clickCopyLinkButton = () => {
 	clickButton(ManageUserInvitesPage.copyLinkButtonCss);
 };
 
+export const addInviteButtonVisible = () => {
+	verifyElementIsVisible(ManageUserInvitesPage.addInviteButtonCss);
+};
+
+export const clickAddInviteButton = () => {
+	clickButton(ManageUserInvitesPage.addInviteButtonCss);
+};
+
 export const resendInviteButtonVisible = () => {
 	verifyElementIsVisible(ManageUserInvitesPage.resendInviteButtonCss);
 };
 
 export const clickResendInviteButton = () => {
 	clickButton(ManageUserInvitesPage.resendInviteButtonCss);
-};
-
-export const cancelResendInviteButtonVisible = () => {
-	verifyElementIsVisible(ManageUserInvitesPage.cancelResendInviteButtonCss);
-};
-
-export const clickCancelResendInviteButton = () => {
-	clickButton(ManageUserInvitesPage.cancelResendInviteButtonCss);
 };
 
 export const confirmResendInviteButtonVisible = () => {
@@ -79,14 +79,6 @@ export const deleteInviteButtonVisible = () => {
 
 export const clickDeleteInviteButton = () => {
 	clickButton(ManageUserInvitesPage.deleteInviteButtonCss);
-};
-
-export const cancelDeleteInviteButtonVisible = () => {
-	verifyElementIsVisible(ManageUserInvitesPage.cancelDeleteInviteButtonCss);
-};
-
-export const clickCancelDeleteInviteButton = () => {
-	clickButton(ManageUserInvitesPage.cancelDeleteInviteButtonCss);
 };
 
 export const confirmDeleteInviteButtonVisible = () => {
@@ -113,7 +105,7 @@ export const emailInputVisible = () => {
 	verifyElementIsVisible(ManageUserInvitesPage.emailInputCss);
 };
 
-export const enterEmailInputData = (data) => {
+export const enterEmailInputData = (data: string) => {
 	enterInputConditionally(ManageUserInvitesPage.emailInputCss, data);
 };
 
@@ -127,21 +119,13 @@ export const enterDateInputData = () => {
 	enterInput(ManageUserInvitesPage.dateInputCss, date);
 };
 
-export const saveButtonVisible = () => {
-	verifyElementIsVisible(ManageUserInvitesPage.saveButtonCss);
-};
-
-export const clickSaveButton = () => {
-	clickButton(ManageUserInvitesPage.saveButtonCss);
-};
-
 export const clickKeyboardButtonByKeyCode = (keycode) => {
 	clickKeyboardBtnByKeycode(keycode);
 };
 
 export const verifyInviteExist = (name: string) => {
-	vefiryByLength(ManageUserInvitesPage.clientsTableRow, 1)
-	verifyByText(ManageUserInvitesPage.clientsTableData, name)
+	verifyByLength(ManageUserInvitesPage.clientsTableRow, 1);
+	verifyByText(ManageUserInvitesPage.clientsTableData, name);
 };
 
 export const verifyRoleSelect = () => {
@@ -152,19 +136,30 @@ export const clickOnRoleSelect = () => {
 	clickButton(ManageUserInvitesPage.rolesInputCss);
 };
 
-export const verifyRolesDropdown = () =>{
-	verifyElementIsVisible(ManageUserInvitesPage.rolesDropdownCss);
-}
-
-export const clickRolesDropdown = (index) =>{
-	clickButtonByIndex(ManageUserInvitesPage.rolesDropdownCss, index);
-}
-
-export const verifyEmailInput = () => {
-	verifyElementIsVisible(ManageUserInvitesPage.searchEmailInputCss);
+export const verifyRolesDropdown = () => {
+	verifyElementIsVisible(ManageUserInvitesPage.dropdownCss);
 };
 
-export const searchByEmail = (name: string) => {
-	clearField(ManageUserInvitesPage.searchEmailInputCss);
-	enterInput(ManageUserInvitesPage.searchEmailInputCss, name);
+export const clickRolesDropdown = (index: number) => {
+	clickButtonByIndex(ManageUserInvitesPage.dropdownCss, index);
+};
+
+export const verifyInvitationExpirationSelect = () => {
+	verifyElementIsVisible(ManageUserInvitesPage.invitationExpirationSelectCss);
+};
+
+export const clickOnInvitationExpirationSelect = () => {
+	clickButton(ManageUserInvitesPage.invitationExpirationSelectCss);
+};
+
+export const verifyInvitationExpirationDropdown = () => {
+	verifyElementIsVisible(ManageUserInvitesPage.dropdownCss);
+};
+
+export const clickInvitationExpirationDropdown = (index: number) => {
+	clickButtonByIndex(ManageUserInvitesPage.dropdownCss, index);
+};
+
+export const clickWithCorrectStatusRow = () => {
+	cy.contains('tbody tr', 'INVITED').click();
 };

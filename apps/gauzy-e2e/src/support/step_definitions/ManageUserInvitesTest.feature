@@ -1,8 +1,10 @@
 Feature: Manage user invites test
+
   Scenario: Login with email
     Given Login with default credentials and visit Users page
-  Scenario: Create new invite
     Then User can visit Candidates invites page
+
+  Scenario: Create new invite
     Then User can see manage invites button
     When User click on manage invites button
     Then User will see grid button
@@ -17,27 +19,31 @@ Feature: Manage user invites test
     Then User click on roles select
     When User can see roles dropdown
     Then User click see roles dropdown
+    Then User can see invitation expiration select
+    When User clicks invitation expiration select
+    Then User can see invitation expiration dropdown
+    And User selects invitation expiration option
     And User can see save button
     When User click on save button
     Then Notification message will appear
-    When User see email input field
-    Then User type email
-    And User can verify client name
-  Scenario: Copy invite
-    And User can see invites table
-    When User click on invites first table row
-    Then Copy invite button will become active
-    When User click on copy invite button
-    Then Notification message will appear
+
   Scenario: Resend invite
-    When User click on invites first table row again
+    When User click on invites table row with "INVITED" status
     Then Resend invite button will become active
     When User click on resend invite button
     Then User can see confirm resend invite button
     When User click on confirm resend invite button
     Then Notification message will appear
+
+  Scenario: Copy invite
+    And User can see invites table
+    When User click on invites table row with "INVITED" status
+    Then Copy invite button will become active
+    When User click on copy invite button
+    Then Notification message will appear
+
   Scenario: Delete invite
-    When User click again on first table row
+    When User click on invites table row with "INVITED" status
     Then Delete button will become active
     When User click on delete button
     Then User can see confirm delete button
