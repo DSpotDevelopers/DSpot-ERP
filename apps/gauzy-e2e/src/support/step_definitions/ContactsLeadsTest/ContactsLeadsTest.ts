@@ -14,21 +14,21 @@ import * as manageEmployeesPage from '../../Base/pages/ManageEmployees.po';
 
 import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
-let email = faker.internet.exampleEmail();
-let fullName = faker.person.firstName() + ' ' + faker.person.lastName();
-let deleteName = faker.person.firstName() + ' ' + faker.person.lastName();
-let inviteName = faker.person.firstName() + ' ' + faker.person.lastName();
-let city = faker.location.city();
-let postcode = faker.location.zipCode();
-let street = faker.location.streetAddress();
-let website = faker.internet.url();
+const email = faker.internet.exampleEmail();
+const fullName = faker.person.firstName() + ' ' + faker.person.lastName();
+const deleteName = faker.person.firstName() + ' ' + faker.person.lastName();
+const inviteName = faker.person.firstName() + ' ' + faker.person.lastName();
+const city = faker.location.city();
+const postcode = faker.location.zipCode();
+const street = faker.location.streetAddress();
+const website = faker.internet.url();
 
-let firstName = faker.person.firstName();
-let lastName = faker.person.lastName();
-let username = faker.internet.userName();
-let password = faker.internet.password();
-let employeeEmail = faker.internet.exampleEmail();
-let imgUrl = faker.image.avatar();
+const firstName = faker.person.firstName();
+const lastName = faker.person.lastName();
+const username = faker.internet.userName();
+const password = faker.internet.password();
+const employeeEmail = faker.internet.exampleEmail();
+const imgUrl = faker.image.avatar();
 
 // Login with email
 Given('Login with default credentials', () => {
@@ -46,15 +46,7 @@ And('User can add new employee', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addEmployee(
-		manageEmployeesPage,
-		firstName,
-		lastName,
-		username,
-		employeeEmail,
-		password,
-		imgUrl
-	);
+	CustomCommands.addEmployee(manageEmployeesPage, firstName, lastName, username, employeeEmail, password, imgUrl);
 });
 
 // Add project
@@ -62,10 +54,7 @@ And('User can add new project', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addProject(
-		organizationProjectsPage,
-		OrganizationProjectsPageData
-	);
+	CustomCommands.addProject(organizationProjectsPage, OrganizationProjectsPageData);
 });
 
 // Add lead
@@ -151,7 +140,7 @@ And('User can verify contact was created', () => {
 });
 
 And('User clear the search field', () => {
-	contactsLeadsPage.clearSearchInput()
+	contactsLeadsPage.clearSearchInput();
 });
 
 // Edit lead
@@ -165,7 +154,7 @@ Then('User enter client name', () => {
 
 And('User can verify client name', () => {
 	contactsLeadsPage.verifyClientNameInTable(fullName);
-})
+});
 
 And('User can see contacts table', () => {
 	contactsLeadsPage.tableRowVisible();
@@ -305,7 +294,7 @@ Then('User enter client name again', () => {
 
 Then('User can verify client name again', () => {
 	contactsLeadsPage.verifyClientNameInTable(deleteName);
-})
+});
 
 // Delete lead
 Then('User can see contacts table', () => {

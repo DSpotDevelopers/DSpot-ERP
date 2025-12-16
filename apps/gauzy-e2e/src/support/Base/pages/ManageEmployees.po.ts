@@ -27,7 +27,7 @@ export const gridBtnExists = () => {
 	verifyElementIsVisible(ManageEmployeesPage.gridButtonCss);
 };
 
-export const gridBtnClick = (index) => {
+export const gridBtnClick = (index: number) => {
 	clickButtonByIndex(ManageEmployeesPage.gridButtonCss, index);
 };
 
@@ -57,7 +57,7 @@ export const enterDateData = () => {
 	enterInput(ManageEmployeesPage.dateInputCss, date);
 };
 
-export const clickKeyboardButtonByKeyCode = (keycode) => {
+export const clickKeyboardButtonByKeyCode = (keycode: number) => {
 	clickKeyboardBtnByKeycode(keycode);
 };
 
@@ -69,7 +69,7 @@ export const clickProjectDropdown = () => {
 	clickButton(ManageEmployeesPage.selectProjectDropdownCss);
 };
 
-export const selectProjectFromDropdown = (text) => {
+export const selectProjectFromDropdown = (text: string) => {
 	clickElementByText(ManageEmployeesPage.selectProjectDropdownOptionCss, text);
 };
 
@@ -110,7 +110,7 @@ export const usernameInputVisible = () => {
 	verifyElementIsVisible(ManageEmployeesPage.usernameInputCss);
 };
 
-export const enterUsernameData = (data) => {
+export const enterUsernameData = (data: string) => {
 	enterInput(ManageEmployeesPage.usernameInputCss, data);
 };
 
@@ -118,7 +118,7 @@ export const employeeEmailInputVisible = () => {
 	verifyElementIsVisible(ManageEmployeesPage.emailInputCss);
 };
 
-export const enterEmployeeEmailData = (data) => {
+export const enterEmployeeEmailData = (data: string) => {
 	enterInput(ManageEmployeesPage.emailInputCss, data);
 };
 
@@ -126,7 +126,7 @@ export const passwordInputVisible = () => {
 	verifyElementIsVisible(ManageEmployeesPage.passwordInputCss);
 };
 
-export const enterPasswordInputData = (data) => {
+export const enterPasswordInputData = (data: string) => {
 	enterInput(ManageEmployeesPage.passwordInputCss, data);
 };
 
@@ -138,11 +138,11 @@ export const clickTagsDropdown = () => {
 	clickButton(ManageEmployeesPage.addTagsDropdownCss);
 };
 
-export const selectTagFromDropdown = (index) => {
+export const selectTagFromDropdown = (index: number) => {
 	clickButtonByIndex(ManageEmployeesPage.tagsDropdownOption, index);
 };
 
-export const selectTagFromDropdownByText = (text) => {
+export const selectTagFromDropdownByText = (text: string) => {
 	clickElementByText(ManageEmployeesPage.tagsDropdownOption, text);
 };
 
@@ -154,7 +154,7 @@ export const imageInputVisible = () => {
 	verifyElementIsVisible(ManageEmployeesPage.imgInputCss);
 };
 
-export const enterImageDataUrl = (url) => {
+export const enterImageDataUrl = (url: string) => {
 	enterInput(ManageEmployeesPage.imgInputCss, url);
 };
 
@@ -214,7 +214,7 @@ export const usernameEditInputVisible = () => {
 	verifyElementIsVisible(ManageEmployeesPage.usernameEditSecondInputCss);
 };
 
-export const enterUsernameEditInputData = (data) => {
+export const enterUsernameEditInputData = (data: string) => {
 	clearField(ManageEmployeesPage.usernameEditSecondInputCss);
 	enterInput(ManageEmployeesPage.usernameEditSecondInputCss, data);
 };
@@ -223,7 +223,7 @@ export const emailEditInputVisible = () => {
 	verifyElementIsVisible(ManageEmployeesPage.emailEditSecondInputCss);
 };
 
-export const enterEmailEditInputData = (data) => {
+export const enterEmailEditInputData = (data: string) => {
 	clearField(ManageEmployeesPage.emailEditSecondInputCss);
 	enterInput(ManageEmployeesPage.emailEditSecondInputCss, data);
 };
@@ -232,7 +232,7 @@ export const firstNameEditInputVisible = () => {
 	verifyElementIsVisible(ManageEmployeesPage.firstNameSecondEditInputCss);
 };
 
-export const enterFirstNameEditInputData = (data) => {
+export const enterFirstNameEditInputData = (data: string) => {
 	clearField(ManageEmployeesPage.firstNameSecondEditInputCss);
 	enterInput(ManageEmployeesPage.firstNameSecondEditInputCss, data);
 };
@@ -241,7 +241,7 @@ export const lastNameEditInputVisible = () => {
 	verifyElementIsVisible(ManageEmployeesPage.lastNameSecondEditInputCss);
 };
 
-export const enterLastNameEditInputData = (data) => {
+export const enterLastNameEditInputData = (data: string) => {
 	clearField(ManageEmployeesPage.lastNameSecondEditInputCss);
 	enterInput(ManageEmployeesPage.lastNameSecondEditInputCss, data);
 };
@@ -254,7 +254,7 @@ export const clickPreferredLanguageDropdown = () => {
 	clickButton(ManageEmployeesPage.preferredLanguageDropdownCss);
 };
 
-export const selectLanguageFromDropdown = (text) => {
+export const selectLanguageFromDropdown = (text: string) => {
 	clickElementByText(ManageEmployeesPage.preferredLanguageOptionCss, text);
 };
 

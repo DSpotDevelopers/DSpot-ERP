@@ -33,8 +33,7 @@ let editFirstName = ' ';
 let editLastName = ' ';
 let editEmail = ' ';
 
-//! waitToLoad. No request ever occurred.
-describe.skip('Edit employee test', () => {
+describe('Edit employee test', { testIsolation: false }, () => {
 	before(() => {
 		firstName = faker.person.firstName();
 		lastName = faker.person.lastName();
@@ -69,10 +68,10 @@ describe.skip('Edit employee test', () => {
 			contactsLeadsPage,
 			ContactsLeadsPageData
 		);
+		cy.visit('/#/pages/dashboard/accounting');
 	});
 
 	it('Should edit account data', () => {
-		cy.visit('/#/pages/dashboard/accounting');
 		editEmployeePage.selectEmployeeByName(`${firstName} ${lastName}`);
 		editEmployeePage.editButtonVisible();
 		editEmployeePage.clickEditButton();
@@ -84,8 +83,9 @@ describe.skip('Edit employee test', () => {
 		editEmployeePage.enterFirstNameData(editFirstName);
 		editEmployeePage.lastNameInputVisible();
 		editEmployeePage.enterLastNameData(editLastName);
-		editEmployeePage.languageSelectVisible();
-		editEmployeePage.chooseLanguage(EditEmployeePageData.preferredLanguage);
+		editEmployeePage.preferredLanguageDropdownVisible();
+		editEmployeePage.clickPreferredLanguageDropdown();
+		editEmployeePage.selectLanguageFromDropdown(EditEmployeePageData.preferredLanguage);
 		editEmployeePage.tabButtonVisible();
 		editEmployeePage.clickTabButton(1);
 	});

@@ -20,7 +20,7 @@ export const gridBtnExists = () => {
 	cy.wait('@waitToLoad');
 };
 
-export const gridBtnClick = (index) => {
+export const gridBtnClick = (index: number) => {
 	clickButtonByIndex(ContactsLeadsPage.gridButtonCss, index);
 };
 
@@ -36,7 +36,7 @@ export const nameInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.nameInputCss);
 };
 
-export const enterNameInputData = (data) => {
+export const enterNameInputData = (data: string) => {
 	clearField(ContactsLeadsPage.nameInputCss);
 	enterInput(ContactsLeadsPage.nameInputCss, data);
 };
@@ -45,7 +45,7 @@ export const emailInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.emailInputCss);
 };
 
-export const enterEmailInputData = (data) => {
+export const enterEmailInputData = (data: string) => {
 	clearField(ContactsLeadsPage.emailInputCss);
 	enterInput(ContactsLeadsPage.emailInputCss, data);
 };
@@ -54,7 +54,7 @@ export const phoneInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.phoneInputCss);
 };
 
-export const enterPhoneInputData = (data) => {
+export const enterPhoneInputData = (data: string) => {
 	clearField(ContactsLeadsPage.phoneInputCss);
 	enterInput(ContactsLeadsPage.phoneInputCss, data);
 };
@@ -67,7 +67,7 @@ export const clickCountryDropdown = () => {
 	clickButton(ContactsLeadsPage.countryDropdownCss);
 };
 
-export const selectCountryFromDropdown = (text) => {
+export const selectCountryFromDropdown = (text: string) => {
 	clickElementByText(ContactsLeadsPage.dropdownOptionCss, text);
 };
 
@@ -75,7 +75,7 @@ export const cityInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.cityInputCss);
 };
 
-export const enterCityInputData = (data) => {
+export const enterCityInputData = (data: string) => {
 	clearField(ContactsLeadsPage.cityInputCss);
 	enterInput(ContactsLeadsPage.cityInputCss, data);
 };
@@ -84,7 +84,7 @@ export const postcodeInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.postCodeInputCss);
 };
 
-export const enterPostcodeInputData = (data) => {
+export const enterPostcodeInputData = (data: string) => {
 	clearField(ContactsLeadsPage.postCodeInputCss);
 	enterInput(ContactsLeadsPage.postCodeInputCss, data);
 };
@@ -93,7 +93,7 @@ export const streetInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.streetInputCss);
 };
 
-export const enterStreetInputData = (data) => {
+export const enterStreetInputData = (data: string) => {
 	clearField(ContactsLeadsPage.streetInputCss);
 	enterInput(ContactsLeadsPage.streetInputCss, data);
 };
@@ -106,7 +106,7 @@ export const clickProjectDropdown = () => {
 	clickButton(ContactsLeadsPage.projectsDropdownCss);
 };
 
-export const selectProjectFromDropdown = (text) => {
+export const selectProjectFromDropdown = (text: string) => {
 	clickElementByText(ContactsLeadsPage.projectsDropdownOptionCss, text);
 };
 
@@ -118,8 +118,8 @@ export const clickSelectEmployeeDropdown = () => {
 	clickButton(ContactsLeadsPage.usersMultiSelectCss);
 };
 
-export const selectEmployeeDropdownOption = (index) => {
-	clickButtonByIndex(ContactsLeadsPage.dropdownOptionCss, index);
+export const selectEmployeeDropdownOption = (index: number) => {
+	clickButtonByIndex(ContactsLeadsPage.usersDropdownOptionCss, index);
 };
 
 export const tagsMultiSelectVisible = () => {
@@ -130,7 +130,7 @@ export const clickTagsMultiSelect = () => {
 	clickButton(ContactsLeadsPage.addTagsDropdownCss);
 };
 
-export const selectTagsFromDropdown = (index) => {
+export const selectTagsFromDropdown = (index: number) => {
 	clickButtonByIndex(ContactsLeadsPage.tagsDropdownOption, index);
 };
 
@@ -138,12 +138,12 @@ export const websiteInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.websiteInputCss);
 };
 
-export const enterWebsiteInputData = (data) => {
+export const enterWebsiteInputData = (data: string) => {
 	clearField(ContactsLeadsPage.websiteInputCss);
 	enterInput(ContactsLeadsPage.websiteInputCss, data);
 };
 
-export const clickKeyboardButtonByKeyCode = (keycode) => {
+export const clickKeyboardButtonByKeyCode = (keycode: number) => {
 	clickKeyboardBtnByKeycode(keycode);
 };
 
@@ -175,7 +175,7 @@ export const tableRowVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.selectTableRowCss);
 };
 
-export const selectTableRow = (index) => {
+export const selectTableRow = (index: number) => {
 	clickButtonByIndex(ContactsLeadsPage.selectTableRowCss, index);
 };
 
@@ -183,7 +183,7 @@ export const editButtonVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.editButtonCss);
 };
 
-export const clickEditButton = (index) => {
+export const clickEditButton = (index: number) => {
 	clickButtonByIndex(ContactsLeadsPage.editButtonCss, index);
 };
 
@@ -215,7 +215,7 @@ export const contactNameInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.contactNameCss);
 };
 
-export const enterContactNameData = (data) => {
+export const enterContactNameData = (data: string) => {
 	clearField(ContactsLeadsPage.contactNameCss);
 	enterInput(ContactsLeadsPage.contactNameCss, data);
 };
@@ -224,7 +224,7 @@ export const contactPhoneInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.contactPhoneCss);
 };
 
-export const enterContactPhoneData = (data) => {
+export const enterContactPhoneData = (data: string) => {
 	clearField(ContactsLeadsPage.contactPhoneCss);
 	enterInput(ContactsLeadsPage.contactPhoneCss, data);
 };
@@ -233,16 +233,16 @@ export const contactEmailInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.contactEmailCss);
 };
 
-export const enterContactEmailData = (data) => {
+export const enterContactEmailData = (data: string) => {
 	clearField(ContactsLeadsPage.contactEmailCss);
 	enterInput(ContactsLeadsPage.contactEmailCss, data);
 };
 
-export const verifyLeadExists = (text) => {
+export const verifyLeadExists = (text: string) => {
 	verifyText(ContactsLeadsPage.verifyLeadCss, text);
 };
 
-export const verifyElementIsDeleted = (text) => {
+export const verifyElementIsDeleted = (text: string) => {
 	verifyTextNotExisting(ContactsLeadsPage.verifyLeadCss, text);
 };
 
@@ -274,7 +274,7 @@ export const budgetInputVisible = () => {
 	verifyElementIsVisible(ContactsLeadsPage.budgetInputCss);
 };
 
-export const enterBudgetData = (data) => {
+export const enterBudgetData = (data: number) => {
 	clearField(ContactsLeadsPage.budgetInputCss);
 	enterInput(ContactsLeadsPage.budgetInputCss, data);
 };
@@ -299,4 +299,12 @@ export const clearSearchInput = () => {
 export const verifyClientNameInTable = (name: string) => {
 	verifyByLength(ContactsLeadsPage.clientsTableRow, 1);
 	verifyByText(ContactsLeadsPage.clientsTableData, name);
+};
+
+export const nextGroupButtonVisible = () => {
+	verifyElementIsVisible(ContactsLeadsPage.nextGroupButtonCss);
+};
+
+export const clickGroupNextButton = () => {
+	clickButton(ContactsLeadsPage.nextGroupButtonCss);
 };
