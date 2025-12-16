@@ -90,8 +90,8 @@ export const CustomCommands = {
 		contactsLeadsPage.clickCardBody();
 		contactsLeadsPage.websiteInputVisible();
 		contactsLeadsPage.enterWebsiteInputData(website);
-		contactsLeadsPage.saveButtonVisible();
-		contactsLeadsPage.clickSaveButton();
+		contactsLeadsPage.verifyNextButtonVisible();
+		contactsLeadsPage.clickNextButton();
 		contactsLeadsPage.countryDropdownVisible();
 		contactsLeadsPage.clickCountryDropdown();
 		contactsLeadsPage.selectCountryFromDropdown(ContactsLeadsPageData.country);
@@ -101,12 +101,12 @@ export const CustomCommands = {
 		contactsLeadsPage.enterPostcodeInputData(postcode);
 		contactsLeadsPage.streetInputVisible();
 		contactsLeadsPage.enterStreetInputData(street);
-		contactsLeadsPage.verifyNextButtonVisible();
-		contactsLeadsPage.clickNextButton();
+		contactsLeadsPage.nextGroupButtonVisible();
+		contactsLeadsPage.clickGroupNextButton();
 		contactsLeadsPage.budgetInputVisible();
 		contactsLeadsPage.enterBudgetData(ContactsLeadsPageData.hours);
-		contactsLeadsPage.lastStepBtnVisible();
-		contactsLeadsPage.clickLastStepBtn();
+		contactsLeadsPage.nextGroupButtonVisible();
+		contactsLeadsPage.clickGroupNextButton();
 		contactsLeadsPage.selectEmployeeDropdownVisible();
 		contactsLeadsPage.clickSelectEmployeeDropdown();
 		contactsLeadsPage.selectEmployeeDropdownOption(0);

@@ -5,14 +5,13 @@ import {
 	clickButton,
 	clickElementByText,
 	clearField,
-	verifyValue,
 	clickButtonByIndex,
 	waitElementToHide,
 	verifyText
 } from '../utils/util';
 import { EditEmployeePage } from '../pageobjects/EditEmployeePageObject';
 
-export const selectEmployeeByName = (name) => {
+export const selectEmployeeByName = (name: string) => {
 	clickElementByText(EditEmployeePage.employeeCss, name);
 };
 
@@ -28,7 +27,7 @@ export const usernameInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.usernameInputCss);
 };
 
-export const enterUsernameInputData = (data) => {
+export const enterUsernameInputData = (data: string) => {
 	clearField(EditEmployeePage.usernameInputCss);
 	enterInput(EditEmployeePage.usernameInputCss, data);
 };
@@ -37,7 +36,7 @@ export const firstNameInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.firstNameInputCss);
 };
 
-export const enterFirstNameData = (data) => {
+export const enterFirstNameData = (data: string) => {
 	clearField(EditEmployeePage.firstNameInputCss);
 	enterInput(EditEmployeePage.firstNameInputCss, data);
 };
@@ -46,7 +45,7 @@ export const lastNameInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.lastNameInputCss);
 };
 
-export const enterLastNameData = (data) => {
+export const enterLastNameData = (data: string) => {
 	clearField(EditEmployeePage.lastNameInputCss);
 	enterInput(EditEmployeePage.lastNameInputCss, data);
 };
@@ -55,33 +54,36 @@ export const emailInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.emailInputCss);
 };
 
-export const enterEmailData = (data) => {
+export const enterEmailData = (data: string) => {
 	clearField(EditEmployeePage.emailInputCss);
 	enterInput(EditEmployeePage.emailInputCss, data);
 };
 
-export const languageSelectVisible = () => {
+export const preferredLanguageDropdownVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.preferredLanguageCss);
 };
 
-export const chooseLanguage = (data) => {
+export const clickPreferredLanguageDropdown = () => {
 	clickButton(EditEmployeePage.preferredLanguageCss);
-	clickElementByText(EditEmployeePage.dropdownOptionCss, data);
+};
+
+export const selectLanguageFromDropdown = (text: string) => {
+	clickElementByText(EditEmployeePage.preferredLanguageOptionCss, text);
 };
 
 export const tabButtonVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.tabButtonCss);
 };
 
-export const clickTabButton = (index) => {
-	clickButtonByIndex(EditEmployeePage.tabButtonCss, index);
+export const clickTabButton = (index: number) => {
+	cy.get(EditEmployeePage.tabButtonCss).eq(index).find(EditEmployeePage.tabCss).click();
 };
 
 export const linkedinInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.linkedInInputCss);
 };
 
-export const enterLinkedinInputData = (data) => {
+export const enterLinkedinInputData = (data: string) => {
 	clearField(EditEmployeePage.linkedInInputCss);
 	enterInput(EditEmployeePage.linkedInInputCss, data);
 };
@@ -90,7 +92,7 @@ export const githubInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.githubInputCss);
 };
 
-export const enterGithubInputData = (data) => {
+export const enterGithubInputData = (data: string) => {
 	clearField(EditEmployeePage.githubInputCss);
 	enterInput(EditEmployeePage.githubInputCss, data);
 };
@@ -99,7 +101,7 @@ export const upworkInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.upworkInputCss);
 };
 
-export const enterUpworkInputData = (data) => {
+export const enterUpworkInputData = (data: string) => {
 	clearField(EditEmployeePage.upworkInputCss);
 	enterInput(EditEmployeePage.upworkInputCss, data);
 };
@@ -108,7 +110,7 @@ export const descriptionInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.descriptionInputCss);
 };
 
-export const enterDescriptionInputData = (data) => {
+export const enterDescriptionInputData = (data: string) => {
 	clearField(EditEmployeePage.descriptionInputCss);
 	enterInput(EditEmployeePage.descriptionInputCss, data);
 };
@@ -141,7 +143,7 @@ export const clickCountryDropdown = () => {
 	clickButton(EditEmployeePage.countryDropdownCss);
 };
 
-export const selectCountryFromDropdown = (text) => {
+export const selectCountryFromDropdown = (text: string) => {
 	clickElementByText(EditEmployeePage.dropdownOptionCss, text);
 };
 
@@ -149,7 +151,7 @@ export const cityInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.cityInputCss);
 };
 
-export const enterCityInputData = (data) => {
+export const enterCityInputData = (data: string) => {
 	clearField(EditEmployeePage.cityInputCss);
 	enterInput(EditEmployeePage.cityInputCss, data);
 };
@@ -158,7 +160,7 @@ export const postcodeInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.postCodeInputCss);
 };
 
-export const enterPostcodeInputData = (data) => {
+export const enterPostcodeInputData = (data: string) => {
 	clearField(EditEmployeePage.postCodeInputCss);
 	enterInput(EditEmployeePage.postCodeInputCss, data);
 };
@@ -167,7 +169,7 @@ export const streetInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.addressInputCss);
 };
 
-export const enterStreetInputData = (data) => {
+export const enterStreetInputData = (data: string) => {
 	clearField(EditEmployeePage.addressInputCss);
 	enterInput(EditEmployeePage.addressInputCss, data);
 };
@@ -180,15 +182,15 @@ export const clickPayPeriodDropdown = () => {
 	clickButton(EditEmployeePage.payPeriodDropdownCss);
 };
 
-export const selectPayPeriodOption = (text) => {
-	clickElementByText(EditEmployeePage.dropdownOptionCss, text);
+export const selectPayPeriodOption = (text: string) => {
+	clickElementByText(EditEmployeePage.dropdownOptionAnotherCss, text);
 };
 
 export const weeklyLimitInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.weeklyLimitInputCss);
 };
 
-export const enterWeeklyLimitInputData = (data) => {
+export const enterWeeklyLimitInputData = (data: number) => {
 	clearField(EditEmployeePage.weeklyLimitInputCss);
 	enterInput(EditEmployeePage.weeklyLimitInputCss, data);
 };
@@ -197,7 +199,7 @@ export const billRateInputVisible = () => {
 	verifyElementIsVisible(EditEmployeePage.billRateValueInputCss);
 };
 
-export const enterBillRateInputData = (data) => {
+export const enterBillRateInputData = (data: number) => {
 	clearField(EditEmployeePage.billRateValueInputCss);
 	enterInput(EditEmployeePage.billRateValueInputCss, data);
 };
@@ -218,11 +220,8 @@ export const clickProjectOrContactDropdown = () => {
 	clickButton(EditEmployeePage.projectOrContactsDropdownCss);
 };
 
-export const selectProjectOrContactFromDropdown = (index) => {
-	clickButtonByIndex(
-		EditEmployeePage.projectOrContactDropdownOptionCss,
-		index
-	);
+export const selectProjectOrContactFromDropdown = (index: number) => {
+	clickButtonByIndex(EditEmployeePage.projectOrContactDropdownOptionCss, index);
 };
 
 export const saveProjectOrContactButtonVisible = () => {
@@ -245,23 +244,10 @@ export const saveBtnClick = () => {
 	clickButton(EditEmployeePage.saveButtonCss);
 };
 
-export const verifyEmployee = (text) => {
+export const verifyEmployee = (text: string) => {
 	verifyText(EditEmployeePage.verifyEmployeeCss, text);
 };
 
 export const waitMessageToHide = () => {
 	waitElementToHide(EditEmployeePage.toastrMessageCss);
-};
-
-//////////////////////////////////////////////////////////////////////////////
-export const verifyFirstName = (val) => {
-	verifyValue(EditEmployeePage.firstNameInputCss, val);
-};
-
-export const verifyLastName = (val) => {
-	verifyValue(EditEmployeePage.lastNameInputCss, val);
-};
-
-export const verifyEmail = (val) => {
-	verifyValue(EditEmployeePage.emailInputCss, val);
 };

@@ -13,14 +13,14 @@ import * as logoutPage from '../../Base/pages/Logout.po';
 
 import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
-let email = faker.internet.exampleEmail();
-let fullName = faker.person.firstName() + ' ' + faker.person.lastName();
-let inviteName = faker.person.firstName() + ' ' + faker.person.lastName();
-let deleteName = faker.person.firstName() + ' ' + faker.person.lastName();
-let city = faker.location.city();
-let postcode = faker.location.zipCode();
-let street = faker.location.streetAddress();
-let website = faker.internet.url();
+const email = faker.internet.exampleEmail();
+const fullName = faker.person.firstName() + ' ' + faker.person.lastName();
+const inviteName = faker.person.firstName() + ' ' + faker.person.lastName();
+const deleteName = faker.person.firstName() + ' ' + faker.person.lastName();
+const city = faker.location.city();
+const postcode = faker.location.zipCode();
+const street = faker.location.streetAddress();
+const website = faker.internet.url();
 
 // Login with email
 Given('Login with default credentials', () => {
@@ -38,10 +38,7 @@ And('User can add new project', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addProject(
-		organizationProjectsPage,
-		OrganizationProjectsPageData
-	);
+	CustomCommands.addProject(organizationProjectsPage, OrganizationProjectsPageData);
 });
 
 // Add new client
@@ -49,16 +46,7 @@ And('User can add new client', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addClient(
-		clientsPage,
-		fullName,
-		email,
-		website,
-		city,
-		postcode,
-		street,
-		ClientsData
-	);
+	CustomCommands.addClient(clientsPage, fullName, email, website, city, postcode, street, ClientsData);
 });
 
 // Invite client
@@ -119,7 +107,7 @@ And('User can verify client was created', () => {
 });
 
 And('User clear the search field', () => {
-	clientsPage.clearSearchInput()
+	clientsPage.clearSearchInput();
 });
 
 // Edit client
@@ -133,7 +121,7 @@ Then('User enter client name', () => {
 
 And('User can verify client name', () => {
 	clientsPage.verifyClientNameInTable(fullName);
-})
+});
 
 And('User can see clients table', () => {
 	clientsPage.tableRowVisible();

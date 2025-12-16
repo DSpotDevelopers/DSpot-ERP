@@ -65,7 +65,7 @@ describe.skip('Contacts leads test', () => {
 		contactsLeadsPage.tableRowVisible();
 		contactsLeadsPage.selectTableRow(0);
 		contactsLeadsPage.editButtonVisible();
-		contactsLeadsPage.clickEditButton();
+		contactsLeadsPage.clickEditButton(ContactsLeadsPageData.editBtn);
 		contactsLeadsPage.nameInputVisible();
 		contactsLeadsPage.enterNameInputData(deleteName);
 		contactsLeadsPage.emailInputVisible();

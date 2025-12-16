@@ -16,12 +16,12 @@ import { Given, Then, When, And } from 'cypress-cucumber-preprocessor/steps';
 
 const pageLoadTimeout = Cypress.config('pageLoadTimeout');
 
-let firstName = faker.person.firstName();
-let lastName = faker.person.lastName();
-let username = faker.internet.userName();
-let password = faker.internet.password();
-let employeeEmail = faker.internet.exampleEmail();
-let imgUrl = faker.image.avatar();
+const firstName = faker.person.firstName();
+const lastName = faker.person.lastName();
+const username = faker.internet.userName();
+const password = faker.internet.password();
+const employeeEmail = faker.internet.exampleEmail();
+const imgUrl = faker.image.avatar();
 
 // Login with email
 Given('Login with default credentials', () => {
@@ -39,15 +39,7 @@ And('User can add new employee', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addEmployee(
-		manageEmployeesPage,
-		firstName,
-		lastName,
-		username,
-		employeeEmail,
-		password,
-		imgUrl
-	);
+	CustomCommands.addEmployee(manageEmployeesPage, firstName, lastName, username, employeeEmail, password, imgUrl);
 });
 
 // Add new project
@@ -55,10 +47,7 @@ And('User can add new project', () => {
 	CustomCommands.logout(dashboardPage, logoutPage, loginPage);
 	CustomCommands.clearCookies();
 	CustomCommands.login(loginPage, LoginPageData, dashboardPage);
-	CustomCommands.addProject(
-		organizationProjectsPage,
-		OrganizationProjectsPageData
-	);
+	CustomCommands.addProject(organizationProjectsPage, OrganizationProjectsPageData);
 });
 
 // Add new task
@@ -97,9 +86,7 @@ When('User click on project dropdown', () => {
 });
 
 Then('User can select project from dropdown options', () => {
-	addTaskPage.selectProjectOptionDropdown(
-		AddTasksPageData.defaultTaskProject
-	);
+	addTaskPage.selectProjectOptionDropdown(AddTasksPageData.defaultTaskProject);
 });
 
 And('User can see employee dropdown', () => {
@@ -137,9 +124,7 @@ And('User can see estimate days input field', () => {
 });
 
 And('User can enter value for estimate days', () => {
-	addTaskPage.enterEstimateDaysInputData(
-		AddTasksPageData.defaultTaskEstimateDays
-	);
+	addTaskPage.enterEstimateDaysInputData(AddTasksPageData.defaultTaskEstimateDays);
 });
 
 And('User can see estimate hours input field', () => {
@@ -147,9 +132,7 @@ And('User can see estimate hours input field', () => {
 });
 
 And('User can add value for estimate hours', () => {
-	addTaskPage.enterEstimateHoursInputData(
-		AddTasksPageData.defaultTaskEstimateHours
-	);
+	addTaskPage.enterEstimateHoursInputData(AddTasksPageData.defaultTaskEstimateHours);
 });
 
 And('User can see estimate minutes input field', () => {
@@ -157,9 +140,7 @@ And('User can see estimate minutes input field', () => {
 });
 
 And('User can enter value for estimate minutes', () => {
-	addTaskPage.enterEstimateMinutesInputData(
-		AddTasksPageData.defaultTaskEstimateMinutes
-	);
+	addTaskPage.enterEstimateMinutesInputData(AddTasksPageData.defaultTaskEstimateMinutes);
 });
 
 And('User can task description input field', () => {
@@ -167,9 +148,7 @@ And('User can task description input field', () => {
 });
 
 And('User can enter value for description', () => {
-	addTaskPage.enterTaskDescriptionTextareaData(
-		AddTasksPageData.defaultTaskDescription
-	);
+	addTaskPage.enterTaskDescriptionTextareaData(AddTasksPageData.defaultTaskDescription);
 });
 
 And('User can see save task button', () => {
@@ -202,7 +181,7 @@ And('User can verify task was created', () => {
 
 // Duplicate task
 And('User clear the search field', () => {
-	addTaskPage.clearSearchInput()
+	addTaskPage.clearSearchInput();
 });
 
 Then('User can see table populated with tasks', () => {
@@ -259,9 +238,7 @@ When('User click on edit project dropdown', () => {
 });
 
 Then('User can select new project from dropdown options', () => {
-	addTaskPage.selectProjectOptionDropdown(
-		AddTasksPageData.defaultTaskProject
-	);
+	addTaskPage.selectProjectOptionDropdown(AddTasksPageData.defaultTaskProject);
 });
 
 And('User can see edit title input field', () => {
@@ -286,9 +263,7 @@ And('User can see edit estimate days input field', () => {
 });
 
 And('User can enter value for estimate days edit', () => {
-	addTaskPage.enterEstimateDaysInputData(
-		AddTasksPageData.defaultTaskEstimateDays
-	);
+	addTaskPage.enterEstimateDaysInputData(AddTasksPageData.defaultTaskEstimateDays);
 });
 
 And('User can see edit estimate hours input field', () => {
@@ -296,9 +271,7 @@ And('User can see edit estimate hours input field', () => {
 });
 
 And('User can add value for estimate hours edit', () => {
-	addTaskPage.enterEstimateHoursInputData(
-		AddTasksPageData.defaultTaskEstimateHours
-	);
+	addTaskPage.enterEstimateHoursInputData(AddTasksPageData.defaultTaskEstimateHours);
 });
 
 And('User can see edit estimate minutes input field', () => {
@@ -306,9 +279,7 @@ And('User can see edit estimate minutes input field', () => {
 });
 
 And('User can enter value for estimate minutes edit', () => {
-	addTaskPage.enterEstimateMinutesInputData(
-		AddTasksPageData.defaultTaskEstimateMinutes
-	);
+	addTaskPage.enterEstimateMinutesInputData(AddTasksPageData.defaultTaskEstimateMinutes);
 });
 
 And('User can task edit description input field', () => {
@@ -316,9 +287,7 @@ And('User can task edit description input field', () => {
 });
 
 And('User can enter value for description edit', () => {
-	addTaskPage.enterTaskDescriptionTextareaData(
-		AddTasksPageData.defaultTaskDescription
-	);
+	addTaskPage.enterTaskDescriptionTextareaData(AddTasksPageData.defaultTaskDescription);
 });
 
 And('User can see save edited task button', () => {
