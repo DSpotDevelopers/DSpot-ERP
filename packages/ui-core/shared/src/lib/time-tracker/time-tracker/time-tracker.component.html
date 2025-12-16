@@ -64,8 +64,15 @@
 													{{ currentSessionTime }}
 												</span>
 												<span class="today-time mt-2">
-													{{ 'TIMER_TRACKER.TODAY' | translate }}
+													{{ 'TIMER_TRACKER.TODAY' | translate }}:
 													{{ todaySessionTime }}
+												</span>
+												<span class="today-time mt-2">
+													{{ 'TIMESHEET.WEEKLY' | translate }}:
+
+													{{ (workedThisWeek$ | async) || 0 | humanDuration : 'HH:mm' }}
+													/
+													{{ (reWeeklyLimit$ | async) * 3600 || 0 | humanDuration : 'HH:mm' }}
 												</span>
 											</div>
 											<span *ngIf="limitReached" class="today-time mt-2 invalid-feedback d-block">
