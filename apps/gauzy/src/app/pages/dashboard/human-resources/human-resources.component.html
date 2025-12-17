@@ -1,13 +1,6 @@
-<nb-card
-	[nbSpinner]="loading"
-	nbSpinnerStatus="primary"
-	*ngIf="selectedEmployee && selectedEmployee.id"
->
+<nb-card [nbSpinner]="loading" nbSpinnerStatus="primary" *ngIf="selectedEmployee && selectedEmployee.id">
 	<nb-card-header class="header">
-		<nb-alert
-			outline="danger"
-			*ngIf="incomePermissionsError || expensePermissionError"
-		>
+		<nb-alert outline="danger" *ngIf="incomePermissionsError || expensePermissionError">
 			{{ 'ORGANIZATIONS_PAGE.PERMISSIONS.INSUFFICIENT' | translate }}
 			<span *ngIf="incomePermissionsError">{{
 				'ORGANIZATIONS_PAGE.PERMISSIONS.ORG_INCOMES_VIEW' | translate
@@ -18,51 +11,26 @@
 		</nb-alert>
 		<div class="header-container">
 			<div class="employee-info">
-				<img
-					class="employee-image"
-					[src]="selectedEmployee.imageUrl"
-					alt="Employee Avatar"
-				/>
+				<img class="employee-image" [src]="selectedEmployee.imageUrl" alt="Employee Avatar" />
 
 				<div class="employee-details">
 					<span class="employee-name">
 						{{ selectedEmployee.fullName | truncate : 22 }}
-						<nb-icon
-							class="mr-1 edit-icon"
-							icon="edit-outline"
-							(click)="edit()"
-						></nb-icon
+						<nb-icon class="mr-1 edit-icon" icon="edit-outline" (click)="edit()"></nb-icon
 					></span>
-					<div
-						class="employee-position"
-						[innerText]="employeePosition"
-					></div>
+					<div class="employee-position" [innerText]="employeePosition"></div>
 				</div>
 			</div>
 
 			<div>
-				<div
-					*ngIf="salary !== 0"
-					class="employee-details employee-salary"
-				>
+				<div *ngIf="salary && salary !== 0" class="employee-details employee-salary">
 					{{ 'DASHBOARD_PAGE.TITLE.SALARY' | translate }}:
-					{{
-						salary
-							| currency: defaultCurrency
-							| position: selectedOrganization?.currencyPosition
-					}}
+					{{ salary | currency : defaultCurrency | position : selectedOrganization?.currencyPosition }}
 				</div>
 
-				<div
-					*ngIf="selectedOrganization?.bonusType && averageBonus"
-					class="employee-details"
-				>
+				<div *ngIf="selectedOrganization?.bonusType && averageBonus" class="employee-details">
 					{{ 'DASHBOARD_PAGE.DEVELOPER.AVERAGE_BONUS' | translate }}:
-					{{
-						averageBonus
-							| currency: defaultCurrency
-							| position: selectedOrganization?.currencyPosition
-					}}
+					{{ averageBonus | currency : defaultCurrency | position : selectedOrganization?.currencyPosition }}
 				</div>
 			</div>
 		</div>
@@ -75,33 +43,28 @@
 				<ga-info-block
 					*ngIf="directIncomeBonus !== 0"
 					accordion="true"
-					title="{{
-						'DASHBOARD_PAGE.DEVELOPER.TOTAL_INCOME' | translate
-					}}"
+					title="{{ 'DASHBOARD_PAGE.DEVELOPER.TOTAL_INCOME' | translate }}"
 					meta="{{
 						'DASHBOARD_PAGE.TITLE.TOTAL_INCOME_CALC'
 							| translate
 								: {
 										totalNonBonusIncome: defaultCurrency
 											? (nonBonusIncome || 0
-											  | currency: defaultCurrency
-											  | position
-													: selectedOrganization?.currencyPosition)
+											  | currency : defaultCurrency
+											  | position : selectedOrganization?.currencyPosition)
 											: nonBonusIncome || 0,
 										totalBonusIncome: defaultCurrency
 											? (directIncomeBonus || 0
-											  | currency: defaultCurrency
-											  | position
-													: selectedOrganization?.currencyPosition)
+											  | currency : defaultCurrency
+											  | position : selectedOrganization?.currencyPosition)
 											: directIncomeBonus || 0
 								  }
 					}}"
 					value="{{
 						defaultCurrency
 							? (income || 0
-							  | currency: defaultCurrency
-							  | position
-									: selectedOrganization?.currencyPosition)
+							  | currency : defaultCurrency
+							  | position : selectedOrganization?.currencyPosition)
 							: income || 0
 					}}"
 					color="#089c17"
@@ -115,9 +78,8 @@
 						value="{{
 							defaultCurrency
 								? (nonBonusIncome
-								  | currency: defaultCurrency
-								  | position
-										: selectedOrganization?.currencyPosition)
+								  | currency : defaultCurrency
+								  | position : selectedOrganization?.currencyPosition)
 								: nonBonusIncome
 						}}"
 						color="#089c17"
@@ -128,20 +90,13 @@
 					<ga-info-block
 						*ngIf="directIncomeBonus !== 0"
 						listItem="true"
-						title="{{
-							'DASHBOARD_PAGE.TITLE.TOTAL_DIRECT_INCOME'
-								| translate
-						}}"
-						meta="{{
-							'DASHBOARD_PAGE.TITLE.TOTAL_DIRECT_INCOME_INFO'
-								| translate
-						}}"
+						title="{{ 'DASHBOARD_PAGE.TITLE.TOTAL_DIRECT_INCOME' | translate }}"
+						meta="{{ 'DASHBOARD_PAGE.TITLE.TOTAL_DIRECT_INCOME_INFO' | translate }}"
 						value="{{
 							defaultCurrency
 								? (directIncomeBonus
-								  | currency: defaultCurrency
-								  | position
-										: selectedOrganization?.currencyPosition)
+								  | currency : defaultCurrency
+								  | position : selectedOrganization?.currencyPosition)
 								: directIncomeBonus
 						}}"
 						color="#089c17"
@@ -152,15 +107,12 @@
 				<!-- Total Income block with no income -->
 				<ga-info-block
 					*ngIf="directIncomeBonus === 0"
-					title="{{
-						'DASHBOARD_PAGE.DEVELOPER.TOTAL_INCOME' | translate
-					}}"
+					title="{{ 'DASHBOARD_PAGE.DEVELOPER.TOTAL_INCOME' | translate }}"
 					value="{{
 						defaultCurrency
 							? (income || 0
-							  | currency: defaultCurrency
-							  | position
-									: selectedOrganization?.currencyPosition)
+							  | currency : defaultCurrency
+							  | position : selectedOrganization?.currencyPosition)
 							: income || 0
 					}}"
 					color="#089c17"
@@ -170,20 +122,13 @@
 
 				<!-- Expenses without salary block  -->
 				<ga-info-block
-					title="{{
-						'DASHBOARD_PAGE.TITLE.TOTAL_EXPENSES_WITHOUT_SALARY'
-							| translate
-					}}"
-					meta="{{
-						'DASHBOARD_PAGE.TITLE.TOTAL_EXPENSES_WITHOUT_SALARY_CALC'
-							| translate
-					}}"
+					title="{{ 'DASHBOARD_PAGE.TITLE.TOTAL_EXPENSES_WITHOUT_SALARY' | translate }}"
+					meta="{{ 'DASHBOARD_PAGE.TITLE.TOTAL_EXPENSES_WITHOUT_SALARY_CALC' | translate }}"
 					value="{{
 						defaultCurrency
 							? (expenseWithoutSalary || 0
-							  | currency: defaultCurrency
-							  | position
-									: selectedOrganization?.currencyPosition)
+							  | currency : defaultCurrency
+							  | position : selectedOrganization?.currencyPosition)
 							: expenseWithoutSalary || 0
 					}}"
 					color="#dbc300"
@@ -192,18 +137,13 @@
 				</ga-info-block>
 				<!-- Total Expenses block -->
 				<ga-info-block
-					title="{{
-						'DASHBOARD_PAGE.DEVELOPER.TOTAL_EXPENSES' | translate
-					}}"
-					meta="{{
-						'DASHBOARD_PAGE.TITLE.TOTAL_EXPENSE_CALC' | translate
-					}}"
+					title="{{ 'DASHBOARD_PAGE.DEVELOPER.TOTAL_EXPENSES' | translate }}"
+					meta="{{ 'DASHBOARD_PAGE.TITLE.TOTAL_EXPENSE_CALC' | translate }}"
 					value="{{
 						defaultCurrency
 							? (expense || 0
-							  | currency: defaultCurrency
-							  | position
-									: selectedOrganization?.currencyPosition)
+							  | currency : defaultCurrency
+							  | position : selectedOrganization?.currencyPosition)
 							: expense || 0
 					}}"
 					color="#dbc300"
@@ -219,24 +159,21 @@
 								: {
 										totalAllIncome: defaultCurrency
 											? (income || 0
-											  | currency: defaultCurrency
-											  | position
-													: selectedOrganization?.currencyPosition)
+											  | currency : defaultCurrency
+											  | position : selectedOrganization?.currencyPosition)
 											: income || 0,
 										totalExpense: defaultCurrency
 											? (expense || 0
-											  | currency: defaultCurrency
-											  | position
-													: selectedOrganization?.currencyPosition)
+											  | currency : defaultCurrency
+											  | position : selectedOrganization?.currencyPosition)
 											: expense || 0
 								  }
 					}}"
 					value="{{
 						defaultCurrency
 							? (profit || 0
-							  | currency: defaultCurrency
-							  | position
-									: selectedOrganization?.currencyPosition)
+							  | currency : defaultCurrency
+							  | position : selectedOrganization?.currencyPosition)
 							: profit || 0
 					}}"
 					color="{{ profit >= 0 ? '#089c17' : '#ff7b00' }}"
@@ -246,23 +183,14 @@
 				</ga-info-block>
 				<!-- Direct Income Bonus block -->
 				<ga-info-block
-					*ngIf="
-						selectedOrganization?.bonusType &&
-						directIncomeBonus !== 0
-					"
-					title="{{
-						'DASHBOARD_PAGE.TITLE.TOTAL_DIRECT_BONUS' | translate
-					}}"
-					meta="{{
-						'DASHBOARD_PAGE.TITLE.TOTAL_DIRECT_BONUS_INFO'
-							| translate
-					}}"
+					*ngIf="selectedOrganization?.bonusType && directIncomeBonus !== 0"
+					title="{{ 'DASHBOARD_PAGE.TITLE.TOTAL_DIRECT_BONUS' | translate }}"
+					meta="{{ 'DASHBOARD_PAGE.TITLE.TOTAL_DIRECT_BONUS_INFO' | translate }}"
 					value="{{
 						defaultCurrency
 							? (directIncomeBonus || 0
-							  | currency: defaultCurrency
-							  | position
-									: selectedOrganization?.currencyPosition)
+							  | currency : defaultCurrency
+							  | position : selectedOrganization?.currencyPosition)
 							: directIncomeBonus || 0
 					}}"
 					color="#66de0b"
@@ -271,13 +199,8 @@
 				</ga-info-block>
 				<!-- Bonus block: Profit Based Bonus  -->
 				<ga-info-block
-					*ngIf="
-						bonusType === 'PROFIT_BASED_BONUS' &&
-						calculatedBonus !== 0
-					"
-					title="{{
-						'DASHBOARD_PAGE.TITLE.TOTAL_PROFIT_BONUS' | translate
-					}}"
+					*ngIf="bonusType === 'PROFIT_BASED_BONUS' && calculatedBonus !== 0"
+					title="{{ 'DASHBOARD_PAGE.TITLE.TOTAL_PROFIT_BONUS' | translate }}"
 					meta="{{
 						'DASHBOARD_PAGE.TITLE.TOTAL_PROFIT_BONUS_INFO'
 							| translate
@@ -285,18 +208,16 @@
 										bonusPercentage: bonusPercentage || 0,
 										difference: defaultCurrency
 											? (profit || 0
-											  | currency: defaultCurrency
-											  | position
-													: selectedOrganization?.currencyPosition)
+											  | currency : defaultCurrency
+											  | position : selectedOrganization?.currencyPosition)
 											: profit || 0
 								  }
 					}}"
 					value="{{
 						defaultCurrency
 							? (calculatedBonus || 0
-							  | currency: defaultCurrency
-							  | position
-									: selectedOrganization?.currencyPosition)
+							  | currency : defaultCurrency
+							  | position : selectedOrganization?.currencyPosition)
 							: calculatedBonus || 0
 					}}"
 					color="{{ calculatedBonus >= 0 ? '#66de0b' : '#ff7b00' }}"
@@ -304,13 +225,8 @@
 				</ga-info-block>
 				<!-- Bonus block: Revenue Based Bonus  -->
 				<ga-info-block
-					*ngIf="
-						bonusType === 'REVENUE_BASED_BONUS' &&
-						calculatedBonus !== 0
-					"
-					title="{{
-						'DASHBOARD_PAGE.TITLE.TOTAL_INCOME_BONUS' | translate
-					}}"
+					*ngIf="bonusType === 'REVENUE_BASED_BONUS' && calculatedBonus !== 0"
+					title="{{ 'DASHBOARD_PAGE.TITLE.TOTAL_INCOME_BONUS' | translate }}"
 					meta="{{
 						'DASHBOARD_PAGE.TITLE.TOTAL_INCOME_BONUS_INFO'
 							| translate
@@ -318,18 +234,16 @@
 										bonusPercentage: bonusPercentage || 0,
 										totalIncome: defaultCurrency
 											? (income || 0
-											  | currency: defaultCurrency
-											  | position
-													: selectedOrganization?.currencyPosition)
+											  | currency : defaultCurrency
+											  | position : selectedOrganization?.currencyPosition)
 											: income || 0
 								  }
 					}}"
 					value="{{
 						defaultCurrency
 							? (calculatedBonus || 0
-							  | currency: defaultCurrency
-							  | position
-									: selectedOrganization?.currencyPosition)
+							  | currency : defaultCurrency
+							  | position : selectedOrganization?.currencyPosition)
 							: calculatedBonus || 0
 					}}"
 					color="{{ calculatedBonus >= 0 ? '#66de0b' : '#ff7b00' }}"
@@ -345,68 +259,47 @@
 								'DASHBOARD_PAGE.TITLE.TOTAL_BONUS_CALC'
 									| translate
 										: {
-												totalBonusIncome:
-													defaultCurrency
-														? (directIncomeBonus
-														  | currency
-																: defaultCurrency
-														  | position
-																: selectedOrganization?.currencyPosition)
-														: directIncomeBonus,
+												totalBonusIncome: defaultCurrency
+													? (directIncomeBonus
+													  | currency : defaultCurrency
+													  | position : selectedOrganization?.currencyPosition)
+													: directIncomeBonus,
 												calculatedBonus: defaultCurrency
 													? (calculatedBonus || 0
-													  | currency
-															: defaultCurrency
-													  | position
-															: selectedOrganization?.currencyPosition)
+													  | currency : defaultCurrency
+													  | position : selectedOrganization?.currencyPosition)
 													: calculatedBonus || 0
 										  }
 							}}
 						</div>
 
 						<!-- CASE: Total Bonus calculation breakup with zero income bonus -->
-						<div
-							*ngIf="
-								directIncomeBonus === 0 &&
-								bonusType === 'REVENUE_BASED_BONUS'
-							"
-						>
+						<div *ngIf="directIncomeBonus === 0 && bonusType === 'REVENUE_BASED_BONUS'">
 							<!-- Revenue based bonus  -->
 							{{
 								'DASHBOARD_PAGE.TITLE.TOTAL_INCOME_BONUS_INFO'
 									| translate
 										: {
-												bonusPercentage:
-													bonusPercentage || 0,
+												bonusPercentage: bonusPercentage || 0,
 												totalIncome: defaultCurrency
 													? (income || 0
-													  | currency
-															: defaultCurrency
-													  | position
-															: selectedOrganization?.currencyPosition)
+													  | currency : defaultCurrency
+													  | position : selectedOrganization?.currencyPosition)
 													: income || 0
 										  }
 							}}
 						</div>
-						<div
-							*ngIf="
-								directIncomeBonus === 0 &&
-								bonusType === 'PROFIT_BASED_BONUS'
-							"
-						>
+						<div *ngIf="directIncomeBonus === 0 && bonusType === 'PROFIT_BASED_BONUS'">
 							<!-- Profit based bonus  -->
 							{{
 								'DASHBOARD_PAGE.TITLE.TOTAL_PROFIT_BONUS_INFO'
 									| translate
 										: {
-												bonusPercentage:
-													bonusPercentage || 0,
+												bonusPercentage: bonusPercentage || 0,
 												difference: defaultCurrency
 													? (profit || 0
-													  | currency
-															: defaultCurrency
-													  | position
-															: selectedOrganization?.currencyPosition)
+													  | currency : defaultCurrency
+													  | position : selectedOrganization?.currencyPosition)
 													: profit || 0
 										  }
 							}}
@@ -421,9 +314,8 @@
 							:
 							{{
 								bonus || 0
-									| currency: defaultCurrency
-									| position
-										: selectedOrganization?.currencyPosition
+									| currency : defaultCurrency
+									| position : selectedOrganization?.currencyPosition
 							}}
 						</div>
 						<!--
@@ -440,9 +332,8 @@
 							:
 							{{
 								bonus || 0
-									| currency: defaultCurrency
-									| position
-										: selectedOrganization?.currencyPosition
+									| currency : defaultCurrency
+									| position : selectedOrganization?.currencyPosition
 							}}
 						</div>
 					</div>
@@ -455,20 +346,12 @@
 			</div>
 		</div>
 
-		<div
-			*ngIf="selectedEmployee && selectedEmployee.id"
-			class="half-content"
-		>
-			<ga-employee-charts
-				[employeeStatistics]="employeeStatistics"
-			></ga-employee-charts>
+		<div *ngIf="selectedEmployee && selectedEmployee.id" class="half-content">
+			<ga-employee-charts [employeeStatistics]="employeeStatistics"></ga-employee-charts>
 		</div>
 
 		<ng-template #noRole>
-			<span>{{
-				'DASHBOARD_PAGE.INSERT_TEXT_FOR_NOT_AUTHENTICATED_USERS'
-					| translate
-			}}</span>
+			<span>{{ 'DASHBOARD_PAGE.INSERT_TEXT_FOR_NOT_AUTHENTICATED_USERS' | translate }}</span>
 		</ng-template>
 	</nb-card-body>
 </nb-card>
