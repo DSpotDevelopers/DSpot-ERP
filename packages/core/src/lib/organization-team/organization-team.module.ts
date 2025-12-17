@@ -18,6 +18,7 @@ import { StatisticModule } from './../time-tracking/statistic/statistic.module';
 import { TaskModule } from './../tasks/task.module';
 import { TypeOrmOrganizationTeamRepository } from './repository/type-orm-organization-team.repository';
 import { MikroOrmOrganizationTeamRepository } from './repository/mikro-orm-organization-team.repository';
+import { SocketModule } from '../socket';
 
 @Module({
 	imports: [
@@ -32,7 +33,8 @@ import { MikroOrmOrganizationTeamRepository } from './repository/mikro-orm-organ
 		TimerModule,
 		CqrsModule,
 		forwardRef(() => StatisticModule),
-		TaskModule
+		TaskModule,
+		SocketModule
 	],
 	controllers: [OrganizationTeamController],
 	providers: [

@@ -125,6 +125,15 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			const removedMembers = (taskMembers || []).filter((member) => !memberIdSet.has(member.id));
 			const newMembers = (data.members || []).filter((member) => !existingMemberIdSet.has(member.id));
 
+			const existingTeams = task.teams || [];
+			const incomingTeams = data.teams || [];
+
+			const existingTeamIdSet = new Set(existingTeams.map((t) => t.id));
+			const incomingTeamIdSet = new Set(incomingTeams.map((t) => t.id));
+
+			const removedTeams = existingTeams.filter((t) => !incomingTeamIdSet.has(t.id));
+			const newTeams = incomingTeams.filter((t) => !existingTeamIdSet.has(t.id));
+
 			if (data.projectId && data.projectId !== task.projectId) {
 				const { projectId } = task;
 
@@ -192,10 +201,6 @@ export class TaskService extends TenantAwareCrudService<Task> {
 								organizationId,
 								tenantId
 							});
-
-							// Send a real-time event to the specified user via socket.
-							// No error is thrown if the user is not currently connected.
-							this._socketService.sendTimerChanged(member?.id);
 						})
 					);
 				} catch (error) {
@@ -240,13 +245,31 @@ export class TaskService extends TenantAwareCrudService<Task> {
 				}
 			}
 
-			try {
-				[...existingMemberIdSet, ...newMembers.map((member) => member.id)].forEach((memberId) => {
-					this._socketService.emitToClient(memberId, 'tasks:changed', null);
-				});
-			} catch (error) {
-				this.logger.error(`Error while sending tasks changed event: ${error}`);
+			const teamIds = [...newTeams.map((t) => t.id), ...removedTeams.map((t) => t.id)];
+			let teamEmployeeIds: string[] = [];
+
+			if (teamIds.length > 0) {
+				const query = this.typeOrmRepository.manager
+					.createQueryBuilder()
+					.select('organization_team_employee.employeeId', 'employeeId')
+					.from('organization_team_employee', 'organization_team_employee')
+					.where('organization_team_employee.organizationTeamId IN (:...teamIds)', { teamIds });
+
+				const result = await query.getRawMany();
+				teamEmployeeIds = result.map((r) => r.employeeId);
 			}
+
+			const affectedEmployeeIds = new Set<ID>([
+				...existingMemberIdSet,
+				...newMembers.map((m) => m.id),
+				...removedMembers.map((m) => m.id),
+				...teamEmployeeIds
+			]);
+
+			affectedEmployeeIds.forEach((employeeId) => {
+				this._socketService.sendTimerChanged(employeeId);
+				this._socketService.emitToClient(employeeId, 'tasks:changed', null);
+			});
 
 			// Generate the activity log
 			this._activityLogService.logActivity<Task>(
@@ -1045,7 +1068,10 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			}
 
 			// Apply filters for organizationSprintId, setting null if not a valid UUID
-			if ((isNotEmpty(organizationSprintId) && !isUUID(organizationSprintId)) || organizationSprintId === 'null') {
+			if (
+				(isNotEmpty(organizationSprintId) && !isUUID(organizationSprintId)) ||
+				organizationSprintId === 'null'
+			) {
 				options.where.organizationSprintId = IsNull();
 			}
 

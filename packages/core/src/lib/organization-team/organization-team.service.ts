@@ -45,6 +45,7 @@ import { OrganizationTeam } from './organization-team.entity';
 import { TypeOrmOrganizationTeamRepository } from './repository/type-orm-organization-team.repository';
 import { MikroOrmOrganizationTeamRepository } from './repository/mikro-orm-organization-team.repository';
 import { MikroOrmOrganizationTeamEmployeeRepository } from '../organization-team-employee/repository/mikro-orm-organization-team-employee.repository';
+import { SocketService } from '../socket';
 
 @FavoriteService(BaseEntityEnum.OrganizationTeam)
 @Injectable()
@@ -61,7 +62,8 @@ export class OrganizationTeamService extends TenantAwareCrudService<Organization
 		private readonly organizationTeamEmployeeService: OrganizationTeamEmployeeService,
 		private readonly userService: UserService,
 		private readonly employeeService: EmployeeService,
-		private readonly taskService: TaskService
+		private readonly taskService: TaskService,
+		private readonly socketService: SocketService
 	) {
 		super(typeOrmOrganizationTeamRepository, mikroOrmOrganizationTeamRepository);
 	}
@@ -307,7 +309,10 @@ export class OrganizationTeamService extends TenantAwareCrudService<Organization
 		const { managerIds, memberIds, organizationId } = input;
 
 		let organizationTeam = await super.findOneByIdString(id, {
-			where: { organizationId, tenantId }
+			where: { organizationId, tenantId },
+			relations: {
+				members: true
+			}
 		});
 
 		// Check permission for CHANGE_SELECTED_EMPLOYEE
@@ -343,6 +348,10 @@ export class OrganizationTeamService extends TenantAwareCrudService<Organization
 
 				// Retrieves a collection of employees based on specified criteria.
 				const employees = await this.retrieveEmployees(memberIds, managerIds, organizationId, tenantId);
+				const beforeEmployeeIds = new Set<ID>((organizationTeam.members || []).map((m) => m.employeeId));
+				const afterEmployeeIds = new Set<ID>(memberIds || []);
+				const removedEmployeeIds = [...beforeEmployeeIds].filter((id) => !afterEmployeeIds.has(id));
+				const addedEmployeeIds = [...afterEmployeeIds].filter((id) => !beforeEmployeeIds.has(id));
 
 				// Update nested entity
 				await this.organizationTeamEmployeeService.updateOrganizationTeam(
@@ -353,6 +362,17 @@ export class OrganizationTeamService extends TenantAwareCrudService<Organization
 					managerIds,
 					memberIds
 				);
+
+				const affectedEmployeeIds = new Set<ID>([...removedEmployeeIds, ...addedEmployeeIds]);
+
+				affectedEmployeeIds.forEach((employeeId) => {
+					this.socketService.sendTimerChanged(employeeId);
+					this.socketService.emitToClient(employeeId, 'tasks:changed', {
+						teamId: id,
+						added: addedEmployeeIds.includes(employeeId),
+						removed: removedEmployeeIds.includes(employeeId)
+					});
+				});
 			}
 
 			const { id: organizationTeamId } = organizationTeam;
@@ -436,7 +456,7 @@ export class OrganizationTeamService extends TenantAwareCrudService<Organization
 					const knex = this.mikroOrmOrganizationTeamEmployeeRepository.getKnex();
 
 					// Construct your SQL query using knex
-					let sqlQuery = knex('organization_team_employee').select(
+					const sqlQuery = knex('organization_team_employee').select(
 						knex.raw(`
 							DISTINCT ON ("organization_team_employee"."organizationTeamId")
 							"organization_team_employee"."organizationTeamId"
@@ -615,12 +635,23 @@ export class OrganizationTeamService extends TenantAwareCrudService<Organization
 			});
 
 			// Check if the team was found before attempting deletion
-			if (team) {
-				return await this.typeOrmRepository.remove(team);
-			} else {
-				// You might want to handle the case where the team was not found differently
+			if (!team) {
 				throw new NotFoundException(`Organization team with ID ${teamId} not found.`);
 			}
+
+			const memberIds = (team.members || []).map((m) => m.id);
+
+			const result = await this.typeOrmRepository.remove(team);
+
+			memberIds.forEach((employeeId) => {
+				this.socketService.sendTimerChanged(employeeId);
+				this.socketService.emitToClient(employeeId, 'tasks:changed', {
+					teamId,
+					removed: true
+				});
+			});
+
+			return result;
 		} catch (error) {
 			throw new ForbiddenException();
 		}
