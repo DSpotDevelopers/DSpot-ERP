@@ -13,3 +13,4 @@ export * from './date-filter.component';
 export * from './product-category-filter.component';
 export * from './product-type-filter.component';
 export * from './employment-type-filter.component';
+export * from './user-role-filter.component';

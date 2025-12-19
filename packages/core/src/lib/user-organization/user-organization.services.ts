@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { ID, IOrganization, IPagination, IUser, IUserOrganization, RolesEnum } from '@gauzy/contracts';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { ID, IEmployee, IOrganization, IPagination, IUser, IUserOrganization, RolesEnum } from '@gauzy/contracts';
 import { RequestContext } from '../core/context';
 import { PaginationParams, TenantAwareCrudService } from '../core/crud';
 import { Employee } from '../core/entities/internal';
@@ -8,9 +8,11 @@ import { TypeOrmOrganizationRepository } from '../organization/repository/type-o
 import { UserOrganization } from './user-organization.entity';
 import { TypeOrmUserOrganizationRepository } from './repository/type-orm-user-organization.repository';
 import { MikroOrmUserOrganizationRepository } from './repository/mikro-orm-user-organization.repository';
+import { Brackets } from 'typeorm';
 
 @Injectable()
 export class UserOrganizationService extends TenantAwareCrudService<UserOrganization> {
+	private readonly logger = new Logger(`GZY - ${UserOrganizationService.name}`);
 	constructor(
 		readonly typeOrmUserOrganizationRepository: TypeOrmUserOrganizationRepository,
 		readonly mikroOrmUserOrganizationRepository: MikroOrmUserOrganizationRepository,
@@ -99,6 +101,117 @@ export class UserOrganizationService extends TenantAwareCrudService<UserOrganiza
 		entity.tenantId = user.tenantId;
 		entity.userId = user.id;
 		return await this.typeOrmUserOrganizationRepository.save(entity);
+	}
+
+	/**
+	 * Finds all user organizations based on the provided filter options.
+	 *
+	 * @param filter Optional filter options to apply when querying user organizations.
+	 * @returns A promise resolving to an array of user organizations.
+	 */
+	async pagination(options: PaginationParams<UserOrganization>): Promise<IPagination<UserOrganization>> {
+		try {
+			const tenantId = RequestContext.currentTenantId();
+			const query = this.typeOrmRepository.createQueryBuilder('userOrganization');
+
+			// JOINS
+			query.leftJoin('userOrganization.user', 'user');
+			query.leftJoin('user.role', 'role');
+			query.leftJoin('user.tags', 'tags');
+
+			// Pagination & withDeleted
+			query.setFindOptions({
+				skip: options?.skip ? options.take * (options.skip - 1) : 0,
+				take: options?.take ?? 10,
+				...(options?.relations ? { relations: options.relations } : {}),
+				...(options && 'withDeleted' in options ? { withDeleted: options.withDeleted } : {})
+			});
+
+			// Base WHERE (tenant + organization)
+			query.where((qb) => {
+				const { where } = options;
+
+				qb.andWhere(`userOrganization.tenantId = :tenantId`, { tenantId });
+
+				if (where?.organizationId) {
+					qb.andWhere('userOrganization.organizationId = :organizationId', {
+						organizationId: where.organizationId
+					});
+				}
+
+				// Status filters
+				if (where) {
+					const statusFields = ['isActive', 'isArchived'];
+					qb.andWhere(
+						new Brackets((b) => {
+							statusFields.forEach((key) => {
+								if (key in where) {
+									b.andWhere(`userOrganization.${key} = :${key}`, { [key]: where[key] });
+								}
+							});
+						})
+					);
+				}
+
+				// User filters
+				if (where?.user) {
+					const userFilter = where.user as Partial<IUser>;
+					qb.andWhere(
+						new Brackets((b) => {
+							if (userFilter.name) {
+								qb.andWhere(`LOWER(CONCAT(user.firstName, ' ', user.lastName)) LIKE LOWER(:fullName)`, {
+									fullName: `%${userFilter.name}%`
+								});
+							}
+
+							if (userFilter.email) {
+								const emailParts = userFilter.email.split(' ');
+								emailParts.forEach((part, i) => {
+									b.orWhere(`LOWER(user.email) LIKE LOWER(:email_${i})`, {
+										[`email_${i}`]: `%${part}%`
+									});
+								});
+							}
+
+							if (userFilter.role?.name) {
+								b.andWhere('LOWER(role.name) = LOWER(:roleName)', { roleName: userFilter.role.name });
+							}
+
+							if (userFilter.tags?.length) {
+								b.andWhere('tags.id IN (:...tags)', { tags: userFilter.tags });
+							}
+						})
+					);
+				}
+
+				// Additional tags filter directly in where
+				const customWhere = where as any;
+				if (customWhere?.tags?.length) {
+					qb.andWhere('tags.id IN (:...tags)', { tags: customWhere.tags });
+				}
+			});
+
+			const [items, total] = await query.getManyAndCount();
+			const userIds = items.filter((org) => org?.user).map((org) => org.user.id) || [];
+			const employees = await this.employeeService.findEmployeesByUserIds(userIds, tenantId);
+			const employeeMap = new Map<string, IEmployee>();
+			employees.forEach((emp) => {
+				if (emp.userId) employeeMap.set(emp.userId, emp);
+			});
+
+			const itemsWithEmployees = items.map((org) => {
+				if (org.user?.id) {
+					const employee = employeeMap.get(org.user.id);
+					return { ...org, user: { ...org.user, employee } };
+				}
+				return org;
+			});
+
+			return { items: itemsWithEmployees, total };
+		} catch (error) {
+			this.logger.error('Error while getting employees', error);
+			throw new BadRequestException(error);
+		}
 	}
 
 	/**

@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NbDialogService } from '@nebular/theme';
 import { TranslateService } from '@ngx-translate/core';
-import { Cell, LocalDataSource } from 'angular2-smart-table';
+import { Cell, Settings } from 'angular2-smart-table';
 import { filter, tap } from 'rxjs/operators';
 import { debounceTime, firstValueFrom, Subject } from 'rxjs';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -16,32 +16,35 @@ import {
 	ComponentLayoutStyleEnum,
 	IRolePermission,
 	IUserViewModel,
-	IUserOrganization,
 	ITag,
 	IEmployee
 } from '@gauzy/contracts';
 import {
 	EmployeesService,
 	ErrorHandlingService,
+	ServerDataSource,
 	Store,
 	ToastrService,
 	UsersOrganizationsService
 } from '@gauzy/ui-core/core';
-import { ComponentEnum, distinctUntilChange } from '@gauzy/ui-core/common';
+import { API_PREFIX, ComponentEnum, distinctUntilChange } from '@gauzy/ui-core/common';
 import {
 	DateFormatPipe,
 	DeleteConfirmationComponent,
 	EmailComponent,
-	IPaginationBase,
+	InputFilterComponent,
 	InviteMutationComponent,
 	PaginationFilterBaseComponent,
 	PictureNameTagsComponent,
 	RoleComponent,
 	TagsColorFilterComponent,
 	TagsOnlyComponent,
-	UserMutationComponent
+	ToggleFilterComponent,
+	UserMutationComponent,
+	UserRoleFilterComponent
 } from '@gauzy/ui-core/shared';
 import { EmployeeWorkStatusComponent } from '../employees/table-components';
+import { HttpClient } from '@angular/common/http';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
@@ -49,11 +52,11 @@ import { EmployeeWorkStatusComponent } from '../employees/table-components';
 	styleUrls: ['./users.component.scss'],
 	standalone: false
 })
-export class UsersComponent extends PaginationFilterBaseComponent implements OnInit, OnDestroy {
+export class UsersComponent extends PaginationFilterBaseComponent implements OnInit {
 	public PermissionsEnum = PermissionsEnum;
 	public users: IUser[] = [];
-	public settingsSmartTable: object;
-	public sourceSmartTable = new LocalDataSource();
+	public settingsSmartTable: Settings;
+	public sourceSmartTable: ServerDataSource;
 	public selectedUser: IUserViewModel;
 	public userName = 'User';
 	public loading: boolean;
@@ -65,7 +68,8 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 	public dataLayoutStyle = ComponentLayoutStyleEnum.TABLE;
 	public componentLayoutStyleEnum = ComponentLayoutStyleEnum;
 	public organization: IOrganization;
-	private _refresh$: Subject<any> = new Subject();
+	public refresh$: Subject<boolean> = new Subject();
+	public users$: Subject<boolean> = this.subject$;
 
 	constructor(
 		private readonly dialogService: NbDialogService,
@@ -77,7 +81,8 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 		public readonly translateService: TranslateService,
 		private readonly userOrganizationsService: UsersOrganizationsService,
 		private readonly employeesService: EmployeesService,
-		private readonly _dateFormatPipe: DateFormatPipe
+		private readonly dateFormatPipe: DateFormatPipe,
+		private readonly httpClient: HttpClient
 	) {
 		super(translateService);
 		this.setView();
@@ -86,22 +91,23 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 	ngOnInit() {
 		this._loadSmartTableSettings();
 		this._applyTranslationOnSmartTable();
-		this.subject$
+		this.users$
 			.pipe(
 				debounceTime(300),
-				tap(() => this.getUsers()),
 				tap(() => this.cancel()),
+				tap(() => this.getUsers()),
 				untilDestroyed(this)
 			)
 			.subscribe();
 		this.store.selectedOrganization$
 			.pipe(
-				filter((organization: IOrganization) => !!organization),
+				debounceTime(100),
 				distinctUntilChange(),
+				filter((organization: IOrganization) => !!organization),
 				tap((organization: IOrganization) => (this.organization = organization)),
 				tap(({ invitesAllowed }: IOrganization) => (this.organizationInvitesAllowed = invitesAllowed)),
-				tap(() => this._refresh$.next(true)),
-				tap(() => this.subject$.next(true)),
+				tap(() => this.refresh$.next(true)),
+				tap(() => this.users$.next(true)),
 				untilDestroyed(this)
 			)
 			.subscribe();
@@ -125,11 +131,11 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 			.pipe(
 				debounceTime(300),
 				distinctUntilChange(),
-				tap(() => this.subject$.next(true)),
+				tap(() => this.users$.next(true)),
 				untilDestroyed(this)
 			)
 			.subscribe();
-		this._refresh$
+		this.refresh$
 			.pipe(
 				filter(() => this._isGridLayout),
 				tap(() => this.refreshPagination()),
@@ -155,10 +161,11 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 				distinctUntilChange(),
 
 				// Update the data layout style based on the emitted layout
-				tap((componentLayout: ComponentLayoutStyleEnum) => (this.dataLayoutStyle = componentLayout)),
-
-				// Refresh pagination settings whenever the layout changes
-				tap(() => this.refreshPagination()),
+				tap((componentLayout: ComponentLayoutStyleEnum) => {
+					this.dataLayoutStyle = componentLayout;
+					this._loadSmartTableSettings();
+					this.refreshPagination();
+				}),
 
 				// Only proceed further if the current layout is grid-based
 				filter(() => this._isGridLayout),
@@ -167,7 +174,7 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 				tap(() => (this.users = [])),
 
 				// Trigger a refresh event for components relying on the subject$
-				tap(() => this.subject$.next(true)),
+				tap(() => this.users$.next(true)),
 
 				// Automatically clean up the subscription when the component is destroyed
 				untilDestroyed(this)
@@ -234,8 +241,8 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 			});
 
 			// Notify subscribers about the update
-			this._refresh$.next(true);
-			this.subject$.next(true);
+			this.refresh$.next(true);
+			this.users$.next(true);
 		}
 	}
 
@@ -258,8 +265,8 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 			});
 
 			// Trigger updates for other components or subscribers
-			this._refresh$.next(true);
-			this.subject$.next(true);
+			this.refresh$.next(true);
+			this.users$.next(true);
 		}
 	}
 
@@ -333,11 +340,11 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 					try {
 						const username = this.userName;
 
-						await this.userOrganizationsService.setUserAsInactive(this.selectedUser.id);
+						await this.userOrganizationsService.setUserAsInactive(this.selectedUser?.id);
 						this.toastrService.success('NOTES.ORGANIZATIONS.DELETE_USER_FROM_ORGANIZATION', { username });
 
-						this._refresh$.next(true);
-						this.subject$.next(true);
+						this.refresh$.next(true);
+						this.users$.next(true);
 					} catch (error) {
 						this.toastrService.danger(error);
 					}
@@ -396,8 +403,8 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 					this.errorHandlingService.handleError(error);
 				} finally {
 					// Perform cleanup or refresh actions
-					this._refresh$.next(true);
-					this.subject$.next(true);
+					this.refresh$.next(true);
+					this.users$.next(true);
 				}
 			});
 	}
@@ -407,58 +414,44 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 	 *
 	 * @returns A promise that resolves to an array of IUserOrganization.
 	 */
-	private async _fetchUserOrganizations(): Promise<IUserOrganization[]> {
-		// If organization is not available, return undefined
-		if (!this.organization) {
-			return;
-		}
+	private async setSmartTableSource(): Promise<void> {
+		if (!this.organization) return;
 
-		// Destructure organization properties for readability
-		const { id: organizationId, tenantId } = this.organization;
-
-		// Fetch user organizations with required relations
-		const userOrganizations = await this.userOrganizationsService.getAll(
-			['user', 'user.role', 'user.tags'],
-			{ organizationId, tenantId },
-			true
-		);
-
-		// Filter out user organizations that are not active or don't have a user with a role
-		return userOrganizations.items.filter((organization: IUserOrganization) => organization.user?.role);
-	}
-
-	/**
-	 * Fetches users from user organizations, maps them to the required format, and loads them into the smart table.
-	 */
-	private async getUsers(): Promise<void> {
 		this.loading = true;
 
-		try {
-			const organizations = await this._fetchUserOrganizations();
+		const { tenantId, id: organizationId } = this.organization;
 
-			// Mapping fetched organizations to required user format
-			const users = organizations
-				.filter(({ user }) => !!user)
-				.map(({ id: userOrganizationId, user, isActive }) => ({
+		this.sourceSmartTable = new ServerDataSource(this.httpClient, {
+			endPoint: `${API_PREFIX}/user-organization/pagination`,
+			relations: ['user', 'user.role', 'user.tags'],
+			withDeleted: false,
+			where: {
+				organizationId,
+				tenantId,
+				...(this.filters.where ? this.filters.where : {})
+			},
+			resultMap: (userOrg: any) => {
+				const { user, id: userOrganizationId, isActive } = userOrg;
+
+				if (!user) return null;
+
+				return {
 					id: user.id,
 					fullName: user.name,
 					email: user.email,
 					tags: user.tags,
 					imageUrl: user.imageUrl,
 					role: user.role,
-					isActive: isActive,
+					isActive,
 					userOrganizationId,
 					...this.employeeMapper(user.employee)
-				}));
-
-			// Initialize Smart Table and load users
-			this.loadUsersToSmartTable(users);
-		} catch (error) {
-			console.error('Error while getting organization users', error?.message);
-			this.toastrService.danger(error);
-		} finally {
-			this.loading = false;
-		}
+				};
+			},
+			finalize: async () => {
+				this.updatePagination(this.sourceSmartTable.count());
+				this.loading = false;
+			}
+		});
 	}
 
 	/**
@@ -468,95 +461,127 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 	 * @param activePage The active page for pagination.
 	 * @param itemsPerPage The number of items per page for pagination.
 	 */
-	private loadUsersToSmartTable(users: any[]): void {
-		const { activePage, itemsPerPage } = this.getPagination();
+	private async getUsers(): Promise<void> {
+		if (!this.organization) return;
 
-		this.sourceSmartTable.setPaging(activePage, itemsPerPage, false);
-		this.sourceSmartTable.load(users);
+		try {
+			this.setSmartTableSource();
 
-		// Load Grid Data
-		this._loadDataGridLayout();
+			const { activePage, itemsPerPage } = this.getPagination();
+			this.sourceSmartTable.setPaging(activePage, itemsPerPage, false);
 
-		// Updates pagination
-		this.updatePagination();
+			if (this.dataLayoutStyle === ComponentLayoutStyleEnum.CARDS_GRID) {
+				await this.sourceSmartTable.getElements();
+				this.users.push(...this.sourceSmartTable.getData());
+			}
+		} catch (error) {
+			console.error('Error while getting organization users', error?.message);
+			this.toastrService.danger(error);
+		} finally {
+			this.loading = false;
+		}
 	}
 
 	/**
-	 * Updates pagination information based on the current state of the smart table.
+	 * Update pagination information
+	 * @param totalItems - Total items returned from the server
 	 */
-	private updatePagination(): void {
-		// Update pagination with total count of items in the smart table
+	private updatePagination(totalItems: number) {
 		this.setPagination({
 			...this.getPagination(),
-			totalItems: this.sourceSmartTable.count()
+			totalItems
 		});
 	}
 
 	/**
-	 * Loads unique user data into the users array if the grid layout is enabled.
+	 * Helper function to create a reusable filter function for columns.
+	 * @param field - The field to filter by.
 	 */
-	private async _loadDataGridLayout(): Promise<void> {
-		// Check if grid layout is enabled
-		if (!this._isGridLayout) {
-			return; // Exit early if grid layout is disabled
-		}
-
-		// Retrieve elements from the source smart table
-		const elements = await this.sourceSmartTable.getElements();
-
-		// Filter unique users based on their IDs
-		const uniqueUsers = elements.filter(
-			(user: IUserOrganization, index: number, self: any) => index === self.findIndex(({ id }) => user.id === id)
-		);
-
-		// Add unique users to the users array
-		this.users.push(...uniqueUsers);
+	private _getFilterFunction(field: string) {
+		return (value: string) => {
+			this.setFilter({ field, search: value });
+			return value?.length > 0; // Return `true` if the value is non-empty
+		};
 	}
 
 	/**
 	 *
 	 */
 	private _loadSmartTableSettings() {
-		const pagination: IPaginationBase = this.getPagination();
+		// Get pagination settings
+		const { itemsPerPage } = this.getPagination() || { itemsPerPage: this.minItemPerPage };
 		this.settingsSmartTable = {
 			actions: false,
 			sortMode: 'single',
-			selectedRowIndex: -1,
 			pager: {
 				display: false,
-				perPage: pagination ? pagination.itemsPerPage : 10
+				perPage: itemsPerPage
 			},
 			columns: {
 				fullName: {
 					title: this.getTranslation('SM_TABLE.FULL_NAME'),
 					type: 'custom',
 					class: 'align-row',
+					width: '20%',
+					isSortable: false,
+					isFilterable: true,
 					renderComponent: PictureNameTagsComponent,
 					componentInitFunction: (instance: PictureNameTagsComponent, cell: Cell) => {
 						instance.rowData = cell.getRow().getData();
 						instance.value = cell.getValue();
-					}
+					},
+					filter: {
+						type: 'custom',
+						component: InputFilterComponent,
+						config: {
+							initialValueInput: this.filters?.where?.user?.name ?? null
+						}
+					},
+					filterFunction: this._getFilterFunction('user.name')
 				},
 				email: {
 					title: this.getTranslation('SM_TABLE.EMAIL'),
 					type: 'custom',
+					class: 'align-row',
+					width: '20%',
+					isFilterable: true,
+					isSortable: false,
 					renderComponent: EmailComponent,
 					componentInitFunction: (instance: EmailComponent, cell: Cell) => {
 						instance.rowData = cell.getRow().getData();
-					}
+					},
+					filter: {
+						type: 'custom',
+						component: InputFilterComponent,
+						config: {
+							initialValueInput: this.filters?.where?.user?.email ?? null
+						}
+					},
+					filterFunction: this._getFilterFunction('user.email')
 				},
 				role: {
 					title: this.getTranslation('SM_TABLE.ROLE'),
 					type: 'custom',
-					width: '5%',
+					width: '10%',
 					renderComponent: RoleComponent,
 					componentInitFunction: (instance: RoleComponent, cell: Cell) => {
 						instance.value = cell.getRawValue();
-					}
+					},
+					filter: {
+						type: 'custom',
+						component: UserRoleFilterComponent,
+						config: {
+							initialValueInput: this.filters?.where?.user?.role?.name ?? null
+						}
+					},
+					filterFunction: this._getFilterFunction('user.role.name')
 				},
 				tags: {
 					title: this.getTranslation('SM_TABLE.TAGS'),
 					type: 'custom',
+					width: '10%',
+					isSortable: false,
+					isFilterable: true,
 					renderComponent: TagsOnlyComponent,
 					componentInitFunction: (instance: TagsOnlyComponent, cell: Cell) => {
 						instance.rowData = cell.getRow().getData();
@@ -564,23 +589,34 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 					},
 					filter: {
 						type: 'custom',
-						component: TagsColorFilterComponent
+						component: TagsColorFilterComponent,
+						config: {
+							initialValueIds: this.filters?.where?.tags ?? null
+						}
 					},
 					filterFunction: (tags: ITag[]) => {
-						const tagIds = [];
-						for (const tag of tags) {
-							tagIds.push(tag.id);
-						}
-						this.setFilter({ field: 'tags', search: tagIds });
-					},
-					isSortable: false,
-					class: 'align-row',
-					width: '10%'
+						const tagIds = Array.isArray(tags) ? tags.map((tag) => tag.id) : [];
+						this.setFilter({
+							field: 'tags',
+							search: tagIds.length > 0 ? [...tagIds] : null
+						});
+						return false;
+					}
 				},
 				status: {
 					title: this.getTranslation('SM_TABLE.STATUS'),
 					type: 'custom',
-					width: '5%',
+					width: '10%',
+					isFilterable: true,
+					isSortable: false,
+					filter: {
+						type: 'custom',
+						component: ToggleFilterComponent
+					},
+					filterFunction: (isActive: boolean) => {
+						this.setFilter({ field: 'isActive', search: isActive });
+						return isActive;
+					},
 					renderComponent: EmployeeWorkStatusComponent,
 					componentInitFunction: (instance: EmployeeWorkStatusComponent, cell: Cell) => {
 						instance.rowData = cell.getRow().getData();
@@ -625,8 +661,8 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 
 		const { endWork, startedWorkOn, isTrackingEnabled, id } = employee;
 		// "Range" when was hired and when exit
-		const start = this._dateFormatPipe.transform(startedWorkOn, null, 'LL');
-		const end = this._dateFormatPipe.transform(endWork, null, 'LL');
+		const start = this.dateFormatPipe.transform(startedWorkOn, null, 'LL');
+		const end = this.dateFormatPipe.transform(endWork, null, 'LL');
 
 		const workStatus = [start, end].filter(Boolean).join(' - ');
 
@@ -647,7 +683,7 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 	 * @returns True if the user is an employee, otherwise false.
 	 */
 	private isEmployee(): boolean {
-		return !!this.selectedUser.employeeId;
+		return !!this.selectedUser?.employeeId;
 	}
 
 	/**
@@ -693,6 +729,4 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 	toggleAddCard(): void {
 		this.showAddCard = !this.showAddCard;
 	}
-
-	ngOnDestroy() {}
 }

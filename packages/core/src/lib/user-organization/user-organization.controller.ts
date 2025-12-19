@@ -4,7 +4,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { parseToBoolean } from '@gauzy/utils';
 import { IUserOrganization, IPagination, ID } from '@gauzy/contracts';
 import { CrudController, PaginationParams } from './../core/crud';
-import { UUIDValidationPipe } from './../shared/pipes';
+import { UseValidationPipe, UUIDValidationPipe } from './../shared/pipes';
 import { TenantPermissionGuard } from './../shared/guards';
 import { UserOrganizationService } from './user-organization.services';
 import { UserOrganization } from './user-organization.entity';
@@ -44,6 +44,34 @@ export class UserOrganizationController extends CrudController<UserOrganization>
 		@Query() query: FindMeUserOrganizationDTO
 	): Promise<IPagination<IUserOrganization>> {
 		return await this.userOrganizationService.findUserOrganizations(params, parseToBoolean(query.includeEmployee));
+	}
+
+	/**
+	 * GET users by pagination in the same tenant.
+	 *
+	 * This endpoint retrieves users by pagination within a specific tenant.
+	 * It uses query parameters to manage pagination and filtering options.
+	 *
+	 * @param params Pagination and filtering parameters.
+	 * @returns A promise resolving to a paginated list of users.
+	 */
+	@ApiOperation({ summary: 'Get users by pagination in the same tenant' })
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: 'Successfully retrieved paginated users.'
+	})
+	@ApiResponse({
+		status: HttpStatus.BAD_REQUEST,
+		description: 'Invalid query parameters. Please check your input.'
+	})
+	@ApiResponse({
+		status: HttpStatus.INTERNAL_SERVER_ERROR,
+		description: 'An error occurred while retrieving paginated users.'
+	})
+	@Get('/pagination')
+	@UseValidationPipe({ transform: true })
+	async pagination(@Query() params: PaginationParams<UserOrganization>): Promise<IPagination<UserOrganization>> {
+		return await this.userOrganizationService.pagination(params);
 	}
 
 	/**

@@ -1,8 +1,4 @@
-<nb-card
-	[nbSpinner]="loading"
-	nbSpinnerStatus="primary"
-	nbSpinnerSize="large"
->
+<nb-card [nbSpinner]="loading" nbSpinnerStatus="primary" nbSpinnerSize="large">
 	<nb-card-header class="d-flex flex-column pb-0">
 		<div class="card-header-title">
 			<h4>
@@ -65,8 +61,8 @@
 						></angular2-smart-table>
 					</div>
 					<div class="pagination-container">
-						<ng-container *ngIf="smartTableSource">
-							<ngx-pagination [source]="smartTableSource"></ngx-pagination>
+						<ng-container *ngIf="sourceSmartTable">
+							<ngx-pagination [source]="sourceSmartTable"></ngx-pagination>
 						</ng-container>
 					</div>
 				</ng-template>
@@ -79,6 +75,7 @@
 						[source]="users"
 						(scroll)="onScroll()"
 						(onSelectedItem)="selectUser($event)"
+						#grid
 					></ga-card-grid>
 				</ng-template>
 
@@ -158,24 +155,12 @@
 			{{ 'BUTTONS.INVITE' | translate }}
 		</button>
 	</ng-template>
-	<button
-		nbButton
-		status="success"
-		size="small"
-		class="action"
-		(click)="add()"
-	>
+	<button nbButton status="success" size="small" class="action" (click)="add()">
 		<nb-icon icon="plus-outline"></nb-icon>
 		{{ 'BUTTONS.ADD_NEW' | translate }}
 	</button>
 	<ng-template ngxPermissionsOnly="TENANT_ADD_EXISTING_USER">
-		<button
-			(click)="toggleAddCard()"
-			nbButton
-			status="warning"
-			class="action"
-			size="small"
-		>
+		<button (click)="toggleAddCard()" nbButton status="warning" class="action" size="small">
 			<nb-icon icon="plus-outline"></nb-icon>
 			{{ 'BUTTONS.ADD_EXISTING' | translate }}
 		</button>
