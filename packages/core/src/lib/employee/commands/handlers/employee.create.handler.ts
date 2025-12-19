@@ -95,7 +95,8 @@ export class EmployeeCreateHandler implements ICommandHandler<EmployeeCreateComm
 
 				return await this._employeeService.create(employeeInput);
 			} catch (error) {
-				this.logger.error('Error while creating employee for existing user', error);
+				this.logger.error(`Error while creating employee for existing user ${input.userId}`, error);
+				throw error;
 			}
 		}
 	}
