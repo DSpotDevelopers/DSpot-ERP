@@ -7,7 +7,7 @@ import { ServerSourceConf } from './server-source.conf';
 
 export class ServerDataSource extends LocalDataSource {
 	protected conf: ServerSourceConf;
-	protected lastRequestCount: number = 0;
+	protected lastRequestCount = 0;
 
 	constructor(protected http: HttpClient, conf: ServerSourceConf | {} = {}) {
 		super();
@@ -56,7 +56,7 @@ export class ServerDataSource extends LocalDataSource {
 	 */
 	protected extractDataFromResponse(res: any): Array<any> {
 		const rawData = res.body;
-		let data = !!this.conf.dataKey ? rawData[this.conf.dataKey] : rawData;
+		const data = this.conf.dataKey ? rawData[this.conf.dataKey] : rawData;
 		try {
 			if (data instanceof Array) {
 				return this.conf.resultMap ? data.map(this.conf.resultMap).filter(Boolean) : data;
@@ -86,7 +86,7 @@ export class ServerDataSource extends LocalDataSource {
 	}
 
 	protected requestElements(): Observable<any> {
-		let httpParams = this.createRequestParams();
+		const httpParams = this.createRequestParams();
 		return this.http.get(this.conf.endPoint, { params: httpParams, observe: 'response' });
 	}
 
@@ -126,9 +126,6 @@ export class ServerDataSource extends LocalDataSource {
 				if (fieldConf.direction) {
 					// Convert direction to uppercase (e.g., ASC or DESC) and add it to orders
 					orders[fieldConf.field] = fieldConf.direction.toUpperCase();
-				} else {
-					// Log a warning if the direction is not defined
-					console.warn(`Direction is not defined for field: ${fieldConf.field}`);
 				}
 			});
 

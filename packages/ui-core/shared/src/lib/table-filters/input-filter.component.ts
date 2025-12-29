@@ -40,7 +40,9 @@ export class InputFilterComponent extends DefaultFilter implements OnInit, OnDes
 	 *
 	 * @param changes
 	 */
-	ngOnChanges(changes: SimpleChanges) {}
+	ngOnChanges(changes: SimpleChanges) {
+		// Required for angular2-smart-table, even if unused
+	}
 
 	/**
 	 * Lifecycle hook called just before the component is destroyed.
