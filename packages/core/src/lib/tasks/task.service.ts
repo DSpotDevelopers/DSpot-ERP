@@ -603,6 +603,11 @@ export class TaskService extends TenantAwareCrudService<Task> {
 				}
 			}
 
+			const taskNumberOrder = options.order?.taskNumber;
+			if (options.order?.taskNumber) {
+				delete options.order.taskNumber;
+			}
+
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
 			query.innerJoin(`${query.alias}.members`, 'members');
 
@@ -625,6 +630,12 @@ export class TaskService extends TenantAwareCrudService<Task> {
 
 			// Apply common filters for tasks
 			this.addTaskCommonFilters(query, options);
+
+			if (taskNumberOrder) {
+				const direction: 'ASC' | 'DESC' = taskNumberOrder === 'DESC' || taskNumberOrder === -1 ? 'DESC' : 'ASC';
+				query.addOrderBy(`${query.alias}.prefix`, direction);
+				query.addOrderBy(`${query.alias}.number`, direction);
+			}
 
 			const [items, total] = await query.getManyAndCount();
 			return { items, total };
@@ -921,6 +932,11 @@ export class TaskService extends TenantAwareCrudService<Task> {
 				}
 			}
 
+			const taskNumberOrder = options.order?.taskNumber;
+			if (options.order?.taskNumber) {
+				delete options.order.taskNumber;
+			}
+
 			const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
 			query.leftJoin(`${query.alias}.teams`, 'teams');
 
@@ -959,6 +975,12 @@ export class TaskService extends TenantAwareCrudService<Task> {
 
 			// Apply common filters for tasks
 			this.addTaskCommonFilters(query, options);
+
+			if (taskNumberOrder) {
+				const direction: 'ASC' | 'DESC' = taskNumberOrder === 'DESC' || taskNumberOrder === -1 ? 'DESC' : 'ASC';
+				query.addOrderBy(`${query.alias}.prefix`, direction);
+				query.addOrderBy(`${query.alias}.number`, direction);
+			}
 
 			const [items, total] = await query.getManyAndCount();
 			return { items, total };
