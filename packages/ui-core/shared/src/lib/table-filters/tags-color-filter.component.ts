@@ -29,7 +29,9 @@ export class TagsColorFilterComponent extends DefaultFilter implements OnInit, O
 		}
 	}
 
-	ngOnChanges(changes: SimpleChanges) {}
+	ngOnChanges(changes: SimpleChanges) {
+		// Required for angular2-smart-table, even if unused
+	}
 
 	/**
 	 *

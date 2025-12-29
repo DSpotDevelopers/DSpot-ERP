@@ -24,6 +24,10 @@ import { OrganizationEmploymentTypesService, Store } from '@gauzy/ui-core/core';
 			::ng-deep angular2-smart-table table .angular2-smart-filter .ng-select .ng-select-container {
 				height: auto;
 			}
+			:host ::ng-deep .ng-select .ng-placeholder {
+				line-height: 0 !important;
+				top: auto !important;
+			}
 		`
 	],
 	standalone: false
@@ -55,7 +59,9 @@ export class EmploymentTypeFilterComponent extends DefaultFilter implements OnIn
 			});
 	}
 
-	ngOnChanges(changes: SimpleChanges) {}
+	ngOnChanges(changes: SimpleChanges) {
+		// Required for angular2-smart-table, even if unused
+	}
 
 	selectedEmploymentTypeEvent(value: IOrganizationEmploymentType[]) {
 		this.column.filterFunction(value, this.column.id);
