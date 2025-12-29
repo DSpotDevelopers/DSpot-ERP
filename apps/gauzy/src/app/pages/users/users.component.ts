@@ -39,9 +39,9 @@ import {
 	RoleComponent,
 	TagsColorFilterComponent,
 	TagsOnlyComponent,
-	ToggleFilterComponent,
 	UserMutationComponent,
-	UserRoleFilterComponent
+	UserRoleFilterComponent,
+	UserToggleFilterComponent
 } from '@gauzy/ui-core/shared';
 import { EmployeeWorkStatusComponent } from '../employees/table-components';
 import { HttpClient } from '@angular/common/http';
@@ -563,6 +563,8 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 					title: this.getTranslation('SM_TABLE.ROLE'),
 					type: 'custom',
 					width: '10%',
+					isSortable: false,
+					isFilterable: true,
 					renderComponent: RoleComponent,
 					componentInitFunction: (instance: RoleComponent, cell: Cell) => {
 						instance.value = cell.getRawValue();
@@ -611,11 +613,31 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 					isSortable: false,
 					filter: {
 						type: 'custom',
-						component: ToggleFilterComponent
+						component: UserToggleFilterComponent,
+						config: {
+							initialValueToggle: {
+								isActive: this.filters?.where?.isActive ?? null,
+								isArchived: this.filters?.where?.isArchived ?? null
+							}
+						}
 					},
-					filterFunction: (isActive: boolean) => {
-						this.setFilter({ field: 'isActive', search: isActive });
-						return isActive;
+					filterFunction: (value: { isActive?: boolean; isArchived?: boolean }) => {
+						if (!value) {
+							// reset
+							this.setFilter({ field: 'isActive', search: null });
+							this.setFilter({ field: 'isArchived', search: null });
+							return false;
+						}
+
+						if ('isActive' in value) {
+							this.setFilter({ field: 'isActive', search: value.isActive });
+						}
+
+						if ('isArchived' in value) {
+							this.setFilter({ field: 'isArchived', search: value.isArchived });
+						}
+
+						return false;
 					},
 					renderComponent: EmployeeWorkStatusComponent,
 					componentInitFunction: (instance: EmployeeWorkStatusComponent, cell: Cell) => {

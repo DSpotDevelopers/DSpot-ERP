@@ -26,6 +26,7 @@ import { ProductCategoryFilterComponent } from './product-category-filter.compon
 import { ProductTypeFilterComponent } from './product-type-filter.component';
 import { EmploymentTypeFilterComponent } from './employment-type-filter.component';
 import { UserRoleFilterComponent } from './user-role-filter.component';
+import { UserToggleFilterComponent } from './user-toggle-filter/user-toggle-filter.component';
 
 @NgModule({
 	imports: [
@@ -60,7 +61,8 @@ import { UserRoleFilterComponent } from './user-role-filter.component';
 		ToggleFilterComponent,
 		DateFilterComponent,
 		EmploymentTypeFilterComponent,
-		UserRoleFilterComponent
+		UserRoleFilterComponent,
+		UserToggleFilterComponent
 	],
 	exports: [],
 	providers: []
