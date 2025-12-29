@@ -33,7 +33,9 @@ export class TaskStatusFilterComponent extends DefaultFilter implements OnChange
 	 *
 	 * @param changes
 	 */
-	ngOnChanges(changes: SimpleChanges) {}
+	ngOnChanges(changes: SimpleChanges) {
+		// Required for angular2-smart-table, even if unused
+	}
 
 	/**
 	 *

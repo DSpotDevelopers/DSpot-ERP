@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DefaultFilter } from 'angular2-smart-table';
 import { debounceTime, distinctUntilChanged, filter, Subscription, tap } from 'rxjs';
@@ -48,6 +48,10 @@ export class RangeFilterComponent extends DefaultFilter implements OnInit, OnDes
 				tap(({ min, max }) => this.column.filterFunction({ min, max }, this.column.id))
 			)
 			.subscribe();
+	}
+
+	ngOnChanges(changes: SimpleChanges) {
+		// Required for angular2-smart-table, even if unused
 	}
 
 	ngOnDestroy() {

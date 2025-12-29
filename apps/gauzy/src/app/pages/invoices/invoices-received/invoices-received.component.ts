@@ -333,6 +333,7 @@ export class InvoicesReceivedComponent extends PaginationFilterBaseComponent imp
 				perPage: pagination ? pagination.itemsPerPage : 10
 			},
 			mode: 'external',
+			sortMode: 'single',
 			selectedRowIndex: -1,
 			noDataMessage: this.getTranslation('SM_TABLE.NO_DATA.RECEIVE_ESTIMATE'),
 			columns: {
@@ -342,7 +343,6 @@ export class InvoicesReceivedComponent extends PaginationFilterBaseComponent imp
 						: this.getTranslation('INVOICES_PAGE.INVOICE_NUMBER'),
 					type: this.isEstimate ? 'string' : 'custom',
 					renderComponent: this.isEstimate ? null : NotesWithTagsComponent,
-					sortDirection: 'asc',
 					width: '20%',
 					filter: {
 						type: 'custom',
