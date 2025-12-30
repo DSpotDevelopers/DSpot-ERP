@@ -14,4 +14,4 @@ export * from './product-category-filter.component';
 export * from './product-type-filter.component';
 export * from './employment-type-filter.component';
 export * from './user-role-filter.component';
-export * from './user-toggle-filter/user-toggle-filter.component';
+export * from './smart-toggle-filter/smart-toggle-filter.component';

@@ -566,7 +566,7 @@ export class EmployeeService extends TenantAwareCrudService<Employee> {
 								if (isNotEmpty(user.email)) {
 									const keywords: string[] = user.email.split(' ');
 									keywords.forEach((keyword: string, index: number) => {
-										web.orWhere(p(`LOWER("user"."email") like LOWER(:email_${index})`), {
+										web.andWhere(p(`LOWER("user"."email") LIKE LOWER(:email_${index})`), {
 											[`email_${index}`]: `%${keyword}%`
 										});
 									});

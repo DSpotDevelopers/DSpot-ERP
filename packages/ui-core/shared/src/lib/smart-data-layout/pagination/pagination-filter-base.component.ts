@@ -118,6 +118,42 @@ export class PaginationFilterBaseComponent extends TranslationBaseComponent impl
 	}
 
 	/**
+	 * Set filter for data based on the provided filter object.
+	 * @param filter - The filter object containing information about the field and search criteria.
+	 * @param doEmit - A boolean flag indicating whether to emit a notification after setting the filter. Default is true.
+	 */
+	protected setFilterWithServiceFalse(filter: any, doEmit = true) {
+		// Split the field path into an array of field names
+		const fields = filter?.field?.split?.('.');
+		const search = filter?.search;
+
+		if (!fields || fields.length === 0) return;
+
+		if (search != null) {
+			// Create an object with nested keys representing the field path and set the search value
+			const keys = fields.reduceRight((value: string, key: string) => ({ [key]: value }), search);
+
+			// Update the 'where' property in the 'filters' object with the new keys
+			this.filters = {
+				where: {
+					...this.filters.where,
+					...keys,
+					...mergeDeep(this.filters.where, keys)
+				}
+			};
+		} else {
+			// If the search criteria is empty or not a boolean, remove the field from the 'where' property
+			const [field] = fields.reverse();
+			cleanKeys(this.filters.where, field);
+		}
+
+		// Emit a notification if doEmit is true
+		if (doEmit) {
+			this.subject$.next(true);
+		}
+	}
+
+	/**
 	 *
 	 * @param selectedPage
 	 */
