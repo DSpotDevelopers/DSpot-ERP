@@ -41,7 +41,7 @@ import {
 	TagsOnlyComponent,
 	UserMutationComponent,
 	UserRoleFilterComponent,
-	UserToggleFilterComponent
+	SmartToggleFilterComponent
 } from '@gauzy/ui-core/shared';
 import { EmployeeWorkStatusComponent } from '../employees/table-components';
 import { HttpClient } from '@angular/common/http';
@@ -613,30 +613,25 @@ export class UsersComponent extends PaginationFilterBaseComponent implements OnI
 					isSortable: false,
 					filter: {
 						type: 'custom',
-						component: UserToggleFilterComponent,
+						component: SmartToggleFilterComponent,
 						config: {
-							initialValueToggle: {
-								isActive: this.filters?.where?.isActive ?? null,
-								isArchived: this.filters?.where?.isArchived ?? null
-							}
+							initialChoice: this.filters?.where?.isActive
+								? 'accept'
+								: this.filters?.where?.isArchived
+								? 'deny'
+								: null,
+							acceptValue: { isActive: true, isArchived: false },
+							denyValue: { isActive: false, isArchived: true }
 						}
 					},
-					filterFunction: (value: { isActive?: boolean; isArchived?: boolean }) => {
+					filterFunction: (value: { isActive?: boolean; isArchived?: boolean } | null) => {
 						if (!value) {
-							// reset
 							this.setFilter({ field: 'isActive', search: null });
 							this.setFilter({ field: 'isArchived', search: null });
 							return false;
 						}
-
-						if ('isActive' in value) {
-							this.setFilter({ field: 'isActive', search: value.isActive });
-						}
-
-						if ('isArchived' in value) {
-							this.setFilter({ field: 'isArchived', search: value.isArchived });
-						}
-
+						if ('isActive' in value) this.setFilter({ field: 'isActive', search: value.isActive });
+						if ('isArchived' in value) this.setFilter({ field: 'isArchived', search: value.isArchived });
 						return false;
 					},
 					renderComponent: EmployeeWorkStatusComponent,

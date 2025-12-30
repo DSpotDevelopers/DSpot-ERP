@@ -42,7 +42,7 @@ import {
 	InviteMutationComponent,
 	PaginationFilterBaseComponent,
 	PictureNameTagsComponent,
-	ToggleFilterComponent
+	SmartToggleFilterComponent
 } from '@gauzy/ui-core/shared';
 import { EmployeeTimeTrackingStatusComponent, EmployeeWorkStatusComponent } from './table-components';
 
@@ -182,8 +182,13 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 			.componentLayout$(this.viewComponentName)
 			.pipe(
 				distinctUntilChange(),
-				tap((componentLayout) => (this.dataLayoutStyle = componentLayout)),
-				tap(() => this.refreshPagination()),
+				tap((componentLayout: ComponentLayoutStyleEnum) => {
+					this.dataLayoutStyle = componentLayout;
+					this._loadSmartTableSettings();
+					this._additionalColumns();
+					this._registerDataTableColumns();
+					this.refreshPagination();
+				}),
 				filter((componentLayout) => componentLayout === ComponentLayoutStyleEnum.CARDS_GRID),
 				tap(() => (this.employees = [])),
 				tap(() => this.employees$.next(true)),
@@ -685,7 +690,10 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 				},
 				filter: {
 					type: 'custom',
-					component: InputFilterComponent
+					component: InputFilterComponent,
+					config: {
+						initialValueInput: this.filters?.where?.user?.name ?? null
+					}
 				},
 				filterFunction: this._getFilterFunction('user.name')
 			},
@@ -700,7 +708,10 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 				isFilterable: true,
 				filter: {
 					type: 'custom',
-					component: InputFilterComponent
+					component: InputFilterComponent,
+					config: {
+						initialValueInput: this.filters?.where?.user?.email ?? null
+					}
 				},
 				filterFunction: this._getFilterFunction('user.email')
 			},
@@ -762,9 +773,28 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 				width: '5%',
 				filter: {
 					type: 'custom',
-					component: ToggleFilterComponent
+					component: SmartToggleFilterComponent,
+					config: {
+						initialChoice:
+							this.filters?.where?.isTrackingEnabled === true
+								? 'accept'
+								: this.filters?.where?.isTrackingEnabled === false
+								? 'deny'
+								: null,
+						acceptValue: { field: 'isTrackingEnabled', value: true },
+						denyValue: { field: 'isTrackingEnabled', value: false }
+					}
 				},
-				filterFunction: this._getFilterFunction('isTrackingEnabled'),
+				filterFunction: (data: { field: string; value: boolean } | null) => {
+					if (!data) {
+						// Reset filter
+						this.setFilterWithServiceFalse({ field: 'isTrackingEnabled', search: null });
+						return false;
+					}
+
+					this.setFilterWithServiceFalse({ field: data.field, search: data.value });
+					return false;
+				},
 				renderComponent: EmployeeTimeTrackingStatusComponent,
 				componentInitFunction: (instance: EmployeeTimeTrackingStatusComponent, cell: Cell) => {
 					instance.rowData = cell.getRow().getData();
@@ -781,7 +811,10 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 				isSortable: false,
 				filter: {
 					type: 'custom',
-					component: EmploymentTypeFilterComponent
+					component: EmploymentTypeFilterComponent,
+					config: {
+						initialValueInput: this.filters?.where?.organizationEmploymentTypes ?? null
+					}
 				},
 				filterFunction: (employmentTypes: IOrganizationEmploymentType[]) => {
 					const typeIds = employmentTypes.map((t) => t.id);
@@ -806,11 +839,27 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 				isSortable: false,
 				filter: {
 					type: 'custom',
-					component: ToggleFilterComponent
+					component: SmartToggleFilterComponent,
+					config: {
+						initialChoice: this.filters?.where?.isActive
+							? 'accept'
+							: this.filters?.where?.isArchived
+							? 'deny'
+							: null,
+						acceptValue: { isActive: true, isArchived: false },
+						denyValue: { isActive: false, isArchived: true }
+					}
 				},
-				filterFunction: (isActive: boolean) => {
-					this.setFilter({ field: 'isActive', search: isActive });
-					return isActive;
+				filterFunction: (value: { isActive?: boolean; isArchived?: boolean } | null) => {
+					if (!value) {
+						// Reset filter
+						this.setFilter({ field: 'isActive', search: null });
+						this.setFilter({ field: 'isArchived', search: null });
+						return false;
+					}
+					if ('isActive' in value) this.setFilter({ field: 'isActive', search: value.isActive });
+					if ('isArchived' in value) this.setFilter({ field: 'isArchived', search: value.isArchived });
+					return false;
 				},
 				renderComponent: EmployeeWorkStatusComponent,
 				componentInitFunction: (instance: EmployeeWorkStatusComponent, cell: Cell) => {
@@ -897,11 +946,27 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 			hide: allowScreenshotCapture === false,
 			filter: {
 				type: 'custom',
-				component: ToggleFilterComponent
+				component: SmartToggleFilterComponent,
+				config: {
+					initialChoice:
+						this.filters?.where?.allowScreenshotCapture === true
+							? 'accept'
+							: this.filters?.where?.allowScreenshotCapture === false
+							? 'deny'
+							: null,
+					acceptValue: { field: 'allowScreenshotCapture', value: true },
+					denyValue: { field: 'allowScreenshotCapture', value: false }
+				}
 			},
-			filterFunction: (isEnable: boolean) => {
-				this.setFilter({ field: 'allowScreenshotCapture', search: isEnable });
-				return isEnable;
+			filterFunction: (data: { field: string; value: boolean } | null) => {
+				if (!data) {
+					// Reset filter
+					this.setFilterWithServiceFalse({ field: 'allowScreenshotCapture', search: null });
+					return false;
+				}
+
+				this.setFilterWithServiceFalse({ field: data.field, search: data.value });
+				return false;
 			},
 			renderComponent: AllowScreenshotCaptureComponent, // The component to render the column
 			componentInitFunction: (instance: AllowScreenshotCaptureComponent, cell: Cell) => {
