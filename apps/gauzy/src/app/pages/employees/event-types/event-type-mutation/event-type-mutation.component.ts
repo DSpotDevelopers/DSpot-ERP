@@ -1,34 +1,36 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { NbDialogRef } from '@nebular/theme';
 import { TranslateService } from '@ngx-translate/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { filter, tap } from 'rxjs/operators';
 import { IEventTypeViewModel, IOrganization } from '@gauzy/contracts';
 import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
-import { Store } from '@gauzy/ui-core/core';
+import { emptyStringValidator, noNegativeZero, Store } from '@gauzy/ui-core/core';
+import { FormHelpers } from '@gauzy/ui-core/shared';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    templateUrl: './event-type-mutation.component.html',
-    styleUrls: ['./event-type-mutation.component.scss'],
-    standalone: false
+	templateUrl: './event-type-mutation.component.html',
+	styleUrls: ['./event-type-mutation.component.scss'],
+	standalone: false
 })
 export class EventTypeMutationComponent extends TranslationBaseComponent implements OnInit {
-	public organization: IOrganization;
+	FormHelpers: typeof FormHelpers = FormHelpers;
+	organization: IOrganization;
 	eventType: IEventTypeViewModel;
 	durationUnits: string[] = ['Minute(s)', 'Hour(s)', 'Day(s)'];
 
 	readonly form: UntypedFormGroup = EventTypeMutationComponent.buildForm(this.fb, this);
 	static buildForm(fb: UntypedFormBuilder, self: EventTypeMutationComponent): UntypedFormGroup {
 		return fb.group({
-			title: [],
+			title: [null, [Validators.required, emptyStringValidator]],
 			description: [],
-			duration: [],
+			duration: [0, [Validators.required, Validators.min(0), noNegativeZero()]],
 			durationUnit: [self.durationUnits[0]],
 			isActive: [false],
 			tags: [],
-			employeeId: []
+			employeeId: [null, Validators.required]
 		});
 	}
 
@@ -84,7 +86,7 @@ export class EventTypeMutationComponent extends TranslationBaseComponent impleme
 
 		const { title, description, duration, isActive = false, tags, employeeId } = this.eventType;
 		this.form.patchValue({
-			title: title,
+			title: title?.trim(),
 			description: description,
 			duration: duration,
 			isActive: isActive,

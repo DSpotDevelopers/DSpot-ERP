@@ -775,7 +775,9 @@
 			"PROJECT_ORGANIZATION_CONTACT": "Este campo es obligatorio. Por favor seleccione un cliente.",
 			"PROJECT_OWNER": "El propietario del proyecto es obligatorio.",
 			"TASK_TITLE": "El título de la tarea es obligatorio y no puede estar vacío.",
-			"INVALID_WHOLE_NUMBER": "Por favor, introduzca un número entero válido entre 1 y 100."
+			"INVALID_WHOLE_NUMBER": "Por favor, introduzca un número entero válido entre 1 y 100.",
+			"TITLE": "El título es obligatorio y no puede estar vacío.",
+			"DURATION_MIN": "La duración no debe ser inferior a {{ min }}."
 		}
 	},
 	"POP_UPS": {

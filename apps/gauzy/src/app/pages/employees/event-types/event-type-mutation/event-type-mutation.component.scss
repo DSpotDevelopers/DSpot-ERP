@@ -1,3 +1,4 @@
+@forward '@shared/required-asterisk';
 @use 'gauzy/_gauzy-dialogs' as *;
 
 :host nb-card {
