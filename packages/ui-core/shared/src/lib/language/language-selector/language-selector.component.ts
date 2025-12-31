@@ -11,17 +11,17 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-language-selector',
-    templateUrl: './language-selector.component.html',
-    styleUrls: ['./language-selector.component.scss'],
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => LanguageSelectorComponent),
-            multi: true
-        }
-    ],
-    standalone: false
+	selector: 'ngx-language-selector',
+	templateUrl: './language-selector.component.html',
+	styleUrls: ['./language-selector.component.scss'],
+	providers: [
+		{
+			provide: NG_VALUE_ACCESSOR,
+			useExisting: forwardRef(() => LanguageSelectorComponent),
+			multi: true
+		}
+	],
+	standalone: false
 })
 export class LanguageSelectorComponent extends TranslationBaseComponent implements OnInit {
 	languages: ILanguage[];
@@ -175,7 +175,7 @@ export class LanguageSelectorComponent extends TranslationBaseComponent implemen
 	}
 
 	async getAllLanguages() {
-		const { items } = await this.languagesService.getAllLanguages();
+		const { items } = await this.languagesService.getAllSupportedLanguages();
 		this.languages = items;
 	}
 
