@@ -774,7 +774,9 @@
 			"PROJECT_ORGANIZATION_CONTACT": "To pole jest wymagane. Wybierz klienta.",
 			"PROJECT_OWNER": "Właściciel projektu jest wymagany.",
 			"TASK_TITLE": "Tytuł zadania jest wymagany i nie może być pusty.",
-			"INVALID_WHOLE_NUMBER": "Wprowadź liczbę całkowitą z przedziału od 1 do 100."
+			"INVALID_WHOLE_NUMBER": "Wprowadź liczbę całkowitą z przedziału od 1 do 100.",
+			"TITLE": "Tytuł jest wymagany i nie może być pusty.",
+			"DURATION_MIN": "Czas trwania nie może być mniejszy niż {{ min }}."
 		}
 	},
 	"POP_UPS": {

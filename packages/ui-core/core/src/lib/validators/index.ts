@@ -4,3 +4,4 @@ export * from './email.validator';
 export * from './match.validator';
 export * from './url-pattern.validator';
 export * from './empty-string.validator';
+export * from './no-negative-zero.validator';

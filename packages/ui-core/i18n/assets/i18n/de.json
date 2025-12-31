@@ -775,7 +775,9 @@
 			"PROJECT_ORGANIZATION_CONTACT": "Dieses Feld ist erforderlich. Bitte wählen Sie einen Kunden aus.",
 			"PROJECT_OWNER": "Projektinhaber ist erforderlich.",
 			"TASK_TITLE": "Der Aufgaben-Titel ist erforderlich und darf nicht leer sein.",
-			"INVALID_WHOLE_NUMBER": "Bitte geben Sie eine ganze Zahl zwischen 1 und 100 ein."
+			"INVALID_WHOLE_NUMBER": "Bitte geben Sie eine ganze Zahl zwischen 1 und 100 ein.",
+			"TITLE": "Titel ist erforderlich und darf nicht leer sein.",
+			"DURATION_MIN": "Die Dauer darf nicht unter {{ min }} liegen."
 		}
 	},
 	"POP_UPS": {
