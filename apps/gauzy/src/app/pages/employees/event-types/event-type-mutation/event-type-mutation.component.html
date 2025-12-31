@@ -88,15 +88,19 @@
 								nbInput
 								formControlName="duration"
 							/>
-						</div>
-						<div class="caption status-danger" *ngIf="form.get('duration').errors?.required">
-							{{ 'VALIDATION.ENTER_POSITIVE_NUMBER' | translate }}
-						</div>
-						<div class="caption status-danger" *ngIf="form.get('duration').errors?.negativeZero">
-							{{ 'VALIDATION.ENTER_POSITIVE_NUMBER' | translate }}
-						</div>
-						<div class="caption status-danger" *ngIf="form.get('duration').errors?.min">
-							{{ 'FORM.ERROR.DURATION_MIN' | translate : { min: form.get('duration').errors.min.min } }}
+							<div
+								class="invalid-feedback d-block"
+								*ngIf="
+									form.get('duration').errors?.required || form.get('duration').errors?.negativeZero
+								"
+							>
+								{{ 'VALIDATION.ENTER_POSITIVE_NUMBER' | translate }}
+							</div>
+							<div class="invalid-feedback d-block" *ngIf="form.get('duration').errors?.min">
+								{{
+									'FORM.ERROR.DURATION_MIN' | translate : { min: form.get('duration').errors.min.min }
+								}}
+							</div>
 						</div>
 					</div>
 					<div class="col-3">
