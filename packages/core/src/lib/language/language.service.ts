@@ -3,6 +3,8 @@ import { CrudService } from '../core/crud/crud.service';
 import { TypeOrmLanguageRepository } from './repository/type-orm-language.repository';
 import { MikroOrmLanguageRepository } from './repository/mikro-orm-language.repository';
 import { Language } from './language.entity';
+import { FindManyOptions, In } from 'typeorm';
+import { IPagination, LanguagesEnum } from '@gauzy/contracts';
 
 @Injectable()
 export class LanguageService extends CrudService<Language> {
@@ -23,5 +25,26 @@ export class LanguageService extends CrudService<Language> {
 		return super.findOneByOptions({
 			where: { name }
 		});
+	}
+
+	/**
+	 * Finds all supported languages with optional filtering and pagination.
+	 * Returns only languages with `code` in LanguagesEnum.
+	 *
+	 * @param options Find options (optional)
+	 * @returns Paginated languages
+	 */
+	public async findAllSupportedLanguages(options?: FindManyOptions<Language>): Promise<IPagination<Language>> {
+		const safeOptions: FindManyOptions<Language> = {
+			...(options || {}),
+			where: {
+				...(options?.where || {}),
+				code: In(Object.values(LanguagesEnum))
+			}
+		};
+
+		const [items, total] = await this.typeOrmRepository.findAndCount(safeOptions);
+
+		return { items, total };
 	}
 }

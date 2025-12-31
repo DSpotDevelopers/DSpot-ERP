@@ -16,6 +16,10 @@ export class LanguagesService {
 		return firstValueFrom(this.http.get<{ items: ILanguage[] }>(`${API_PREFIX}/languages`));
 	}
 
+	getAllSupportedLanguages(): Promise<{ items: ILanguage[] }> {
+		return firstValueFrom(this.http.get<{ items: ILanguage[] }>(`${API_PREFIX}/languages/all-supported`));
+	}
+
 	getSystemLanguages(): Promise<{ items: ILanguage[] }> {
 		return firstValueFrom(
 			this.http.get<{ items: ILanguage[] }>(`${API_PREFIX}/languages`, {

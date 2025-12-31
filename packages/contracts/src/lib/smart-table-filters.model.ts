@@ -6,11 +6,6 @@ export interface CustomFilterConfig {
 	initialValueIds?: string[];
 }
 
-export interface StatusFilterValue {
-	isActive?: boolean;
-	isArchived?: boolean;
-}
-
 export interface ToggleFilterConfig {
 	initialChoice?: 'accept' | 'deny' | null;
 	acceptValue?: boolean;

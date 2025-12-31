@@ -10,7 +10,7 @@ import { LanguageService } from './language.service';
 export class LanguageController {
 	constructor(private readonly languageService: LanguageService) {}
 
-	@ApiOperation({ summary: 'Find all language.' })
+	@ApiOperation({ summary: 'Find all languages.' })
 	@ApiResponse({
 		status: HttpStatus.OK,
 		description: 'Found language',
@@ -30,5 +30,21 @@ export class LanguageController {
 	@Public()
 	async findByName(@Param('name') name: string): Promise<ILanguage> {
 		return this.languageService.findOneByName(name);
+	}
+
+	@ApiOperation({ summary: 'Find all supported languages.' })
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: 'Found language',
+		type: Language
+	})
+	@ApiResponse({
+		status: HttpStatus.NOT_FOUND,
+		description: 'Record not found'
+	})
+	@Get('/all-supported')
+	@Public()
+	async findAllSupportedLanguages(@Query() query: any): Promise<IPagination<ILanguage>> {
+		return this.languageService.findAllSupportedLanguages(query);
 	}
 }
