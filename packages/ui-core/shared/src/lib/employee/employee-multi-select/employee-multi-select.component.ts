@@ -50,8 +50,9 @@ export class EmployeeSelectComponent implements OnInit {
 		return this.val;
 	}
 	public set selectedEmployeeIds(value: string[] | string) {
+		if (value == null) return;
 		this.preSelected = value;
-		this.select.setValue(value);
+		this.select.setValue(value, { emitEvent: false });
 		this.select.updateValueAndValidity();
 	}
 

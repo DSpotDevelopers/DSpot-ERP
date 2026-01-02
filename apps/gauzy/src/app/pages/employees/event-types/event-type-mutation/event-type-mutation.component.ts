@@ -30,7 +30,7 @@ export class EventTypeMutationComponent extends TranslationBaseComponent impleme
 			durationUnit: [self.durationUnits[0]],
 			isActive: [false],
 			tags: [],
-			employeeId: [null, Validators.required]
+			employeeId: []
 		});
 	}
 

@@ -18,18 +18,11 @@
 							[multiple]="false"
 							[placeholder]="'FORM.PLACEHOLDERS.ALL_EMPLOYEES' | translate"
 							[selectedEmployeeIds]="form.get('employeeId').value"
-							customClass="required-asterisk"
 							label="FORM.LABELS.EMPLOYEE"
 							(selectedChange)="onEmployeeChange($event)"
 							formControlName="employeeId"
 						>
 						</ga-employee-multi-select>
-						<div
-							*ngIf="form.get('employeeId')?.errors?.required && form.get('employeeId')?.touched"
-							class="invalid-feedback d-block"
-						>
-							{{ 'TIMESHEET.VALIDATION.EMPLOYEE' | translate }}
-						</div>
 					</div>
 				</div>
 			</div>
