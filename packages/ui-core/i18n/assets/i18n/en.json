@@ -237,6 +237,7 @@
 			"PLUGIN_MARKETPLACE": "This plugin is unvailable on marketplace",
 			"HISTORY": "There's no history"
 		},
+		"WEEKLY_LIMIT": "Weekly Limit (hours)",
 		"TRANSACTION_TYPE": "Type",
 		"AMOUNT": "Amount",
 		"DATE": "Date",

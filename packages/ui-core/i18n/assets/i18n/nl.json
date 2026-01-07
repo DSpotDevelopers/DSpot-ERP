@@ -237,6 +237,7 @@
 			"PLUGIN_MARKETPLACE": "Deze plugin is niet beschikbaar op de marktplaats",
 			"LOADING": "Laden..."
 		},
+		"WEEKLY_LIMIT": "Wekelijks limiet (uren)",
 		"TRANSACTION_TYPE": "Type",
 		"AMOUNT": "Bedrag",
 		"DATE": "Datum",

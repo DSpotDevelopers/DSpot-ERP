@@ -7,3 +7,4 @@ export * from './employee-statistics.service';
 export * from './employee-store.service';
 export * from './employees.service';
 export * from './employee-rate.service';
+export * from './employee-socket.service';

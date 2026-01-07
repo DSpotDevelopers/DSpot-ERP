@@ -237,6 +237,7 @@
 			"PLUGIN_MARKETPLACE": "תוסף זה אינו זמין בשוק",
 			"HISTORY": "אין היסטוריה"
 		},
+		"WEEKLY_LIMIT": "הגבלה שבועית (שעות)",
 		"TRANSACTION_TYPE": "סוג",
 		"AMOUNT": "סכום",
 		"DATE": "תאריך",

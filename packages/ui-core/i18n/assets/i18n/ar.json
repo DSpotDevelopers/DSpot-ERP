@@ -237,6 +237,7 @@
 			"PLUGIN_MARKETPLACE": "هذا المكون الإضافي غير متوفر في السوق",
 			"LOADING": "جار التحميل"
 		},
+		"WEEKLY_LIMIT": "الحد الأسبوعي (بالساعات)",
 		"TRANSACTION_TYPE": "النوع",
 		"AMOUNT": "المبلغ",
 		"DATE": "التاريخ",

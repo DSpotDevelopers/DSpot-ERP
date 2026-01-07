@@ -237,6 +237,7 @@
 			"PLUGIN_MARKETPLACE": "Este complemento no está disponible en el mercado",
 			"LOADING": "Cargando..."
 		},
+		"WEEKLY_LIMIT": "Límite semanal (horas)",
 		"TRANSACTION_TYPE": "Tipo",
 		"AMOUNT": "Cantidad",
 		"DATE": "Fecha",

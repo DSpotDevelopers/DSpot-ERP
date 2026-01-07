@@ -178,6 +178,7 @@
 			"PRODUCT_TYPE_NO_DATA": "crwdns11481:0crwdne11481:0",
 			"TEAM_DASHBOARD": "crwdns11521:0crwdne11521:0"
 		},
+		"WEEKLY_LIMIT": "crwdnsXXXXX:0crwdneXXXXX:0",
 		"TRANSACTION_TYPE": "crwdns7534:0crwdne7534:0",
 		"AMOUNT": "crwdns7536:0crwdne7536:0",
 		"DATE": "crwdns20:0crwdne20:0",

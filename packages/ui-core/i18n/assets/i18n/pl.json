@@ -236,6 +236,7 @@
 			"PLUGIN": "Nie zainstalowano żadnych wtyczek.",
 			"PLUGIN_MARKETPLACE": "Ta wtyczka nie jest dostępna na rynku"
 		},
+		"WEEKLY_LIMIT": "Tygodniowy limit (godziny)",
 		"TRANSACTION_TYPE": "Typ",
 		"AMOUNT": "Kwota",
 		"DATE": "Data",

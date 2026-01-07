@@ -47,7 +47,9 @@ export class EmployeeUpdateHandler implements ICommandHandler<EmployeeUpdateComm
 
 			// Send a real-time event to the specified user via socket.
 			// No error is thrown if the user is not currently connected.
-			this._socketService.sendTimerChanged(user?.employeeId);
+			this._socketService.sendTimerChanged(employee?.id);
+			this._socketService.emitToClient(employee?.id, 'employee:changed', null);
+
 			return employee;
 		} catch (error) {
 			this.logger.error('Error while updating employee', error);
