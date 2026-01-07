@@ -237,6 +237,7 @@
 			"PLUGIN_MARKETPLACE": "Dieses Plugin ist im Marktplatz nicht verfügbar",
 			"LOADING": "Laden..."
 		},
+		"WEEKLY_LIMIT": "Wöchentliches Limit (Stunden)",
 		"TRANSACTION_TYPE": "Typ",
 		"AMOUNT": "Betrag",
 		"DATE": "Datum",

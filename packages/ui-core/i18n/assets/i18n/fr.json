@@ -227,6 +227,7 @@
 			"PLUGIN_MARKETPLACE": "Ce plugin n'est pas disponible sur le marché",
 			"LOADING": "Chargement..."
 		},
+		"WEEKLY_LIMIT": "Limite hebdomadaire (heures)",
 		"TRANSACTION_TYPE": "Taper",
 		"AMOUNT": "Montant",
 		"DATE": "Date",

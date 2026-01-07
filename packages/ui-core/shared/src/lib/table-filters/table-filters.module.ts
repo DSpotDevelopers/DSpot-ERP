@@ -27,6 +27,7 @@ import { ProductTypeFilterComponent } from './product-type-filter.component';
 import { EmploymentTypeFilterComponent } from './employment-type-filter.component';
 import { UserRoleFilterComponent } from './user-role-filter.component';
 import { SmartToggleFilterComponent } from './smart-toggle-filter/smart-toggle-filter.component';
+import { NumberInputFilterComponent } from './number-input-filter.component';
 
 @NgModule({
 	imports: [
@@ -62,7 +63,8 @@ import { SmartToggleFilterComponent } from './smart-toggle-filter/smart-toggle-f
 		DateFilterComponent,
 		EmploymentTypeFilterComponent,
 		UserRoleFilterComponent,
-		SmartToggleFilterComponent
+		SmartToggleFilterComponent,
+		NumberInputFilterComponent
 	],
 	exports: [],
 	providers: []

@@ -7,6 +7,7 @@ import { Cell, IColumns, Settings } from 'angular2-smart-table';
 import { Subject, debounceTime, filter, firstValueFrom, tap } from 'rxjs';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import {
+	EmployeeSocketService,
 	EmployeeStore,
 	EmployeesService,
 	ErrorHandlingService,
@@ -40,6 +41,7 @@ import {
 	EmploymentTypeFilterComponent,
 	InputFilterComponent,
 	InviteMutationComponent,
+	NumberInputFilterComponent,
 	PaginationFilterBaseComponent,
 	PictureNameTagsComponent,
 	SmartToggleFilterComponent
@@ -95,7 +97,8 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 		private readonly _employeeStore: EmployeeStore,
 		private readonly _httpClient: HttpClient,
 		private readonly _dateFormatPipe: DateFormatPipe,
-		private readonly _pageDataTableRegistryService: PageDataTableRegistryService
+		private readonly _pageDataTableRegistryService: PageDataTableRegistryService,
+		private readonly _employeeSocketService: EmployeeSocketService
 	) {
 		super(translateService);
 		this.setView();
@@ -110,6 +113,13 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 				debounceTime(300),
 				tap(() => this.clearItem()),
 				tap(() => this.getEmployees()),
+				untilDestroyed(this)
+			)
+			.subscribe();
+		this._employeeSocketService.employeeChanged$
+			.pipe(
+				debounceTime(300),
+				tap(() => this.employees$.next(true)),
 				untilDestroyed(this)
 			)
 			.subscribe();
@@ -768,7 +778,7 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 				title: () => this.getTranslation('SM_TABLE.TIME_TRACKING'),
 				type: 'custom',
 				isFilterable: true,
-				isSortable: true,
+				isSortable: false,
 				class: 'text-center',
 				width: '5%',
 				filter: {
@@ -829,8 +839,26 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 			},
 			{
 				dataTableId: this.dataTableId,
-				columnId: 'workStatus',
+				columnId: 'reWeeklyLimit',
 				order: 4,
+				title: () => this.getTranslation('SM_TABLE.WEEKLY_LIMIT'),
+				type: 'text',
+				classContent: 'align-row',
+				width: '10%',
+				isFilterable: true,
+				filter: {
+					type: 'custom',
+					component: NumberInputFilterComponent,
+					config: {
+						initialValueInput: this.filters?.where?.reWeeklyLimit ?? null
+					}
+				},
+				filterFunction: this._getFilterFunction('reWeeklyLimit')
+			},
+			{
+				dataTableId: this.dataTableId,
+				columnId: 'workStatus',
+				order: 5,
 				title: () => this.getTranslation('SM_TABLE.STATUS'),
 				type: 'custom',
 				class: 'text-center',
@@ -880,7 +908,7 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 	private _getFilterFunction(field: string) {
 		return (value: string) => {
 			this.setFilter({ field, search: value });
-			return value.length > 0; // Return `true` if the value is non-empty
+			return value?.length > 0; // Return `true` if the value is non-empty
 		};
 	}
 
@@ -936,7 +964,7 @@ export class EmployeesComponent extends PaginationFilterBaseComponent implements
 		this._pageDataTableRegistryService.registerPageDataTableColumn({
 			dataTableId: this.dataTableId, // The identifier for the data table location
 			columnId: 'allowScreenshotCapture', // The identifier for the column
-			order: 8, // The order of the column in the table
+			order: 6, // The order of the column in the table
 			title: () => this.getTranslation('SM_TABLE.SCREEN_CAPTURE'), // The title of the column
 			type: 'custom', // The type of the column
 			class: 'text-center', // The class of the column

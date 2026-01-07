@@ -495,7 +495,8 @@ export class EmployeeService extends TenantAwareCrudService<Employee> {
 					isActive: true,
 					isArchived: true,
 					isAway: true,
-					isOnline: true
+					isOnline: true,
+					reWeeklyLimit: true
 				},
 				...(options?.relations ? { relations: options.relations } : {}),
 				...(options && 'withDeleted' in options ? { withDeleted: options.withDeleted } : {}) // Include soft-deleted parent entities
@@ -520,7 +521,13 @@ export class EmployeeService extends TenantAwareCrudService<Employee> {
 					// Apply conditions for specific fields in the Employee entity
 					qb.andWhere(
 						new Brackets((web: WhereExpressionBuilder) => {
-							const fields = ['isActive', 'isArchived', 'isTrackingEnabled', 'allowScreenshotCapture'];
+							const fields = [
+								'isActive',
+								'isArchived',
+								'isTrackingEnabled',
+								'allowScreenshotCapture',
+								'reWeeklyLimit'
+							];
 							fields.forEach((key: string) => {
 								if (key in where) {
 									web.andWhere(p(`${qb.alias}.${key} = :${key}`), { [key]: where[key] });

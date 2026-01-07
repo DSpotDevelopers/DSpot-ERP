@@ -237,6 +237,7 @@
 			"PLUGIN_MARKETPLACE": "Questo plugin non è disponibile sul marketplace",
 			"LOADING": "Caricamento..."
 		},
+		"WEEKLY_LIMIT": "Limite settimanale (ore)",
 		"TRANSACTION_TYPE": "Tipo",
 		"AMOUNT": "Importo",
 		"DATE": "Data",

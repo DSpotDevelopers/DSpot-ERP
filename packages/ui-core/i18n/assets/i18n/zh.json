@@ -237,6 +237,7 @@
 			"PLUGIN_MARKETPLACE": "该插件在市场上不可用",
 			"LOADING": "加载中..."
 		},
+		"WEEKLY_LIMIT": "每周限制（小时）",
 		"TRANSACTION_TYPE": "类型",
 		"AMOUNT": "金额",
 		"DATE": "日期",

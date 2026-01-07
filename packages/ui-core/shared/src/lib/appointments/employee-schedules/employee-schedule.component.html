@@ -10,8 +10,8 @@
 				: 'EMPLOYEE_SCHEDULES_MODAL.SLOTS_AVAILABLE'
 			) | translate
 		}}
-		<div>
-			<nb-list *ngIf="schedule.slots.length">
+		<div *ngIf="schedule?.slots?.length">
+			<nb-list>
 				<nb-list-item *ngFor="let item of schedule.slots">
 					<span>- {{ item.startTime }} to {{ item.endTime }} <br /></span>
 				</nb-list-item>
@@ -23,7 +23,7 @@
 			{{ 'BUTTONS.OK' | translate }}
 		</button>
 
-		<ng-container *ngIf="schedule.slots.length">
+		<ng-container *ngIf="schedule?.slots?.length">
 			<button nbButton type="button" class="mr-3" (click)="closeDialog('no')">
 				{{ 'BUTTONS.NO' | translate }}
 			</button>

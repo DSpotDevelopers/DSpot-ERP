@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, tap } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { ID, IOrganization } from '@gauzy/contracts';
+import { IOrganization } from '@gauzy/contracts';
 import { distinctUntilChange } from '@gauzy/ui-core/common';
 import { EventTypeService, Store, ToastrService } from '@gauzy/ui-core/core';
 import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
@@ -12,13 +12,13 @@ import { EmployeeSelectorComponent } from '@gauzy/ui-core/shared';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ga-pick-employee',
-    templateUrl: './pick-employee.component.html',
-    styleUrls: ['./pick-employee.component.scss'],
-    providers: [EventTypeService],
-    standalone: false
+	selector: 'ga-pick-employee',
+	templateUrl: './pick-employee.component.html',
+	styleUrls: ['./pick-employee.component.scss'],
+	providers: [EventTypeService],
+	standalone: false
 })
-export class PickEmployeeComponent extends TranslationBaseComponent implements OnInit, OnDestroy {
+export class PickEmployeeComponent extends TranslationBaseComponent implements OnInit {
 	public loading: boolean;
 	public organization: IOrganization;
 	public organization$: Observable<IOrganization>;
@@ -62,7 +62,7 @@ export class PickEmployeeComponent extends TranslationBaseComponent implements O
 		const { id: organizationId, tenantId } = this.organization;
 
 		// Get the selected employee
-		const selectedEmployeeId: ID = this.employeeSelector.selectedEmployee?.id;
+		const selectedEmployeeId = this.employeeSelector.selectedEmployee?.id;
 
 		// If an employee is selected, fetch the event types
 		if (selectedEmployeeId) {
@@ -99,6 +99,4 @@ export class PickEmployeeComponent extends TranslationBaseComponent implements O
 			this._toastrService.danger(this.getTranslation('PUBLIC_APPOINTMENTS.SELECT_EMPLOYEE_ERROR'));
 		}
 	}
-
-	ngOnDestroy() {}
 }
