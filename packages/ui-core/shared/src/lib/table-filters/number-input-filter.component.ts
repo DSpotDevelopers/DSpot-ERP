@@ -8,7 +8,7 @@ import { CustomFilterConfig } from '@gauzy/contracts';
 @Component({
 	selector: 'ga-number-input-filter-selector',
 	template: `
-		<input type="number" [formControl]="inputControl" class="form-control" [placeholder]="column.title" />
+		<input type="number" min="0" [formControl]="inputControl" class="form-control" [placeholder]="column.title" />
 	`,
 	standalone: false
 })
