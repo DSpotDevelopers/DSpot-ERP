@@ -24,7 +24,8 @@ import {
 	NavigationService,
 	SelectorBuilderService,
 	SeoService,
-	Store
+	Store,
+	UsersSocketService
 } from '@gauzy/ui-core/core';
 import { I18nService } from '@gauzy/ui-core/i18n';
 
@@ -50,7 +51,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 		private readonly _activatedRoute: ActivatedRoute,
 		private readonly _selectorBuilderService: SelectorBuilderService,
 		private readonly _dateRangePickerBuilderService: DateRangePickerBuilderService,
-		private readonly _navigationService: NavigationService
+		private readonly _navigationService: NavigationService,
+		private readonly _usersSocketService: UsersSocketService
 	) {
 		this.getActivateRouterDataEvent();
 		this.getPreferredLanguage();
