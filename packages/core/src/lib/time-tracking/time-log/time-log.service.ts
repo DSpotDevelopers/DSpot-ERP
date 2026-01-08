@@ -1257,6 +1257,24 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			query.andWhere(p(`"${query.alias}"."organizationTeamId" IN (:...teamIds)`), { teamIds });
 		}
 
+		//Show only time logs from projects assigned to current employee
+		if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY) && user.employeeId) {
+			const assignedProjectsSubQuery = query
+				.subQuery()
+				.select('1')
+				.from('organization_project_employee', 'ope')
+				.where(`ope."organizationProjectId" = "${query.alias}"."projectId"`)
+				.andWhere(`ope."employeeId" = :currentEmployeeId`)
+				.getQuery();
+
+			query.andWhere(
+				new Brackets((qb) => {
+					qb.where(`"${query.alias}"."projectId" IS NULL`);
+					qb.orWhere(`EXISTS ${assignedProjectsSubQuery}`, { currentEmployeeId: user.employeeId });
+				})
+			);
+		}
+
 		// Filters records based on the overall column, representing the activity level.
 		if (!ignoreSlots && isNotEmpty(request.activityLevel)) {
 			/**

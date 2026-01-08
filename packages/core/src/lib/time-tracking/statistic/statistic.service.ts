@@ -355,6 +355,24 @@ export class StatisticService {
 			);
 		}
 
+		//Show only time logs from projects assigned to current employee
+		if (RequestContext.hasPermission(PermissionsEnum.VIEW_ASSIGNED_PROJECTS_ONLY) && user.employeeId) {
+			const assignedProjectsSubQuery = logs
+				.subQuery()
+				.select('1')
+				.from('organization_project_employee', 'ope')
+				.where(`ope."organizationProjectId" = time_log."projectId"`)
+				.andWhere(`ope."employeeId" = :currentEmployeeId`)
+				.getQuery();
+
+			logs.andWhere(
+				new Brackets((qb) => {
+					qb.where(`time_log."projectId" IS NULL`);
+					qb.orWhere(`EXISTS ${assignedProjectsSubQuery}`, { currentEmployeeId: user.employeeId });
+				})
+			);
+		}
+
 		const timeLogs = await logs.getMany();
 
 		// Adjust logs that cross midnight boundaries according to timezone
@@ -409,9 +427,8 @@ export class StatisticService {
 		const tenantId = RequestContext.currentTenantId() ?? request.tenantId;
 
 		// Check if the user only can see himself
-		const onlyCanSeeHimself: boolean = isOnlyMeSelected || !RequestContext.hasPermission(
-			PermissionsEnum.CHANGE_SELECTED_EMPLOYEE
-		);
+		const onlyCanSeeHimself: boolean =
+			isOnlyMeSelected || !RequestContext.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
 
 		const filteredEmployeeIds = [];
 
