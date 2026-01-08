@@ -38,6 +38,7 @@ import { TaskService } from '../tasks/task.service';
 import { MikroOrmUserRepository } from './repository/mikro-orm-user.repository';
 import { TypeOrmUserRepository } from './repository/type-orm-user.repository';
 import { User } from './user.entity';
+import { SocketService } from '../socket';
 
 @Injectable()
 export class UserService extends TenantAwareCrudService<User> {
@@ -46,7 +47,8 @@ export class UserService extends TenantAwareCrudService<User> {
 		readonly mikroOrmUserRepository: MikroOrmUserRepository,
 		private readonly _configService: ConfigService,
 		private readonly _employeeService: EmployeeService,
-		private readonly _taskService: TaskService
+		private readonly _taskService: TaskService,
+		private readonly _socketService: SocketService
 	) {
 		super(typeOrmUserRepository, mikroOrmUserRepository);
 	}
@@ -372,6 +374,9 @@ export class UserService extends TenantAwareCrudService<User> {
 
 			// Save the updated user entity
 			await this.save(entity);
+
+			const employee = await this._employeeService.findOneByUserId(user.id);
+			if (employee) this._socketService.emitToClient(employee?.id, 'user:changed', null);
 
 			// Return the updated user
 			return await this.findOneByWhereOptions({

@@ -16,6 +16,7 @@ import { TaskModule } from './../tasks/task.module';
 import { EmployeeModule } from './../employee/employee.module';
 import { TypeOrmUserRepository } from './repository/type-orm-user.repository';
 import { MikroOrmUserRepository } from './repository/mikro-orm-user.repository';
+import { SocketModule } from '../socket';
 
 @Module({
 	imports: [
@@ -25,7 +26,8 @@ import { MikroOrmUserRepository } from './repository/mikro-orm-user.repository';
 		forwardRef(() => TaskModule),
 		forwardRef(() => EmployeeModule),
 		CqrsModule,
-		FactoryResetModule
+		FactoryResetModule,
+		SocketModule
 	],
 	controllers: [UserController],
 	providers: [UserService, TypeOrmUserRepository, MikroOrmUserRepository, ...CommandHandlers],
