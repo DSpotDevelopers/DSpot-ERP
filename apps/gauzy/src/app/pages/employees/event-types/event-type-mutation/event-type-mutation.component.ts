@@ -4,7 +4,7 @@ import { NbDialogRef } from '@nebular/theme';
 import { TranslateService } from '@ngx-translate/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { filter, tap } from 'rxjs/operators';
-import { IEventTypeViewModel, IOrganization } from '@gauzy/contracts';
+import { IEventTypeViewModel, IOrganization, PermissionsEnum } from '@gauzy/contracts';
 import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
 import { emptyStringValidator, noNegativeZero, Store } from '@gauzy/ui-core/core';
 import { FormHelpers } from '@gauzy/ui-core/shared';
@@ -20,6 +20,8 @@ export class EventTypeMutationComponent extends TranslationBaseComponent impleme
 	organization: IOrganization;
 	eventType: IEventTypeViewModel;
 	durationUnits: string[] = ['Minute(s)', 'Hour(s)', 'Day(s)'];
+	selectedEmployeeId = null;
+	private hasPermission = false;
 
 	readonly form: UntypedFormGroup = EventTypeMutationComponent.buildForm(this.fb, this);
 	static buildForm(fb: UntypedFormBuilder, self: EventTypeMutationComponent): UntypedFormGroup {
@@ -44,10 +46,15 @@ export class EventTypeMutationComponent extends TranslationBaseComponent impleme
 	}
 
 	ngOnInit() {
+		this.hasPermission = this.store.hasPermission(PermissionsEnum.CHANGE_SELECTED_EMPLOYEE);
+
 		this.store.selectedOrganization$
 			.pipe(
 				filter((organization: IOrganization) => !!organization),
 				tap((organization: IOrganization) => (this.organization = organization)),
+				tap(() => {
+					if (!this.hasPermission) this._applyEmployeeWithoutPermission();
+				}),
 				tap(() => this._patchRawForm()),
 				untilDestroyed(this)
 			)
@@ -98,6 +105,14 @@ export class EventTypeMutationComponent extends TranslationBaseComponent impleme
 		this.form.patchValue({
 			durationUnit: durationUnit ? durationUnit : this.durationUnits[0]
 		});
+	}
+
+	private _applyEmployeeWithoutPermission() {
+		const employeeId = this.store.user?.employee?.id;
+		if (!employeeId) return;
+		this.selectedEmployeeId = employeeId;
+		this.form.patchValue({ employeeId });
+		this.form.get('employeeId')?.disable({ emitEvent: false });
 	}
 
 	selectedTagsEvent(ev) {
