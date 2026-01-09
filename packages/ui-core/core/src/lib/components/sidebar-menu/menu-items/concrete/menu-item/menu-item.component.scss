@@ -136,3 +136,9 @@
     margin: 0 0.625rem;
   }
 }
+
+:host ::ng-deep .no-children {
+  nb-accordion-item-header .expansion-indicator {
+    display: none !important;
+  }
+}

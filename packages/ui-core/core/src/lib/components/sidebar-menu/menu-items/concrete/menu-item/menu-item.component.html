@@ -2,7 +2,15 @@
 	*ngxPermissionsOnly="item?.data?.permissionKeys"
 	[ngClass]="state ? item?.class : item?.class + ' closed'"
 >
-	<nb-accordion-item [collapsed]="collapse" (collapsedChange)="onCollapse($event)" [ngClass]="{ opened: selected }">
+	<nb-accordion-item
+		[collapsed]="collapse"
+		(collapsedChange)="onCollapse($event)"
+		[ngClass]="{
+			opened: selected,
+			'has-children': item?.children?.length > 0,
+			'no-children': !item?.children?.length
+		}"
+	>
 		<nb-accordion-item-header
 			[gaTooltip]="item?.title"
 			[icon]="item?.icon"

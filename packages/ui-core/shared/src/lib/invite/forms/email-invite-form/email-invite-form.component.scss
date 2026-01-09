@@ -11,12 +11,6 @@
     padding-top: 2px;
   }
 
-  .adjust-height {
-    ::ng-deep .ng-select-container {
-      height: auto;
-    }
-  }
-
   ::ng-deep .custom-tag-list.nb-tag-list-with-input.size-medium {
     box-shadow: var(--gauzy-shadow) inset;
     background-color: var(--gauzy-card-2);
@@ -73,4 +67,12 @@
   nb-tag-list nb-tag::ng-deep {
     text-transform: initial;
   }
+}
+
+:host ::ng-deep .adjust-height .ng-select-container {
+  height: auto !important;
+}
+
+:host ::ng-deep .adjust-height.ng-select.ng-select-multiple .ng-value-container {
+  width: 50% !important;
 }
