@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { BehaviorSubject, EMPTY, filter, fromEvent, switchMap, tap } from 'rxjs';
 import { SocketConnectionService } from '../socket-connection/socket-connection.service';
+import { IEmployee } from '@gauzy/contracts';
 
 @UntilDestroy()
 @Injectable({
 	providedIn: 'root'
 })
 export class EmployeeSocketService {
-	public employeeChanged$ = new BehaviorSubject<boolean>(false);
+	public employeeChanged$ = new BehaviorSubject<IEmployee | null>(null);
 
 	constructor(private readonly socketConnection: SocketConnectionService) {
 		this.listenToEmployeeChanges();
@@ -27,11 +28,11 @@ export class EmployeeSocketService {
 						console.warn('[Socket] Socket not ready');
 						return EMPTY;
 					}
-					return fromEvent<void>(socket, 'employee:changed');
+					return fromEvent<IEmployee>(socket, 'employee:changed');
 				}),
-				tap(() => {
+				tap((payload) => {
 					console.log('[Socket] employee:changed event');
-					this.employeeChanged$.next(true);
+					this.employeeChanged$.next(payload);
 				}),
 				untilDestroyed(this)
 			)

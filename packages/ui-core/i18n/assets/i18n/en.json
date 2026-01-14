@@ -4191,8 +4191,9 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "The server URL mustn't be empty."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "Weekly limit exceeded",
-		"PROJECT_TASK_PERMISSION_ERROR": "Timer stopped because you don't have permission to access this task",
-		"PROJECT_PROJECT_PERMISSION_ERROR": "Timer stopped because you don't have permission to access this project",
+		"PROJECT_TASK_PERMISSION_ERROR": "Timer stopped because you don't have permission to access this task.",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "Timer stopped because you don't have permission to access this project.",
+		"TRACKING_DISABLED_ERROR": "The time tracking functionality has been disabled for you.",
 		"OF_HRS": "Of {{ limit }} hrs",
 		"TIME_TRACKER_DISABLED": "Time tracker has been disabled",
 		"STOP_TIMER_CHANGE_CLIENT": "Please stop the timer before changing the client",

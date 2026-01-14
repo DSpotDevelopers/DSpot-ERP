@@ -624,5 +624,6 @@ export enum TimeLogPartialStatus {
 export enum TimeErrorsEnum {
 	INVALID_TASK_PERMISSIONS = 'invalid-task-permissions',
 	INVALID_PROJECT_PERMISSIONS = 'invalid-project-permissions',
-	WEEKLY_LIMIT_REACHED = 'weekly-limit-reached'
+	WEEKLY_LIMIT_REACHED = 'weekly-limit-reached',
+	TRACKING_DISABLED = 'tracking-disabled'
 }

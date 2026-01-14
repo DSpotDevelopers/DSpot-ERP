@@ -44,11 +44,12 @@ export class EmployeeUpdateHandler implements ICommandHandler<EmployeeUpdateComm
 				linkedInId: input.linkedInId || null,
 				id
 			});
+			const existingEmployee = await this._employeeService.findOneById(id);
 
 			// Send a real-time event to the specified user via socket.
 			// No error is thrown if the user is not currently connected.
 			this._socketService.sendTimerChanged(employee?.id);
-			this._socketService.emitToClient(employee?.id, 'employee:changed', null);
+			this._socketService.emitToClient(employee?.id, 'employee:changed', existingEmployee);
 
 			return employee;
 		} catch (error) {

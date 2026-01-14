@@ -650,4 +650,53 @@ export class EmployeeService extends TenantAwareCrudService<Employee> {
 			throw new BadRequestException(error.message || 'Failed to recover soft-deleted employee');
 		}
 	}
+
+	/**
+	 * Finds an employee by employee ID.
+	 *
+	 * @param employeeId The ID of the employee to find.
+	 * @param options Optional TypeORM FindOneOptions for further query customization.
+	 * @returns A Promise resolving to the employee if found, otherwise null.
+	 */
+	async findOneById(employeeId: ID, options?: FindOneOptions<Employee>): Promise<IEmployee | null> {
+		try {
+			// Base where clause
+			const whereClause = {
+				id: employeeId,
+				isActive: true,
+				isArchived: false
+			};
+
+			// Merge with options if any
+			const queryOptions: FindOneOptions<Employee> = {
+				...options,
+				where: {
+					...whereClause,
+					...(options?.where || {})
+				},
+				relations: {
+					user: true,
+					organizationPosition: true,
+					...(options?.relations || {})
+				}
+			};
+
+			switch (this.ormType) {
+				case MultiORMEnum.MikroORM: {
+					const { where, mikroOptions } = parseTypeORMFindToMikroOrm<Employee>(
+						queryOptions as FindManyOptions
+					);
+					const employee = await this.mikroOrmRepository.findOne(where, mikroOptions);
+					return this.serialize(employee as Employee);
+				}
+				case MultiORMEnum.TypeORM:
+					return await this.typeOrmRepository.findOne(queryOptions);
+				default:
+					throw new Error(`Not implemented for ORM type: ${this.ormType}`);
+			}
+		} catch (error) {
+			this.logger.error('Error finding employee by ID', error);
+			return null;
+		}
+	}
 }

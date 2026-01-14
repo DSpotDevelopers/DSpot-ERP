@@ -25,6 +25,7 @@ import { distinctUntilChange, isNotEmpty } from '@gauzy/ui-core/common';
 import {
 	DEFAULT_SELECTOR_VISIBILITY,
 	DateRangePickerBuilderService,
+	EmployeeSocketService,
 	EmployeeStore,
 	EmployeesService,
 	ISelectorVisibility,
@@ -146,7 +147,8 @@ export class HeaderComponent extends TranslationBaseComponent implements OnInit,
 		private readonly selectorBuilderService: SelectorBuilderService,
 		private readonly selectorService: SelectorService,
 		private readonly cd: ChangeDetectorRef,
-		private readonly dialogService: NbDialogService
+		private readonly dialogService: NbDialogService,
+		private readonly employeeSocketService: EmployeeSocketService
 	) {
 		super(translate);
 	}
@@ -228,6 +230,18 @@ export class HeaderComponent extends TranslationBaseComponent implements OnInit,
 		this._loadContextMenus();
 		// -- setup shortcuts keyboards
 		this.setupShortcuts();
+
+		// A temporary solution. Possibly a different approach when we implement immediate notifications after changing permissions or settings.
+		this.employeeSocketService.employeeChanged$
+			.pipe(
+				filter((empl) => !!empl),
+				tap((empl) => {
+					this.employee = { ...this.employee, ...empl };
+					this.subject$.next(true);
+				}),
+				untilDestroyed(this)
+			)
+			.subscribe();
 	}
 
 	ngAfterViewInit(): void {

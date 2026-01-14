@@ -4183,8 +4183,9 @@
 			"PLUGIN_INSTALL_CDN_ERROR": "L'URL del server non deve essere vuoto."
 		},
 		"WEEKLY_LIMIT_EXCEEDED": "Limite settimanale superato",
-		"PROJECT_TASK_PERMISSION_ERROR": "Timer fermato perché non hai il permesso di accedere a questo progetto/attività",
-		"PROJECT_PROJECT_PERMISSION_ERROR": "Il timer è stato interrotto perché non hai il permesso per accedere a questo progetto",
+		"PROJECT_TASK_PERMISSION_ERROR": "Timer fermato perché non hai il permesso di accedere a questo progetto/attività.",
+		"PROJECT_PROJECT_PERMISSION_ERROR": "Il timer è stato interrotto perché non hai il permesso per accedere a questo progetto.",
+		"TRACKING_DISABLED_ERROR": "La funzionalità di tracciamento del tempo è stata disabilitata per te.",
 		"OF_HRS": "Di {{ limit }} ore",
 		"TIME_TRACKER_DISABLED": "Il time tracker è stato disabilitato",
 		"STOP_TIMER_CHANGE_CLIENT": "Ferma il timer prima di cambiare cliente",

@@ -18,10 +18,10 @@ interface IWorkSpace {
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-gauzy-workspaces',
-    templateUrl: './workspaces.component.html',
-    styleUrls: ['./workspaces.component.scss'],
-    standalone: false
+	selector: 'ngx-gauzy-workspaces',
+	templateUrl: './workspaces.component.html',
+	styleUrls: ['./workspaces.component.scss'],
+	standalone: false
 })
 export class WorkspacesComponent extends TranslationBaseComponent implements AfterViewInit, OnInit {
 	public _workspaces$: BehaviorSubject<IWorkSpace[]> = new BehaviorSubject([]);
@@ -64,12 +64,12 @@ export class WorkspacesComponent extends TranslationBaseComponent implements Aft
 		}
 		const { tenant } = this.user;
 		const workspace = {
-			id: tenant.id,
-			imgUrl: tenant.logo,
+			id: tenant?.id,
+			imgUrl: tenant?.logo,
 			isOnline: true
 		};
 		const workspaces = this._workspaces$.getValue();
-		const index = workspaces.find((workspace: IWorkSpace) => workspace.id === tenant.id);
+		const index = workspaces.find((workspace: IWorkSpace) => workspace?.id === tenant?.id);
 
 		if (!index) {
 			this._workspaces$.next([...workspaces, workspace]);

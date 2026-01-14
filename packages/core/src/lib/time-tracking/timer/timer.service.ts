@@ -567,6 +567,18 @@ export class TimerService {
 				});
 				throw new ForbiddenException(TimeErrorsEnum.INVALID_TASK_PERMISSIONS);
 			}
+
+			// If the timer is running, ensure that the employee is tracking enabled
+			if (!employee?.isTrackingEnabled) {
+				await this.safeStopTimer({
+					tenantId,
+					organizationId,
+					startedAt: lastLog.startedAt,
+					stoppedAt: now.toDate(),
+					timeZone: request?.timeZone
+				});
+				throw new ForbiddenException(TimeErrorsEnum.TRACKING_DISABLED);
+			}
 		}
 
 		// Get weekly statistics
@@ -883,10 +895,6 @@ export class TimerService {
 
 		// Fetch the employee details
 		const employee = await this.findEmployee();
-		// Check if time tracking is enabled for the employee
-		if (!employee.isTrackingEnabled) {
-			throw new ForbiddenException('The time tracking functionality has been disabled for you.');
-		}
 
 		// Retrieve tenant ID
 		const tenantId = RequestContext.currentTenantId() ?? request.tenantId;
@@ -901,6 +909,11 @@ export class TimerService {
 		if (!lastLog) {
 			this.logger.warn(`No running log found. Can't stop timer because it was already stopped.`);
 			throw new NotAcceptableException(`No running log found. Can't stop timer because it was already stopped.`);
+		}
+
+		// Check if time tracking is enabled for the employee
+		if (!lastLog && !employee.isTrackingEnabled) {
+			throw new ForbiddenException('The time tracking functionality has been disabled for you.');
 		}
 
 		// Check if the employee has reached the weekly limit

@@ -230,6 +230,9 @@ export class TimeTrackerService implements OnDestroy {
 				} else if (error.status == 403 && error.error?.message === TimeErrorsEnum.INVALID_PROJECT_PERMISSIONS) {
 					this.turnOffTimer();
 					this.toastrService.danger('TIMER_TRACKER.PROJECT_PROJECT_PERMISSION_ERROR');
+				} else if (error.status == 403 && error.error?.message === TimeErrorsEnum.TRACKING_DISABLED) {
+					this.turnOffTimer();
+					this.toastrService.danger('TIMER_TRACKER.TRACKING_DISABLED_ERROR');
 				} else if (error.status === 409 && error.error?.message === TimeErrorsEnum.WEEKLY_LIMIT_REACHED) {
 					this.turnOffTimer();
 					this.updateTimerStore({
