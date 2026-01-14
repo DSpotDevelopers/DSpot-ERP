@@ -46,6 +46,9 @@ export class TimeTrackerStatusService {
 									if (error.error?.message === TimeErrorsEnum.INVALID_PROJECT_PERMISSIONS) {
 										this.toastrService.danger('TIMER_TRACKER.PROJECT_PROJECT_PERMISSION_ERROR');
 									}
+									if (error.error?.message === TimeErrorsEnum.TRACKING_DISABLED) {
+										this.toastrService.danger('TIMER_TRACKER.TRACKING_DISABLED_ERROR');
+									}
 									return EMPTY;
 								}),
 								untilDestroyed(this)
