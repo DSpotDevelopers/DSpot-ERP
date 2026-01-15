@@ -415,6 +415,23 @@ export class AuthService extends SocialAuthService {
 	}
 
 	/**
+	 * Generates a short JWT token for password reset.
+	 * This token does NOT include permissions, only userId, tenantId and a random code.
+	 *
+	 * @param user - The user object for which to generate the reset token.
+	 * @returns The JWT token as a string.
+	 */
+	private generateResetToken(user: IUser): string {
+		const payload = {
+			userId: user.id,
+			tenantId: user.tenantId ?? null,
+			type: 'password_reset',
+			code: generateAlphaNumericCode()
+		};
+		return sign(payload, environment.JWT_SECRET, { expiresIn: '10m' });
+	}
+
+	/**
 	 * Initiates the process to request a password reset.
 	 *
 	 * @param request - The reset password request object containing the email address.
@@ -445,7 +462,7 @@ export class AuthService extends SocialAuthService {
 			// Iterate through users and generate reset links
 			for await (const user of users) {
 				const { email, tenantId } = user;
-				const token = await this.getJwtAccessToken(user);
+				const token = this.generateResetToken(user);
 
 				// Proceed if a valid token and email are obtained
 				if (!!token && !!email) {
