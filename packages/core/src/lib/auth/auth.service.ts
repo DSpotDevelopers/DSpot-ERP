@@ -571,13 +571,18 @@ export class AuthService extends SocialAuthService {
 			}
 
 			// Verify the token and extract user information
-			const { id, tenantId } = verify(token, environment.JWT_SECRET) as {
-				id: ID;
+			const { userId, tenantId, type } = verify(token, environment.JWT_SECRET) as {
+				userId: ID;
 				tenantId: ID;
+				type: string;
 			};
 
+			if (type !== 'password_reset') {
+				throw new BadRequestException('Invalid reset token');
+			}
+
 			// Fetch the user by ID and tenant
-			const user = await this.userService.findOneByIdString(id, {
+			const user = await this.userService.findOneByIdString(userId, {
 				where: { tenantId },
 				relations: { tenant: true }
 			});
