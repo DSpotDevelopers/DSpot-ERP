@@ -339,8 +339,8 @@
 		</button>
 		<button
 			class="mr-3"
-			(click)="updateInvoice('DRAFT')"
 			[disabled]="form.invalid"
+			[preventDoubleSubmit]="updateDraftInvoice.bind(this)"
 			size="small"
 			status="primary"
 			class="gray"
@@ -348,10 +348,24 @@
 		>
 			{{ 'BUTTONS.SAVE_AS_DRAFT' | translate }}
 		</button>
-		<button class="mr-3" (click)="sendToContact()" status="success" size="small" [disabled]="form.invalid" nbButton>
+		<button
+			class="mr-3"
+			status="success"
+			size="small"
+			[disabled]="form.invalid"
+			[preventDoubleSubmit]="sendToContact.bind(this)"
+			nbButton
+		>
 			{{ 'BUTTONS.SAVE_AND_SEND_CONTACT' | translate }}
 		</button>
-		<button class="mr-3" (click)="sendViaEmail()" status="success" size="small" [disabled]="form.invalid" nbButton>
+		<button
+			class="mr-3"
+			status="success"
+			size="small"
+			[disabled]="form.invalid"
+			[preventDoubleSubmit]="sendViaEmail.bind(this)"
+			nbButton
+		>
 			{{ 'BUTTONS.SAVE_AND_SEND_EMAIL' | translate }}
 		</button>
 	</nb-card-footer>

@@ -12,6 +12,7 @@ import {
 } from '@gauzy/ui-core/core';
 import { InviteMutationComponent } from './invite-mutation.component';
 import { InviteFormsModule } from '../forms/invite-forms.module';
+import { DirectivesModule } from '../../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -21,7 +22,8 @@ import { InviteFormsModule } from '../forms/invite-forms.module';
 		NbCardModule,
 		NbIconModule,
 		TranslateModule.forChild(),
-		InviteFormsModule
+		InviteFormsModule,
+		DirectivesModule
 	],
 	exports: [InviteMutationComponent],
 	declarations: [InviteMutationComponent],

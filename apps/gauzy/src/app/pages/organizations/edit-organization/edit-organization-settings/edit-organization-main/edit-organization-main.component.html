@@ -34,16 +34,13 @@
 							type="text"
 							nbInput
 							formControlName="name"
-							[placeholder]=" 'FORM.PLACEHOLDERS.NAME' | translate"
+							[placeholder]="'FORM.PLACEHOLDERS.NAME' | translate"
 						/>
 					</div>
 				</div>
 				<div class="col">
 					<span>
-					<ga-currency
-						formControlName="currency"
-						[formControl]="form.get('currency')"
-					></ga-currency>
+						<ga-currency formControlName="currency" [formControl]="form.get('currency')"></ga-currency>
 					</span>
 				</div>
 			</div>
@@ -133,8 +130,17 @@
 							formControlName="emailDomain"
 						/>
 						<ng-container *ngIf="form.get('emailDomain').invalid && form.get('emailDomain').touched">
-							<p class="caption status-danger" *ngIf="form.get('emailDomain').errors?.minlength || form.get('emailDomain').errors?.maxlength">
-								{{ 'ORGANIZATIONS_PAGE.EDIT.ERRORS.EMAIL_DOMAIN_INVALID_LENGTH' | translate : { min: 4, max: 255 } }}
+							<p
+								class="caption status-danger"
+								*ngIf="
+									form.get('emailDomain').errors?.minlength ||
+									form.get('emailDomain').errors?.maxlength
+								"
+							>
+								{{
+									'ORGANIZATIONS_PAGE.EDIT.ERRORS.EMAIL_DOMAIN_INVALID_LENGTH'
+										| translate : { min: 4, max: 255 }
+								}}
 							</p>
 							<p class="caption status-danger" *ngIf="form.get('emailDomain').errors?.pattern">
 								{{ 'ORGANIZATIONS_PAGE.EDIT.ERRORS.EMAIL_DOMAIN_INVALID_PATTERN' | translate }}
@@ -165,7 +171,7 @@
 		<div class="actions">
 			<button
 				[disabled]="this.form.invalid"
-				(click)="updateOrganizationSettings()"
+				[preventDoubleSubmit]="updateOrganizationSettings.bind(this)"
 				nbButton
 				status="success"
 			>

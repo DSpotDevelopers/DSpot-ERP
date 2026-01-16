@@ -5,9 +5,7 @@
 				<div class="col-6">
 					<h4>
 						<ngx-header-title>
-							<span class="menu-setting"
-								>{{ 'MENU.SETTINGS' | translate }}/
-							</span>
+							<span class="menu-setting">{{ 'MENU.SETTINGS' | translate }}/ </span>
 							{{ 'ACCOUNTING_TEMPLATES_PAGE.HEADER' | translate }}
 						</ngx-header-title>
 					</h4>
@@ -24,9 +22,7 @@
 						<nb-card-body class="editor">
 							<div class="form-group">
 								<label class="label" for="template">
-									{{
-										'FORM.LABELS.TEMPLATE_BODY' | translate
-									}}
+									{{ 'FORM.LABELS.TEMPLATE_BODY' | translate }}
 								</label>
 								<ace-editor
 									#templateEditor
@@ -55,51 +51,31 @@
 										size="small"
 										[template]="'ng-select'"
 										formControlName="languageCode"
-										(selectedLanguageEvent)="
-											subject$.next(true)
-										"
+										(selectedLanguageEvent)="subject$.next(true)"
 									>
 									</ngx-language-selector>
 								</div>
 								<div class="select-block">
 									<label class="label" for="templateName">
-										{{
-											'FORM.PLACEHOLDERS.TEMPLATES'
-												| translate
-										}}
+										{{ 'FORM.PLACEHOLDERS.TEMPLATES' | translate }}
 									</label>
 									<nb-select
 										id="templateName"
 										class="d-block"
 										size="small"
-										placeholder="{{
-											'FORM.LABELS.TEMPLATE_NAME'
-												| translate
-										}}"
+										placeholder="{{ 'FORM.LABELS.TEMPLATE_NAME' | translate }}"
 										formControlName="templateType"
 										(selectedChange)="subject$.next(true)"
 									>
-										<nb-option
-											*ngFor="let name of templateTypes"
-											[value]="name"
-										>
-											{{
-												'ACCOUNTING_TEMPLATES_PAGE.TEMPLATE_NAMES.' +
-													name | translate
-											}}
+										<nb-option *ngFor="let name of templateTypes" [value]="name">
+											{{ 'ACCOUNTING_TEMPLATES_PAGE.TEMPLATE_NAMES.' + name | translate }}
 										</nb-option>
 									</nb-select>
 								</div>
 							</div>
 							<div class="template-save">
-								<button
-									nbButton
-									status="success"
-									(click)="onSave()"
-								>
-									{{
-										'EMAIL_TEMPLATES_PAGE.SAVE' | translate
-									}}
+								<button nbButton status="success" [preventDoubleSubmit]="onSave.bind(this)">
+									{{ 'EMAIL_TEMPLATES_PAGE.SAVE' | translate }}
 								</button>
 							</div>
 						</nb-card-header>
@@ -107,10 +83,7 @@
 							<div class="email-column-sub-header">
 								<div class="form-group preview-subject">
 									<label class="label" for="previewTemplate">
-										{{
-											'FORM.LABELS.TEMPLATE_PREVIEW'
-												| translate
-										}}
+										{{ 'FORM.LABELS.TEMPLATE_PREVIEW' | translate }}
 									</label>
 								</div>
 							</div>

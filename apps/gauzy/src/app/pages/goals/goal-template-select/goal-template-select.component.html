@@ -1,18 +1,11 @@
 <nb-card size="large" class="max-width-50vw">
 	<nb-card-header>
-		<nb-icon
-			class="ml-auto mt-1 close"
-			icon="close-outline"
-			(click)="closeDialog(null)"
-		></nb-icon
+		<nb-icon class="ml-auto mt-1 close" icon="close-outline" (click)="closeDialog(null)"></nb-icon
 	></nb-card-header>
 	<nb-card-body class="mt-3 margin-stepper">
 		<nb-stepper #stepper orientation="horizontal" [linear]="true">
 			<nb-step label="Select a Preset">
-				<nb-accordion
-					class="mt-3"
-					*ngFor="let template of goalTemplates; let index = index"
-				>
+				<nb-accordion class="mt-3" *ngFor="let template of goalTemplates; let index = index">
 					<nb-accordion-item [expanded]="index == 0 ? true : false">
 						<nb-accordion-item-header>
 							{{ template.name }}
@@ -22,15 +15,8 @@
 								{{ keyResult.name }}
 							</p>
 							<div class="text-right">
-								<button
-									nbButton
-									status="success"
-									(click)="nextStep(template)"
-								>
-									{{
-										'BUTTONS.SELECT_AND_CONTINUE'
-											| translate
-									}}
+								<button nbButton status="success" (click)="nextStep(template)">
+									{{ 'BUTTONS.SELECT_AND_CONTINUE' | translate }}
 								</button>
 							</div>
 						</nb-accordion-item-body>
@@ -46,16 +32,11 @@
 						<nb-select
 							*ngIf="timeFrames.length > 0"
 							id="objective-deadline"
-							placeholder="{{
-								'GOALS_PAGE.FORM.LABELS.DEADLINE' | translate
-							}}"
+							placeholder="{{ 'GOALS_PAGE.FORM.LABELS.DEADLINE' | translate }}"
 							fullWidth
 							formControlName="deadline"
 						>
-							<nb-option
-								*ngFor="let deadline of timeFrames"
-								[value]="deadline.name"
-							>
+							<nb-option *ngFor="let deadline of timeFrames" [value]="deadline.name">
 								{{ deadline.name }}
 							</nb-option>
 						</nb-select>
@@ -67,10 +48,7 @@
 								nbButton
 								(click)="openSetTimeFrame()"
 							>
-								{{
-									'GOALS_PAGE.BUTTONS.ADD_TIME_FRAME'
-										| translate
-								}}
+								{{ 'GOALS_PAGE.BUTTONS.ADD_TIME_FRAME' | translate }}
 							</button>
 						</p>
 						<ga-goal-level-select
@@ -87,15 +65,10 @@
 		</nb-stepper>
 	</nb-card-body>
 	<nb-card-footer class="text-right" [hidden]="stepper.selectedIndex == 0">
-		<button
-			class="mr-3"
-			[hidden]="stepper.selectedIndex == 0"
-			nbButton
-			(click)="previousStep()"
-		>
+		<button class="mr-3" [hidden]="stepper.selectedIndex == 0" nbButton (click)="previousStep()">
 			{{ 'BUTTONS.BACK' | translate }}
 		</button>
-		<button type="submit" nbButton status="success" (click)="createGoal()">
+		<button type="submit" nbButton status="success" [preventDoubleSubmit]="createGoal.bind(this)">
 			{{ 'BUTTONS.CREATE' | translate }}
 		</button>
 	</nb-card-footer>

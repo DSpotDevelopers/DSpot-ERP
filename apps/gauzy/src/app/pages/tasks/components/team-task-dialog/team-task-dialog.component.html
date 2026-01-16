@@ -221,7 +221,12 @@
 		<button (click)="dialogRef.close()" class="mr-3" nbButton outline status="basic">
 			{{ 'BUTTONS.CANCEL' | translate }}
 		</button>
-		<button (click)="onSave()" [disabled]="form.invalid || (teams && teams.length === 0)" nbButton status="success">
+		<button
+			[disabled]="form.invalid || (teams && teams.length === 0)"
+			[preventDoubleSubmit]="onSave.bind(this)"
+			nbButton
+			status="success"
+		>
 			{{ 'BUTTONS.SAVE' | translate }}
 		</button>
 	</nb-card-footer>

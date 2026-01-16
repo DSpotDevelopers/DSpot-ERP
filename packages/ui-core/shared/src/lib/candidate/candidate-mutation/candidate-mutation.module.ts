@@ -8,6 +8,7 @@ import { UserFormsModule } from '../../user/forms/user-forms.module';
 import { FileUploaderModule } from '../../file-uploader-input';
 import { CandidateMutationComponent } from './candidate-mutation.component';
 import { CandidateCvComponent } from '../candidate-cv/candidate-cv.component';
+import { DirectivesModule } from '../../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -20,7 +21,8 @@ import { CandidateCvComponent } from '../candidate-cv/candidate-cv.component';
 		NbTagModule,
 		TranslateModule.forChild(),
 		UserFormsModule,
-		FileUploaderModule
+		FileUploaderModule,
+		DirectivesModule
 	],
 	exports: [CandidateMutationComponent, CandidateCvComponent],
 	declarations: [CandidateMutationComponent, CandidateCvComponent],

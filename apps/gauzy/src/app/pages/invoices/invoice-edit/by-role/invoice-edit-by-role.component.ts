@@ -450,7 +450,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 		await this.calculateTotal();
 	}
 
-	async updateInvoice(status: string, sendTo?: string) {
+	private async updateInvoice(status: string, sendTo?: string) {
 		const tableData = await this.smartTableSource.getAll();
 		if (tableData.length) {
 			const invoiceData = this.form.value;
@@ -583,6 +583,10 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 		} else {
 			this.toastrService.warning('INVOICES_PAGE.INVOICE_ITEM.NO_ITEMS');
 		}
+	}
+
+	updateDraftInvoice() {
+		return this.updateInvoice('DRAFT');
 	}
 
 	async sendToContact() {

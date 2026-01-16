@@ -1,23 +1,12 @@
-<nb-card
-	[nbSpinner]="loading"
-	nbSpinnerStatus="primary"
-	nbSpinnerSize="large"
->
+<nb-card [nbSpinner]="loading" nbSpinnerStatus="primary" nbSpinnerSize="large">
 	<nb-card-header class="d-flex flex-column">
-		<span class="cancel"
-			><i class="fas fa-times" (click)="closeDialog()"></i
-		></span>
+		<span class="cancel"><i class="fas fa-times" (click)="closeDialog()"></i></span>
 		<h5 class="title">
 			{{ 'EMPLOYEES_PAGE.ADD_EMPLOYEE' | translate }}
 		</h5>
 	</nb-card-header>
 	<nb-card-body>
-		<nb-stepper
-			[linear]="linear"
-			orientation="horizontal"
-			disableStepNavigation
-			#stepper
-		>
+		<nb-stepper [linear]="linear" orientation="horizontal" disableStepNavigation #stepper>
 			<nb-step [label]="step1">
 				<ng-template #step1>
 					{{ 'EMPLOYEES_PAGE.ADD_EMPLOYEES.STEP_1' | translate }}
@@ -70,38 +59,19 @@
 					{{ 'EMPLOYEES_PAGE.ADD_EMPLOYEES.STEP_2' | translate }}
 				</ng-template>
 				<div class="text-left">
-					<button
-						status="basic"
-						size="small"
-						class="gray"
-						outline
-						nbButton
-						nbStepperPrevious
-					>
-						{{
-							'EMPLOYEES_PAGE.ADD_EMPLOYEES.PREVIOUS' | translate
-						}}
+					<button status="basic" size="small" class="gray" outline nbButton nbStepperPrevious>
+						{{ 'EMPLOYEES_PAGE.ADD_EMPLOYEES.PREVIOUS' | translate }}
 					</button>
 					<button
 						nbButton
 						status="success"
 						size="small"
 						class="mr-3 ml-3"
-						(click)="addEmployee()"
+						[preventDoubleSubmit]="addEmployee.bind(this)"
 					>
-						{{
-							'EMPLOYEES_PAGE.ADD_EMPLOYEES.ADD_ANOTHER_EMPLOYEE'
-								| translate
-						}}
+						{{ 'EMPLOYEES_PAGE.ADD_EMPLOYEES.ADD_ANOTHER_EMPLOYEE' | translate }}
 					</button>
-					<button
-						status="basic"
-						class="green"
-						size="small"
-						outline
-						nbButton
-						nbStepperNext
-					>
+					<button status="basic" class="green" size="small" outline nbButton nbStepperNext>
 						{{ 'EMPLOYEES_PAGE.ADD_EMPLOYEES.NEXT' | translate }}
 					</button>
 				</div>
@@ -111,29 +81,17 @@
 					{{ 'EMPLOYEES_PAGE.ADD_EMPLOYEES.STEP_3' | translate }}
 				</ng-template>
 				<div class="text-left">
-					<button
-						class="gray"
-						status="basic"
-						outline
-						size="small"
-						nbButton
-						nbStepperPrevious
-					>
-						{{
-							'EMPLOYEES_PAGE.ADD_EMPLOYEES.PREVIOUS' | translate
-						}}
+					<button class="gray" status="basic" outline size="small" nbButton nbStepperPrevious>
+						{{ 'EMPLOYEES_PAGE.ADD_EMPLOYEES.PREVIOUS' | translate }}
 					</button>
 					<button
 						size="small"
 						status="success"
 						class="mr-3 ml-3"
-						(click)="add()"
+						[preventDoubleSubmit]="add.bind(this)"
 						nbButton
 					>
-						{{
-							'EMPLOYEES_PAGE.ADD_EMPLOYEES.FINISHED_ADDING'
-								| translate
-						}}
+						{{ 'EMPLOYEES_PAGE.ADD_EMPLOYEES.FINISHED_ADDING' | translate }}
 					</button>
 				</div>
 			</nb-step>

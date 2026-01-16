@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { debounceTime, filter, firstValueFrom, Subject, tap } from 'rxjs';
+import { debounceTime, EMPTY, filter, firstValueFrom, Subject, tap } from 'rxjs';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { ID, IEmployee, IEmployeeUpdateInput, IUserUpdateInput, PermissionsEnum } from '@gauzy/contracts';
 import {
@@ -25,7 +25,7 @@ import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
 	providers: [EmployeeStore],
 	standalone: false
 })
-export class EditEmployeeProfileComponent extends TranslationBaseComponent implements OnInit, OnDestroy {
+export class EditEmployeeProfileComponent extends TranslationBaseComponent implements OnInit {
 	public tabsetId: PageTabsetRegistryId = this._route.snapshot.data.tabsetId; // The identifier for the tabset
 	public employeeId: ID = this._route.snapshot.params.id;
 
@@ -68,6 +68,7 @@ export class EditEmployeeProfileComponent extends TranslationBaseComponent imple
 		this._employeeStore.userForm$
 			.pipe(
 				tap((value: IUserUpdateInput) => {
+					if (!value) return EMPTY;
 					this.submitUserForm(value);
 				}),
 				untilDestroyed(this)
@@ -76,6 +77,7 @@ export class EditEmployeeProfileComponent extends TranslationBaseComponent imple
 		this._employeeStore.employeeForm$
 			.pipe(
 				tap((value: IEmployeeUpdateInput) => {
+					if (!value) return EMPTY;
 					this.submitEmployeeForm(value);
 				}),
 				untilDestroyed(this)
@@ -325,6 +327,4 @@ export class EditEmployeeProfileComponent extends TranslationBaseComponent imple
 			)
 			.subscribe();
 	}
-
-	ngOnDestroy() {}
 }

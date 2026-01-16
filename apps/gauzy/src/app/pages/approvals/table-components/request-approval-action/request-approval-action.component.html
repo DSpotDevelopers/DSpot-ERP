@@ -1,17 +1,17 @@
 <button
 	nbButton
 	status="success"
-	(click)="approval()"
+	[preventDoubleSubmit]="approval.bind(this)"
 	*ngIf="isApproval"
 	size="small"
-  class="req-green"
+	class="req-green"
 >
 	{{ 'APPROVAL_REQUEST_PAGE.APPROVE' | translate }}
 </button>
 <button
 	nbButton
 	status="danger"
-	(click)="refuse()"
+	[preventDoubleSubmit]="refuse.bind(this)"
 	*ngIf="isRefuse"
 	size="small"
 	class="req-red"

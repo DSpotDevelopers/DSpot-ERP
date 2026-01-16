@@ -4,9 +4,7 @@
 	</nb-card-header>
 	<nb-card-body>
 		<div class="form-group">
-			<div
-				class="form-group d-flex flex-row justify-content-between align-items-center m-0"
-			>
+			<div class="form-group d-flex flex-row justify-content-between align-items-center m-0">
 				<div class="form-group w-100 p-0">
 					<form [formGroup]="form" *ngIf="form">
 						<ga-user-organizations-multi-select
@@ -18,15 +16,10 @@
 					</form>
 				</div>
 				<div class="form-group d-flex flex-row ml-3 add-organization-action">
-					<button
-						(click)="cancel()"
-						nbButton
-						outline
-						status="basic"
-					>
+					<button (click)="cancel()" nbButton outline status="basic">
 						{{ 'BUTTONS.CANCEL' | translate }}
 					</button>
-					<button nbButton (click)="submitForm()" status="success">
+					<button nbButton [preventDoubleSubmit]="submitForm.bind(this)" status="success">
 						{{ 'BUTTONS.SAVE' | translate }}
 					</button>
 				</div>

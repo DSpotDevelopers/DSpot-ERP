@@ -79,7 +79,7 @@
 	</div>
 </ng-template>
 <ng-template #visibleButton>
-	<button (click)="save()" nbButton status="success" class="action" size="small">
+	<button [preventDoubleSubmit]="save.bind(this)" nbButton status="success" class="action" size="small">
 		<nb-icon class="mr-1" icon="plus-outline"></nb-icon>
 		{{ 'BUTTONS.ADD' | translate }}
 	</button>

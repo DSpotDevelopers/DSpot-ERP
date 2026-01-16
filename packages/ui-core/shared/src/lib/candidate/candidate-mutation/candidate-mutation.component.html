@@ -85,7 +85,13 @@
 					<button nbButton outline class="green" size="small" (click)="addCandidate()">
 						{{ 'CANDIDATES_PAGE.ADD_CANDIDATES.ADD_ANOTHER_CANDIDATE' | translate }}
 					</button>
-					<button status="success" size="small" (click)="add()" class="mr-3 ml-3" nbButton>
+					<button
+						status="success"
+						size="small"
+						[preventDoubleSubmit]="add.bind(this)"
+						class="mr-3 ml-3"
+						nbButton
+					>
 						{{ 'CANDIDATES_PAGE.ADD_CANDIDATES.FINISHED_ADDING' | translate }}
 					</button>
 				</div>

@@ -1,12 +1,7 @@
 <nb-card style="width: 645px; height: 390px">
 	<nb-card-header>
-		<span class="cancel"
-			><i class="fas fa-times" (click)="closeDialog(null)"></i
-		></span>
-		<h4 class="title">{{
-			'KEY_RESULT_PAGE.EDIT_KEY_RESULT_PARAMETERS'
-				| translate
-		}}</h4>
+		<span class="cancel"><i class="fas fa-times" (click)="closeDialog(null)"></i></span>
+		<h4 class="title">{{ 'KEY_RESULT_PAGE.EDIT_KEY_RESULT_PARAMETERS' | translate }}</h4>
 	</nb-card-header>
 	<nb-card-body class="p-0">
 		<nb-tabset>
@@ -18,39 +13,21 @@
 					<div class="row mt-2">
 						<div class="col-md-6">
 							<label for="key-result-weight" class="label mt-3">
-								{{
-									'KEY_RESULT_PAGE.FORM.LABELS.WEIGHT'
-										| translate
-								}}
+								{{ 'KEY_RESULT_PAGE.FORM.LABELS.WEIGHT' | translate }}
 							</label>
-							<nb-select
-								id="key-result-weight"
-								fullWidth
-								formControlName="weight"
-							>
+							<nb-select id="key-result-weight" fullWidth formControlName="weight">
 								<nb-option
-									*ngFor="
-										let weight of keyResultWeightEnum
-											| keyvalue
-									"
+									*ngFor="let weight of keyResultWeightEnum | keyvalue"
 									[value]="weight.value"
-									>{{
-										'KEY_RESULT_PAGE.WEIGHT.' + weight.key
-											| translate
-									}}</nb-option
+									>{{ 'KEY_RESULT_PAGE.WEIGHT.' + weight.key | translate }}</nb-option
 								>
 							</nb-select>
 						</div>
-						<div
-							class="col-md-6 d-flex flex-column justify-content-around"
-						>
-							<label
-								for="goal-progress-comparison"
-								class="label mt-3"
-							>
+						<div class="col-md-6 d-flex flex-column justify-content-around">
+							<label for="goal-progress-comparison" class="label mt-3">
 								{{
 									'KEY_RESULT_PAGE.WEIGHT.OBJECTIVE_PROGRESS'
-										| translate: { weight: keyResultWeight }
+										| translate : { weight: keyResultWeight }
 								}}
 							</label>
 							<span class="w-100 d-flex align-items-center">
@@ -85,7 +62,7 @@
 		<button class="mr-3" outline nbButton (click)="closeDialog(null)">
 			{{ 'BUTTONS.CANCEL' | translate }}
 		</button>
-		<button nbButton status="success" (click)="updateKeyResult()">
+		<button nbButton status="success" [preventDoubleSubmit]="updateKeyResult.bind(this)">
 			{{ 'BUTTONS.SAVE' | translate }}
 		</button>
 	</nb-card-footer>

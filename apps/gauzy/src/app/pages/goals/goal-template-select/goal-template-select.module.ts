@@ -11,7 +11,7 @@ import {
 	NbIconModule
 } from '@nebular/theme';
 import { TranslateModule } from '@ngx-translate/core';
-import { GoalLevelSelectModule } from '@gauzy/ui-core/shared';
+import { DirectivesModule, GoalLevelSelectModule } from '@gauzy/ui-core/shared';
 import { GoalTemplateSelectComponent } from './goal-template-select.component';
 
 @NgModule({
@@ -29,7 +29,8 @@ import { GoalTemplateSelectComponent } from './goal-template-select.component';
 		NbIconModule,
 		NbStepperModule,
 		GoalLevelSelectModule,
-		TranslateModule.forChild()
+		TranslateModule.forChild(),
+		DirectivesModule
 	],
 	exports: [GoalTemplateSelectComponent]
 })

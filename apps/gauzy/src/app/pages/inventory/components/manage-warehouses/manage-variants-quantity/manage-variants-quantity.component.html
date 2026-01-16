@@ -1,5 +1,5 @@
 <button
-	(click)="onManageVariantsClick()"
+	[preventDoubleSubmit]="onManageVariantsClick.bind(this)"
 	size="small"
 	nbButton
 	status="primary"

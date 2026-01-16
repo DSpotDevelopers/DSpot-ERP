@@ -1,8 +1,6 @@
 <nb-card>
 	<nb-card-header class="d-flex flex-column">
-		<span class="cancel"
-			><i class="fas fa-times" (click)="closeDialog()"></i
-		></span>
+		<span class="cancel"><i class="fas fa-times" (click)="closeDialog()"></i></span>
 		<h5 class="title">
 			{{ 'INVITE_PAGE.' + invitationType + '.HEADER' | translate }}
 		</h5>
@@ -24,8 +22,8 @@
 		<button
 			class="mr-2"
 			[disabled]="emailInviteForm.form.invalid"
+			[preventDoubleSubmit]="add.bind(this)"
 			status="success"
-			(click)="add()"
 			nbButton
 		>
 			{{ 'INVITE_PAGE.' + invitationType + '.ACTION' | translate }}

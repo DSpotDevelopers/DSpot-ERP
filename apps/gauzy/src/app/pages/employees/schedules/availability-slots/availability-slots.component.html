@@ -42,7 +42,7 @@
 					<button
 						nbButton
 						status="primary"
-						(click)="setSchedule()"
+						[preventDoubleSubmit]="setSchedule.bind(this)"
 						[disabled]="!createForm.startTime || !createForm.endTime ? true : false"
 					>
 						{{ 'BUTTONS.SET' | translate }}
