@@ -5,6 +5,7 @@ import { NbCardModule, NbButtonModule, NbIconModule, NbDatepickerModule, NbInput
 import { TranslateModule } from '@ngx-translate/core';
 import { UserFormsModule } from '../../user/forms/user-forms.module';
 import { EmployeeEndWorkComponent } from './employee-end-work.component';
+import { DirectivesModule } from '../../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -16,7 +17,8 @@ import { EmployeeEndWorkComponent } from './employee-end-work.component';
 		NbIconModule,
 		NbDatepickerModule,
 		NbInputModule,
-		TranslateModule.forChild()
+		TranslateModule.forChild(),
+		DirectivesModule
 	],
 	exports: [EmployeeEndWorkComponent],
 	declarations: [EmployeeEndWorkComponent],

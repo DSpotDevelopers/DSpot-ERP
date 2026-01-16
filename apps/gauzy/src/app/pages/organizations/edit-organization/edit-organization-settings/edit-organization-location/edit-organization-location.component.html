@@ -10,7 +10,7 @@
 		<div class="actions">
 			<button
 				[disabled]="this.form.invalid"
-				(click)="updateOrganizationSettings()"
+				[preventDoubleSubmit]="updateOrganizationSettings.bind(this)"
 				nbButton
 				status="success"
 			>
@@ -18,8 +18,5 @@
 			</button>
 		</div>
 	</div>
-	<ga-leaflet-map
-		#leafletTemplate
-		(mapClicked)="onMapClicked($event)"
-	></ga-leaflet-map>
+	<ga-leaflet-map #leafletTemplate (mapClicked)="onMapClicked($event)"></ga-leaflet-map>
 </form>

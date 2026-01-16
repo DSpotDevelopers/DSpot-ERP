@@ -12,7 +12,7 @@
 		<input [(ngModel)]="data" (input)="sendData()" type="text" class="form-control border border-danger" />
 	</nb-card-body>
 	<nb-card-footer>
-		<button (click)="delete()" class="mr-3" status="danger" nbButton>
+		<button [preventDoubleSubmit]="delete.bind(this)" class="mr-3" status="danger" nbButton>
 			{{ 'BUTTONS.OK' | translate }}
 		</button>
 		<button (click)="close()" status="info" nbButton>

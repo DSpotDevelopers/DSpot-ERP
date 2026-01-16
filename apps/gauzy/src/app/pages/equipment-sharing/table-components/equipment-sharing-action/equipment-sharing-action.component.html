@@ -1,19 +1,13 @@
 <button
 	nbButton
 	status="success"
-	(click)="approval()"
+	[preventDoubleSubmit]="approval.bind(this)"
 	*ngIf="isApproval"
 	class="mr-3"
 	[size]="'tiny'"
 >
 	{{ 'EQUIPMENT_SHARING_PAGE.APPROVE' | translate }}
 </button>
-<button
-	nbButton
-	status="danger"
-	(click)="refuse()"
-	*ngIf="isRefuse"
-	[size]="'tiny'"
->
+<button nbButton status="danger" [preventDoubleSubmit]="refuse.bind(this)" *ngIf="isRefuse" [size]="'tiny'">
 	{{ 'EQUIPMENT_SHARING_PAGE.REFUSE' | translate }}
 </button>

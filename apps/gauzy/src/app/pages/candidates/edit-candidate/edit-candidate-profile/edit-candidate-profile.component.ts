@@ -22,15 +22,15 @@ import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
 import { Store } from '@gauzy/ui-core/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { CandidateInterviewInfoComponent } from '@gauzy/ui-core/shared';
-import { firstValueFrom } from 'rxjs';
+import { EMPTY, firstValueFrom } from 'rxjs';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ga-edit-candidate-profile',
-    templateUrl: './edit-candidate-profile.component.html',
-    styleUrls: ['./edit-candidate-profile.component.scss'],
-    providers: [CandidateStore],
-    standalone: false
+	selector: 'ga-edit-candidate-profile',
+	templateUrl: './edit-candidate-profile.component.html',
+	styleUrls: ['./edit-candidate-profile.component.scss'],
+	providers: [CandidateStore],
+	standalone: false
 })
 export class EditCandidateProfileComponent extends TranslationBaseComponent implements OnInit, OnDestroy {
 	routeParams: Params;
@@ -68,9 +68,11 @@ export class EditCandidateProfileComponent extends TranslationBaseComponent impl
 			});
 		});
 		this.candidateStore.userForm$.pipe(untilDestroyed(this)).subscribe((value) => {
+			if (!value) return EMPTY;
 			this.submitUserForm(value);
 		});
 		this.candidateStore.candidateForm$.pipe(untilDestroyed(this)).subscribe((value) => {
+			if (!value) return EMPTY;
 			this.submitCandidateForm(value);
 		});
 		this.loadTabs();

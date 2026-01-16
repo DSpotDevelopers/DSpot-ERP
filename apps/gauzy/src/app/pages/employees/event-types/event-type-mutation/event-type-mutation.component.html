@@ -135,7 +135,12 @@
 		<button (click)="dialogRef.close()" status="basic" outline class="mr-2" nbButton>
 			{{ 'BUTTONS.CANCEL' | translate }}
 		</button>
-		<button [disabled]="form.invalid" (click)="addOrEditEventType()" status="success" nbButton>
+		<button
+			[disabled]="form.invalid"
+			[preventDoubleSubmit]="addOrEditEventType.bind(this)"
+			status="success"
+			nbButton
+		>
 			{{ 'BUTTONS.SAVE' | translate }}
 		</button>
 	</nb-card-footer>

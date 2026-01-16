@@ -29,6 +29,7 @@ import { CandidateEmailComponent } from './candidate-notification-form/candidate
 import { CandidateInterviewFormComponent } from './candidate-interview-form/candidate-interview-form.component';
 import { CandidateTechnologiesComponent } from './interview-criterions/candidate-technologies/candidate-technologies.component';
 import { CandidatePersonalQualitiesComponent } from './interview-criterions/candidate-personal-qualities/candidate-personal-qualities.component';
+import { DirectivesModule } from '../../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -52,7 +53,8 @@ import { CandidatePersonalQualitiesComponent } from './interview-criterions/cand
 		EmployeeMultiSelectModule,
 		CandidateSelectModule,
 		CandidateCalendarInfoModule,
-		TranslateModule.forChild()
+		TranslateModule.forChild(),
+		DirectivesModule
 	],
 	exports: [
 		CandidateInterviewMutationComponent,

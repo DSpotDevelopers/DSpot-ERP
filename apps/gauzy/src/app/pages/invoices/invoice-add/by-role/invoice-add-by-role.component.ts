@@ -591,7 +591,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		}
 	}
 
-	async addInvoice(status: string, sendTo?: string) {
+	private async addInvoice(status: string, sendTo?: string) {
 		const tableSources = await this.smartTableSource.getAll();
 		if (isEmpty(tableSources)) {
 			this.toastrService.danger(
@@ -647,6 +647,10 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				}
 			});
 		}
+	}
+
+	addDraftInvoice() {
+		return this.addInvoice('DRAFT');
 	}
 
 	async sendToContact() {

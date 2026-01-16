@@ -40,7 +40,7 @@
 		<button status="basic" outline class="mr-3" nbButton (click)="cancel()">
 			{{ 'BUTTONS.CANCEL' | translate }}
 		</button>
-		<button (click)="sendEmail()" status="success" [disabled]="form.invalid" nbButton>
+		<button status="success" [disabled]="form.invalid" [preventDoubleSubmit]="sendEmail.bind(this)" nbButton>
 			{{ 'BUTTONS.SEND' | translate }}
 		</button>
 	</nb-card-footer>

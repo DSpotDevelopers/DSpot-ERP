@@ -6,6 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { UsersService } from '@gauzy/ui-core/core';
 import { UserMutationComponent } from './user-mutation.component';
 import { UserFormsModule } from '../forms/user-forms.module';
+import { DirectivesModule } from '../../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -15,7 +16,8 @@ import { UserFormsModule } from '../forms/user-forms.module';
 		NbCardModule,
 		NbIconModule,
 		TranslateModule.forChild(),
-		UserFormsModule
+		UserFormsModule,
+		DirectivesModule
 	],
 	exports: [UserMutationComponent],
 	declarations: [UserMutationComponent],

@@ -9,14 +9,10 @@
 		<form [formGroup]="form" *ngIf="form">
 			<div class="row">
 				<div class="form-group col-12">
-					<label for="note" class="label">{{
-						'INVOICES_PAGE.INTERNAL_NOTE.NOTE' | translate
-					}}</label>
+					<label for="note" class="label">{{ 'INVOICES_PAGE.INTERNAL_NOTE.NOTE' | translate }}</label>
 					<textarea
 						nbInput
-						placeholder="{{
-							'INVOICES_PAGE.INTERNAL_NOTE.ADD_NOTE' | translate
-						}}"
+						placeholder="{{ 'INVOICES_PAGE.INTERNAL_NOTE.ADD_NOTE' | translate }}"
 						id="note"
 						formControlName="internalNote"
 						class="internal-note-input"
@@ -30,7 +26,7 @@
 		<button outline status="basic" class="mr-3" nbButton (click)="cancel()">
 			{{ 'BUTTONS.CANCEL' | translate }}
 		</button>
-		<button *ngIf="form" (click)="addNote()" status="success" nbButton>
+		<button *ngIf="form" [preventDoubleSubmit]="addNote.bind(this)" status="success" nbButton>
 			{{ 'BUTTONS.SAVE' | translate }}
 		</button>
 	</nb-card-footer>

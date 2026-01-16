@@ -7,9 +7,7 @@
 		<form [formGroup]="form" *ngIf="form">
 			<div class="row">
 				<div class="form-group col-12">
-					<label for="emailsSelect" class="label">{{
-						'SM_TABLE.CONTACT_NAME' | translate
-					}}</label>
+					<label for="emailsSelect" class="label">{{ 'SM_TABLE.CONTACT_NAME' | translate }}</label>
 					<input
 						type="text"
 						#name
@@ -18,26 +16,15 @@
 						formControlName="name"
 						placeholder="{{ 'SM_TABLE.CONTACT_NAME' | translate }}"
 						[status]="
-							form.controls.name.touched
-								? form.controls.name.value == 0
-									? 'danger'
-									: 'basic'
-								: 'basic'
+							form.controls.name.touched ? (form.controls.name.value == 0 ? 'danger' : 'basic') : 'basic'
 						"
-						[attr.aria-invalid]="
-							form.controls.name.invalid &&
-							form.controls.name.touched
-								? true
-								: null
-						"
+						[attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched ? true : null"
 					/>
 				</div>
 			</div>
 			<div class="row">
 				<div class="form-group col-12">
-					<label for="emailsSelect" class="label">{{
-						'ORGANIZATIONS_PAGE.EDIT.PHONE' | translate
-					}}</label>
+					<label for="emailsSelect" class="label">{{ 'ORGANIZATIONS_PAGE.EDIT.PHONE' | translate }}</label>
 					<input
 						pattern="[0-9]{0,30}"
 						type="text"
@@ -45,9 +32,7 @@
 						nbInput
 						fullWidth
 						formControlName="primaryPhone"
-						placeholder="{{
-							'ORGANIZATIONS_PAGE.EDIT.PHONE' | translate
-						}}"
+						placeholder="{{ 'ORGANIZATIONS_PAGE.EDIT.PHONE' | translate }}"
 						[status]="
 							form.controls.primaryPhone.dirty
 								? form.controls.primaryPhone.invalid
@@ -56,41 +41,22 @@
 								: 'basic'
 						"
 						[attr.aria-invalid]="
-							form.controls.primaryPhone.invalid &&
-							form.controls.primaryPhone.touched
-								? true
-								: null
+							form.controls.primaryPhone.invalid && form.controls.primaryPhone.touched ? true : null
 						"
 					/>
-					<ng-container
-						*ngIf="
-							form.controls.primaryPhone.invalid &&
-							form.controls.primaryPhone.touched
-						"
-					>
-						<p
-							class="caption status-danger"
-							*ngIf="form.controls.primaryPhone.errors?.required"
-						>
+					<ng-container *ngIf="form.controls.primaryPhone.invalid && form.controls.primaryPhone.touched">
+						<p class="caption status-danger" *ngIf="form.controls.primaryPhone.errors?.required">
 							{{ 'TOASTR.MESSAGE.PHONE_REQUIRED' | translate }}
 						</p>
-						<p
-							class="caption status-danger"
-							*ngIf="form.controls.primaryPhone.errors?.pattern"
-						>
-							{{
-								'TOASTR.MESSAGE.PHONE_CONTAINS_ONLY_NUMBERS'
-									| translate
-							}}
+						<p class="caption status-danger" *ngIf="form.controls.primaryPhone.errors?.pattern">
+							{{ 'TOASTR.MESSAGE.PHONE_CONTAINS_ONLY_NUMBERS' | translate }}
 						</p>
 					</ng-container>
 				</div>
 			</div>
 			<div class="row">
 				<div class="form-group col-12">
-					<label for="emailsSelect" class="label">{{
-						'FORM.LABELS.EMAIL_INVITATION' | translate
-					}}</label>
+					<label for="emailsSelect" class="label">{{ 'FORM.LABELS.EMAIL_INVITATION' | translate }}</label>
 					<input
 						fullWidth
 						id="emailInput"
@@ -99,23 +65,12 @@
 						formControlName="primaryEmail"
 						placeholder="{{ 'SM_TABLE.EMAIL' | translate }}"
 						[status]="
-							form.controls.primaryEmail.dirty &&
-							form.controls.primaryEmail.invalid
-								? 'danger'
-								: 'basic'
+							form.controls.primaryEmail.dirty && form.controls.primaryEmail.invalid ? 'danger' : 'basic'
 						"
 					/>
-					<ng-container
-						*ngIf="
-							form.controls.primaryEmail.errors &&
-							form.controls.primaryEmail.errors.exists
-						"
-					>
+					<ng-container *ngIf="form.controls.primaryEmail.errors && form.controls.primaryEmail.errors.exists">
 						<p class="caption status-danger">
-							{{
-								'NOTES.ORGANIZATIONS.EDIT_ORGANIZATIONS_CONTACTS.EMAIL_EXISTS'
-									| translate
-							}}
+							{{ 'NOTES.ORGANIZATIONS.EDIT_ORGANIZATIONS_CONTACTS.EMAIL_EXISTS' | translate }}
 						</p>
 					</ng-container>
 				</div>
@@ -131,7 +86,7 @@
 			status="success"
 			size="small"
 			[disabled]="form.invalid"
-			(click)="inviteContact()"
+			[preventDoubleSubmit]="inviteContact.bind(this)"
 			nbButton
 		>
 			{{ 'ORGANIZATIONS_PAGE.EMAIL_INVITE' | translate }}

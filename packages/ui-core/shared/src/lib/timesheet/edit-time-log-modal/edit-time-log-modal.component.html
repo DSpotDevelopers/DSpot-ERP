@@ -286,7 +286,7 @@
 				[nbSpinner]="loading"
 				nbSpinnerStatus="primary"
 				[disabled]="loading || isButtonDisabled"
-				(click)="addTime()"
+				[preventDoubleSubmit]="addTime.bind(this)"
 			>
 				<nb-icon icon="save-outline"></nb-icon>
 				{{ (mode == 'create' ? 'TIMESHEET.ADD_TIME' : 'TIMESHEET.UPDATE_TIME') | translate }}

@@ -21,6 +21,7 @@ import { TagsColorInputModule } from '../../tags/tags-color-input/tags-color-inp
 import { EmployeeMultiSelectModule } from '../../employee/employee-multi-select/employee-multi-select.module';
 import { ProjectModuleMutationComponent } from './project-module-mutation.component';
 import { RichTextEditorModule } from '../../rich-text-editor';
+import { DirectivesModule } from '../../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -45,7 +46,8 @@ import { RichTextEditorModule } from '../../rich-text-editor';
 		ProjectSelectModule,
 		TaskSelectModule,
 		TaskStatusSelectModule,
-		RichTextEditorModule
+		RichTextEditorModule,
+		DirectivesModule
 	],
 	declarations: [ProjectModuleMutationComponent],
 	exports: [ProjectModuleMutationComponent]

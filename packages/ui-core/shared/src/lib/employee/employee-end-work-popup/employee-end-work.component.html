@@ -31,7 +31,7 @@
 		<button status="basic" outline (click)="closeDialog()" nbButton>
 			{{ 'BUTTONS.CANCEL' | translate }}
 		</button>
-		<button status="success" (click)="endWork()" nbButton>
+		<button status="success" [preventDoubleSubmit]="endWork.bind(this)" nbButton>
 			{{ (backToWork ? 'EMPLOYEES_PAGE.BACK_TO_WORK' : 'EMPLOYEES_PAGE.END_WORK') | translate }}
 		</button>
 	</nb-card-footer>

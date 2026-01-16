@@ -13,10 +13,10 @@ import { ErrorHandlingService, Store } from '@gauzy/ui-core/core';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-edit-employee',
-    templateUrl: './edit-employee.component.html',
-    styleUrls: ['./edit-employee.component.scss', '../../dashboard/dashboard.component.scss'],
-    standalone: false
+	selector: 'ngx-edit-employee',
+	templateUrl: './edit-employee.component.html',
+	styleUrls: ['./edit-employee.component.scss', '../../dashboard/dashboard.component.scss'],
+	standalone: false
 })
 export class EditEmployeeComponent extends TranslationBaseComponent implements OnInit, OnDestroy, AfterViewInit {
 	organization: IOrganization;
@@ -131,7 +131,7 @@ export class EditEmployeeComponent extends TranslationBaseComponent implements O
 		const { id: employeeId, profile_link: employeeProfileLink } = this.selectedEmployee;
 
 		// The call to Location.prepareExternalUrl is the key thing here.
-		let tree = this.router.createUrlTree([
+		const tree = this.router.createUrlTree([
 			`/share/organization/${profile_link}/${id}/${employeeProfileLink}/${employeeId}`
 		]);
 

@@ -14,6 +14,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { TranslateModule } from '@ngx-translate/core';
 import { EquipmentSharingPolicyService } from '@gauzy/ui-core/core';
 import { EquipmentSharingPolicyMutationComponent } from './equipment-sharing-policy-mutation.component';
+import { DirectivesModule } from '../../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -28,7 +29,8 @@ import { EquipmentSharingPolicyMutationComponent } from './equipment-sharing-pol
 		NbSelectModule,
 		NbRadioModule,
 		NgSelectModule,
-		TranslateModule.forChild()
+		TranslateModule.forChild(),
+		DirectivesModule
 	],
 	declarations: [EquipmentSharingPolicyMutationComponent],
 	providers: [EquipmentSharingPolicyService]

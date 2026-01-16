@@ -1,14 +1,11 @@
 <nb-card class="main">
 	<nb-card-header>
-    	<span class="cancel">
+		<span class="cancel">
 			<i class="fas fa-times" (click)="cancel()"></i>
 		</span>
 		<h5 class="title">
 			{{
-				(payment
-					? 'INVOICES_PAGE.PAYMENTS.EDIT_PAYMENT'
-					: 'INVOICES_PAGE.PAYMENTS.RECORD_PAYMENT'
-				) | translate
+				(payment ? 'INVOICES_PAGE.PAYMENTS.EDIT_PAYMENT' : 'INVOICES_PAGE.PAYMENTS.RECORD_PAYMENT') | translate
 			}}
 		</h5>
 	</nb-card-header>
@@ -19,10 +16,7 @@
 					<div class="col-9">
 						<div class="form-group">
 							<label for="inputInvoiceNumber" class="label">
-								{{
-									'INVOICES_PAGE.PAYMENTS.SELECT_INVOICE'
-										| translate
-								}}
+								{{ 'INVOICES_PAGE.PAYMENTS.SELECT_INVOICE' | translate }}
 							</label>
 							<nb-select
 								class="d-block"
@@ -31,10 +25,7 @@
 								fullWidth
 								id="inputInvoiceNumber"
 							>
-								<nb-option
-									*ngFor="let invoice of invoices"
-									[value]="invoice"
-								>
+								<nb-option *ngFor="let invoice of invoices" [value]="invoice">
 									{{ invoice.invoiceNumber }}
 								</nb-option>
 							</nb-select>
@@ -59,10 +50,7 @@
 					<div class="col-6">
 						<div class="form-group">
 							<label class="label">
-								{{
-									'INVOICES_PAGE.INVOICE_TYPE.SELECT_PROJECTS'
-										| translate
-								}}
+								{{ 'INVOICES_PAGE.INVOICE_TYPE.SELECT_PROJECTS' | translate }}
 							</label>
 							<ga-project-selector
 								formControlName="projectId"
@@ -80,10 +68,7 @@
 				<div class="col-6">
 					<div class="form-group">
 						<label for="inputPaymentDate" class="label">
-							{{
-								'INVOICES_PAGE.PAYMENTS.PAYMENT_DATE'
-									| translate
-							}}
+							{{ 'INVOICES_PAGE.PAYMENTS.PAYMENT_DATE' | translate }}
 						</label>
 						<input
 							nbInput
@@ -99,10 +84,7 @@
 				<div class="col-6">
 					<div class="form-group">
 						<label for="inputPaymentMethod" class="label">
-							{{
-								'INVOICES_PAGE.PAYMENTS.PAYMENT_METHOD'
-									| translate
-							}}
+							{{ 'INVOICES_PAGE.PAYMENTS.PAYMENT_METHOD' | translate }}
 						</label>
 						<nb-select
 							id="inputPaymentMethod"
@@ -111,14 +93,8 @@
 							[placeholder]="'INVOICES_PAGE.PAYMENTS.PAYMENT_METHOD' | translate"
 							fullWidth
 						>
-							<nb-option
-								*ngFor="let paymentMethod of paymentMethods"
-								[value]="paymentMethod"
-							>
-								{{
-									'INVOICES_PAGE.PAYMENTS.' + paymentMethod
-										| translate
-								}}
+							<nb-option *ngFor="let paymentMethod of paymentMethods" [value]="paymentMethod">
+								{{ 'INVOICES_PAGE.PAYMENTS.' + paymentMethod | translate }}
 							</nb-option>
 						</nb-select>
 					</div>
@@ -180,21 +156,14 @@
 		</form>
 	</nb-card-body>
 	<nb-card-footer class="text-left">
-		<button
-			status="basic"
-			outline
-			size="small"
-			class="mr-3"
-			nbButton
-			(click)="cancel()"
-		>
+		<button status="basic" outline size="small" class="mr-3" nbButton (click)="cancel()">
 			{{ 'BUTTONS.CANCEL' | translate }}
 		</button>
 		<button
-			(click)="addEditPayment()"
+			[preventDoubleSubmit]="addEditPayment.bind(this)"
 			status="success"
 			[disabled]="form.invalid"
-      		size="small"
+			size="small"
 			nbButton
 		>
 			{{ 'BUTTONS.SAVE' | translate }}

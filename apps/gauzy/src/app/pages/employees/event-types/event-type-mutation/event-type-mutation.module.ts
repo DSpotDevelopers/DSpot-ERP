@@ -14,7 +14,7 @@ import {
 } from '@nebular/theme';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TranslateModule } from '@ngx-translate/core';
-import { EmployeeMultiSelectModule, TagsColorInputModule } from '@gauzy/ui-core/shared';
+import { DirectivesModule, EmployeeMultiSelectModule, TagsColorInputModule } from '@gauzy/ui-core/shared';
 import { EventTypeMutationComponent } from './event-type-mutation.component';
 
 @NgModule({
@@ -34,7 +34,8 @@ import { EventTypeMutationComponent } from './event-type-mutation.component';
 		EmployeeMultiSelectModule,
 		NbCheckboxModule,
 		NbTooltipModule,
-		TranslateModule.forChild()
+		TranslateModule.forChild(),
+		DirectivesModule
 	],
 	exports: [EventTypeMutationComponent],
 	declarations: [EventTypeMutationComponent],

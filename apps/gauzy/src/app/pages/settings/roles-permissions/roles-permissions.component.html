@@ -53,7 +53,7 @@
 						<button
 							nbButton
 							status="success"
-							(click)="createRole()"
+							[preventDoubleSubmit]="createRole.bind(this)"
 							size="small"
 							[nbTooltip]="'BUTTONS.CREATE' | translate"
 						>
@@ -68,7 +68,7 @@
 							nbButton
 							status="basic"
 							class="action"
-							(click)="deleteRole()"
+							[preventDoubleSubmit]="deleteRole.bind(this)"
 							size="small"
 							[nbTooltip]="'BUTTONS.DELETE' | translate"
 						>

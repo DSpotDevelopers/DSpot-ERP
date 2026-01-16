@@ -11,7 +11,14 @@
 		<ga-user-basic-info-form [isShowRole]="true" #userBasicInfo></ga-user-basic-info-form>
 	</nb-card-body>
 	<nb-card-footer class="text-left">
-		<button [disabled]="userBasicInfo.form.invalid" status="basic" class="green" outline (click)="add()" nbButton>
+		<button
+			[disabled]="userBasicInfo.form.invalid"
+			status="basic"
+			class="green"
+			outline
+			[preventDoubleSubmit]="add.bind(this)"
+			nbButton
+		>
 			{{ 'USERS_PAGE.ADD_USER' | translate }}
 		</button>
 		<button status="basic" class="mr-3 ml-3" outline (click)="closeDialog()" nbButton>

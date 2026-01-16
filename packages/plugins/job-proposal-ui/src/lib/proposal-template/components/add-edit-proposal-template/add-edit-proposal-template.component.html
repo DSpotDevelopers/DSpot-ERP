@@ -46,7 +46,7 @@
 		<button (click)="close()" status="basic" outline class="mr-3" nbButton>
 			{{ 'BUTTONS.CANCEL' | translate }}
 		</button>
-		<button (click)="onSave()" [disabled]="form.invalid" status="success" nbButton>
+		<button [disabled]="form.invalid" [preventDoubleSubmit]="onSave.bind(this)" status="success" nbButton>
 			{{ 'BUTTONS.SAVE' | translate }}
 		</button>
 	</nb-card-footer>

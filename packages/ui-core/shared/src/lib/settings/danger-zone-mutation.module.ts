@@ -14,6 +14,7 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService, IncomeService, RoleService } from '@gauzy/ui-core/core';
 import { DangerZoneMutationComponent } from './danger-zone-mutation/danger-zone-mutation.component';
+import { DirectivesModule } from '../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -28,7 +29,8 @@ import { DangerZoneMutationComponent } from './danger-zone-mutation/danger-zone-
 		NbListModule,
 		NbSelectModule,
 		NbToastrModule,
-		TranslateModule.forChild()
+		TranslateModule.forChild(),
+		DirectivesModule
 	],
 	exports: [DangerZoneMutationComponent],
 	declarations: [DangerZoneMutationComponent],

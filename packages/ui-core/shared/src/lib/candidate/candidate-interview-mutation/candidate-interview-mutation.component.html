@@ -108,7 +108,13 @@
 					<button class="btn gray" status="basic" outline="" (click)="previous()" nbButton nbStepperPrevious>
 						{{ 'CANDIDATES_PAGE.EDIT_CANDIDATE.INTERVIEW.PREVIOUS' | translate }}
 					</button>
-					<button class="btn mr-3 ml-3" status="success" nbButton nbStepperSave (click)="save()">
+					<button
+						class="btn mr-3 ml-3"
+						status="success"
+						nbButton
+						nbStepperSave
+						[preventDoubleSubmit]="save.bind(this)"
+					>
 						{{ 'CANDIDATES_PAGE.EDIT_CANDIDATE.INTERVIEW.SAVE' | translate }}
 					</button>
 				</div>

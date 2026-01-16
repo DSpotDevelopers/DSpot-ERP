@@ -516,31 +516,31 @@
 		</button>
 		<button
 			class="mr-3"
-			(click)="addInvoice('DRAFT')"
 			size="small"
 			status="primary"
 			class="gray"
 			[disabled]="disableSaveButton || form.invalid"
+			[preventDoubleSubmit]="addDraftInvoice.bind(this)"
 			nbButton
 		>
 			{{ 'BUTTONS.SAVE_AS_DRAFT' | translate }}
 		</button>
 		<button
 			class="mr-3"
-			(click)="sendToContact()"
 			status="success"
 			size="small"
 			[disabled]="disableSaveButton || form.invalid"
+			[preventDoubleSubmit]="sendToContact.bind(this)"
 			nbButton
 		>
 			{{ 'BUTTONS.SAVE_AND_SEND_CONTACT' | translate }}
 		</button>
 		<button
 			class="mr-3"
-			(click)="sendViaEmail()"
 			status="success"
 			size="small"
 			[disabled]="disableSaveButton || form.invalid"
+			[preventDoubleSubmit]="sendViaEmail.bind(this)"
 			nbButton
 		>
 			{{ 'BUTTONS.SAVE_AND_SEND_EMAIL' | translate }}
