@@ -4,7 +4,7 @@ import { EMPTY, filter, fromEvent, switchMap, tap } from 'rxjs';
 import { SocketConnectionService } from '../socket-connection/socket-connection.service';
 import { IUser } from '@gauzy/contracts';
 import { UsersService } from './users.service';
-import { Store } from '@gauzy/ui-core/core';
+import { Store } from '../store';
 
 @UntilDestroy()
 @Injectable({
