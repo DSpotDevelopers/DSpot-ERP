@@ -1494,7 +1494,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 
 			// Send a real-time event to the specified user via socket.
 			// No error is thrown if the user is not currently connected.
-			this._socketService.sendTimerChanged(employeeId);
+			this._socketService.notifyEmployee(employeeId, 'timer:changed');
 
 			return timeLog;
 		} catch (error) {
@@ -1643,7 +1643,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 
 			// Send a real-time event to the specified user via socket.
 			// No error is thrown if the user is not currently connected.
-			this._socketService.sendTimerChanged(employeeId);
+			this._socketService.notifyEmployee(employeeId, 'timer:changed');
 
 			return newTimeLog;
 		} catch (error) {
@@ -1731,7 +1731,7 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			);
 			// Send a real-time event to the specified user via socket.
 			// No error is thrown if the user is not currently connected.
-			this._socketService.sendTimerChanged(timeLog?.employeeId);
+			this._socketService.notifyEmployee(timeLog?.employeeId, 'timer:changed');
 		}
 
 		return deleted;

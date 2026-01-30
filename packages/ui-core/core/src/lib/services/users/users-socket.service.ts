@@ -34,7 +34,7 @@ export class UsersSocketService {
 				switchMap(() => this.usersService.getMe()),
 				tap((user: IUser) => {
 					console.log('[Socket] user updated', user);
-					this.store.user = user;
+					this.store.user = { ...this.store.user, ...user };
 				}),
 				untilDestroyed(this)
 			)

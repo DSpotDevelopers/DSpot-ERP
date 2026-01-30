@@ -375,8 +375,7 @@ export class UserService extends TenantAwareCrudService<User> {
 			// Save the updated user entity
 			await this.save(entity);
 
-			const employee = await this._employeeService.findOneByUserId(user.id);
-			if (employee) this._socketService.emitToClient(employee?.id, 'user:changed', null);
+			this._socketService.emitToClient(user?.id, 'user:changed', null);
 
 			// Return the updated user
 			return await this.findOneByWhereOptions({

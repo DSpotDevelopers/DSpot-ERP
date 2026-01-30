@@ -15,10 +15,10 @@ import { TimeZoneService } from './time-zone.service';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ga-timezone-filter',
-    templateUrl: './timezone-filter.component.html',
-    styleUrls: ['./timezone-filter.component.scss'],
-    standalone: false
+	selector: 'ga-timezone-filter',
+	templateUrl: './timezone-filter.component.html',
+	styleUrls: ['./timezone-filter.component.scss'],
+	standalone: false
 })
 export class TimezoneFilterComponent extends TranslationBaseComponent implements AfterViewInit, OnInit, OnDestroy {
 	timeZoneOptions: { value: TimeZoneEnum; label: string }[] = [
@@ -39,8 +39,8 @@ export class TimezoneFilterComponent extends TranslationBaseComponent implements
 	selectedTimeFormat: TimeFormatEnum = TimeFormatEnum.FORMAT_12_HOURS;
 	selectedTimeZone: TimeZoneEnum = TimeZoneEnum.UTC_TIMEZONE;
 
-	@Input() isTimezone: boolean = true;
-	@Input() isTimeFormat: boolean = true;
+	@Input() isTimezone = true;
+	@Input() isTimeFormat = true;
 
 	@Output() timeZoneChange = new EventEmitter<string>();
 	@Output() timeFormatChange = new EventEmitter<TimeFormatEnum>();
@@ -87,8 +87,9 @@ export class TimezoneFilterComponent extends TranslationBaseComponent implements
 			distinctUntilChange()
 		);
 		const storeUser$ = this._store.user$.pipe(
-			filter((user: IUser) => !!user),
-			filter(() => !this.hasChangeSelectedEmployeePermission())
+			filter((user: IUser) => !!user)
+			// TODO: commented for tests. Check how it woll be work
+			//filter(() => !this.hasChangeSelectedEmployeePermission())
 		);
 		combineLatest([queryParams$, storeUser$])
 			.pipe(

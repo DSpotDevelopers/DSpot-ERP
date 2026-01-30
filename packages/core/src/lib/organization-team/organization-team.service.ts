@@ -366,8 +366,8 @@ export class OrganizationTeamService extends TenantAwareCrudService<Organization
 				const affectedEmployeeIds = new Set<ID>([...removedEmployeeIds, ...addedEmployeeIds]);
 
 				affectedEmployeeIds.forEach((employeeId) => {
-					this.socketService.sendTimerChanged(employeeId);
-					this.socketService.emitToClient(employeeId, 'tasks:changed', {
+					this.socketService.notifyEmployee(employeeId, 'timer:changed');
+					this.socketService.notifyEmployee(employeeId, 'tasks:changed', {
 						teamId: id,
 						added: addedEmployeeIds.includes(employeeId),
 						removed: removedEmployeeIds.includes(employeeId)
@@ -644,8 +644,8 @@ export class OrganizationTeamService extends TenantAwareCrudService<Organization
 			const result = await this.typeOrmRepository.remove(team);
 
 			memberIds.forEach((employeeId) => {
-				this.socketService.sendTimerChanged(employeeId);
-				this.socketService.emitToClient(employeeId, 'tasks:changed', {
+				this.socketService.notifyEmployee(employeeId, 'timer:changed');
+				this.socketService.notifyEmployee(employeeId, 'tasks:changed', {
 					teamId,
 					removed: true
 				});

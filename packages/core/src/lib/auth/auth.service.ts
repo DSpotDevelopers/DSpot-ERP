@@ -405,6 +405,7 @@ export class AuthService extends SocialAuthService {
 	private generateToken(user: IUser, code: string): string {
 		const payload: JwtPayload = {
 			userId: user.id,
+			roleId: user.role ? user.role.id : null,
 			email: user.email,
 			tenantId: user.tenant ? user.tenantId : null,
 			code
@@ -976,6 +977,7 @@ export class AuthService extends SocialAuthService {
 				id: user.id,
 				tenantId: user.tenantId ?? null,
 				employeeId: employee ? employee.id : null,
+				roleId: user.role ? user.role.id : null,
 				role: user.role ? user.role.name : null,
 				permissions: user.role?.rolePermissions?.filter((rp) => rp.enabled).map((rp) => rp.permission) ?? null
 			};
@@ -1011,7 +1013,8 @@ export class AuthService extends SocialAuthService {
 				id: user.id,
 				email: user.email,
 				tenantId: user.tenantId || null,
-				role: user.role ? user.role.name : null
+				role: user.role ? user.role.name : null,
+				roleId: user.role ? user.role.id : null
 			};
 
 			// Generate the JWT refresh token

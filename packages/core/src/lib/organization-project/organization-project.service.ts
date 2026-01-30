@@ -124,7 +124,7 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 			// Send a real-time event to the specified user via socket.
 			// No error is thrown if the user is not currently connected.
 			members.forEach((member) => {
-				this._socketService.sendTimerChanged(member.employeeId);
+				this._socketService.notifyEmployee(member.employeeId, 'timer:changed');
 			});
 
 			// Create the organization project with the prepared members
@@ -265,7 +265,7 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 		// Send a real-time event to the specified user via socket.
 		// No error is thrown if the user is not currently connected.
 		memberIds.forEach((memberId) => {
-			this._socketService.sendTimerChanged(memberId);
+			this._socketService.notifyEmployee(memberId, 'timer:changed');
 		});
 
 		// Wait for all deletions to complete
@@ -317,7 +317,7 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 			// Send a real-time event to the specified user via socket.
 			// No error is thrown if the user is not currently connected.
 			removedMembers.forEach((member) => {
-				this._socketService.sendTimerChanged(member?.employeeId);
+				this._socketService.notifyEmployee(member?.employeeId, 'timer:changed');
 			});
 
 			// Unsubscribe members who were unassigned from project
@@ -355,7 +355,7 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 
 					// Send a real-time event to the specified user via socket.
 					// No error is thrown if the user is not currently connected.
-					this._socketService.sendTimerChanged(member.employeeId);
+					this._socketService.notifyEmployee(member.employeeId, 'timer:changed');
 				}
 			})
 		);
@@ -377,7 +377,7 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 			// Send a real-time event to the specified user via socket.
 			// No error is thrown if the user is not currently connected.
 			newMembers.forEach((member) => {
-				this._socketService.sendTimerChanged(member.id);
+				this._socketService.notifyEmployee(member.id, 'timer:changed');
 			});
 
 			// Subscribe new assignees to the project
@@ -764,7 +764,7 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 
 						// Send a real-time event to the specified user via socket.
 						// No error is thrown if the user is not currently connected.
-						this._socketService.sendTimerChanged(member.id);
+						this._socketService.notifyEmployee(member.id, 'timer:changed');
 
 						// Return the project with the new member added to the members array
 						return {
@@ -786,7 +786,7 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 
 				// Send a real-time event to the specified user via socket.
 				// No error is thrown if the user is not currently connected.
-				this._socketService.sendTimerChanged(member.id);
+				this._socketService.notifyEmployee(member.id, 'timer:changed');
 			}
 
 			return true;
@@ -843,7 +843,7 @@ export class OrganizationProjectService extends TenantAwareCrudService<Organizat
 			for (const employeeId of affectedEmployeeIds) {
 				// Send a real-time event to the specified user via socket.
 				// No error is thrown if the user is not currently connected.
-				this._socketService.sendTimerChanged(employeeId);
+				this._socketService.notifyEmployee(employeeId, 'timer:changed');
 			}
 
 			return result;

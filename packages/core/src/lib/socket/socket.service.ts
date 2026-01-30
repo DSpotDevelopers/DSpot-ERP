@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
+import { EventBus } from '@nestjs/cqrs';
+import { Server, Socket } from 'socket.io';
+import { EmployeeSocketEvent } from '../event-bus/events/employee-socket.event';
 
 /**
  * SocketService manages connected clients and provides
@@ -18,6 +20,17 @@ export class SocketService {
 	 * Each clientKey (e.g. employeeId, userId, tenantId) can have multiple sockets.
 	 */
 	private readonly clients = new Map<string, Set<Socket>>();
+	private server: Server;
+
+	constructor(private readonly _eventBus: EventBus) {}
+
+	/**
+	 * Assign the Socket.IO server instance to the service.
+	 * Called once during gateway initialization.
+	 */
+	setServer(server: Server) {
+		this.server = server;
+	}
 
 	/**
 	 * Register a client under a given identifier (clientKey).
@@ -49,30 +62,41 @@ export class SocketService {
 	}
 
 	/**
-	 * Emit a "timer:changed" event to all sockets of a single client.
+	 * Emit event to multiple clients.
 	 */
-	sendTimerChanged(clientKey: string): void {
-		const sockets = this.clients.get(clientKey);
-		if (sockets) {
-			sockets.forEach((socket) => {
-				if (socket.connected) {
-					socket.emit('timer:changed');
-				}
-			});
-		}
+	emitToClientMany(clientKeys: string[], event: string, payload?: any): void {
+		clientKeys.forEach((key) => this.emitToClient(key, event, payload));
+	}
+
+	/** Listen to events published on the EventBus */
+
+	/**
+	 * Publish a socket event for a single employee using CQRS EventBus.
+	 * This allows socket emission to be handled asynchronously.
+	 */
+	async notifyEmployee(employeeId: string, event: string, payload?: any) {
+		await this.publishEvent([employeeId], event, payload);
 	}
 
 	/**
-	 * Emit "timer:changed" event to multiple clients.
+	 * Publish a socket event for multiple employees using CQRS EventBus.
 	 */
-	sendTimerChangedMany(clientKeys: string[]): void {
-		clientKeys.forEach((key) => this.sendTimerChanged(key));
+	async notifyEmployees(employeeIds: string[], event: string, payload?: any) {
+		await this.publishEvent(employeeIds, event, payload);
+	}
+
+	/**
+	 * Internal helper that publishes a socket-related domain event.
+	 */
+	private async publishEvent(employeeIds: string[], event: string, payload?: any) {
+		const eventObj = new EmployeeSocketEvent(employeeIds, event, payload);
+		this._eventBus.publish(eventObj);
 	}
 
 	/**
 	 * Generic event emitter to all sockets of a single client.
 	 */
-	emitToClient(clientKey: string, event: string, payload: any): void {
+	emitToClient(clientKey: string, event: string, payload?: any): void {
 		const sockets = this.clients.get(clientKey);
 		if (sockets) {
 			sockets.forEach((socket) => {
@@ -86,7 +110,7 @@ export class SocketService {
 	/**
 	 * Broadcast event to all connected clients.
 	 */
-	broadcast(event: string, payload: any): void {
+	broadcast(event: string, payload?: any): void {
 		this.clients.forEach((sockets) => {
 			sockets.forEach((socket) => {
 				if (socket.connected) {
@@ -94,5 +118,20 @@ export class SocketService {
 				}
 			});
 		});
+	}
+
+	/**
+	 * Emit an event to a specific Socket.IO room.
+	 *
+	 * @param room Room name (e.g. roleId, tenantId)
+	 * @param event Socket event name
+	 * @param payload Event payload
+	 */
+	emitToRoom(room: string, event: string, payload?: any) {
+		if (!this.server) {
+			console.warn('Socket server not initialized!');
+			return;
+		}
+		this.server.to(room).emit(event, payload);
 	}
 }

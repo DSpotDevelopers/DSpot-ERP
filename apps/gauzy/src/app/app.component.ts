@@ -17,11 +17,13 @@ import {
 	DEFAULT_DATE_PICKER_CONFIG,
 	DEFAULT_SELECTOR_VISIBILITY,
 	DateRangePickerBuilderService,
+	FeatureSocketService,
 	IDatePickerConfig,
 	ISelectorVisibility,
 	JitsuService,
 	LanguagesService,
 	NavigationService,
+	RolePermissionSocketService,
 	SelectorBuilderService,
 	SeoService,
 	Store,
@@ -52,7 +54,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 		private readonly _selectorBuilderService: SelectorBuilderService,
 		private readonly _dateRangePickerBuilderService: DateRangePickerBuilderService,
 		private readonly _navigationService: NavigationService,
-		private readonly _usersSocketService: UsersSocketService
+		private readonly _usersSocketService: UsersSocketService,
+		private readonly rolePermissionSocketService: RolePermissionSocketService,
+		private readonly _featureSocketService: FeatureSocketService
 	) {
 		this.getActivateRouterDataEvent();
 		this.getPreferredLanguage();
@@ -115,6 +119,26 @@ export class AppComponent implements OnInit, AfterViewInit {
 		if (Number(this._store.serverConnection) === 0) {
 			this.loading = false;
 		}
+
+		this.rolePermissionSocketService.permissionChanged$
+			.pipe(
+				filter(Boolean),
+				tap(() => {
+					window.location.reload();
+				}),
+				untilDestroyed(this)
+			)
+			.subscribe();
+
+		this._featureSocketService.featureChanged$
+			.pipe(
+				filter(Boolean),
+				tap(() => {
+					window.location.reload();
+				}),
+				untilDestroyed(this)
+			)
+			.subscribe();
 	}
 
 	/**

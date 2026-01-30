@@ -27,6 +27,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	constructor(private readonly socketService: SocketService) {}
 
+	afterInit() {
+		// Register the WebSocket server instance in SocketService
+		// so it can be used to emit events to connected clients
+		this.socketService.setServer(this.server);
+	}
+
 	/**
 	 * Called whenever a client attempts to establish a socket connection.
 	 * Validates JWT and registers the client in the SocketService.
@@ -51,10 +57,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			 *
 			 * For now we call it `clientKey` so it’s flexible.
 			 */
-			const clientKey = payload.employeeId;
+			const clientKey = payload.id; //userId
+			const roleId = payload.roleId;
 
 			this.socketService.registerClient(clientKey, client);
-			console.log(`✅ Client connected via socket ${client.id}`);
+
+			// Add the client to a role-specific room for targeted socket events
+			client.join(roleId);
+			console.log(`✅ Client connected via socket ${client.id}, role:${roleId}`);
 		} catch (err) {
 			console.warn('Invalid JWT token. Disconnecting client.');
 			client.disconnect();
