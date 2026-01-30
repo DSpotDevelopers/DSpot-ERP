@@ -8,6 +8,7 @@ import { RolePermission } from './role-permission.entity';
 import { RolePermissionService } from './role-permission.service';
 import { RoleModule } from './../role/role.module';
 import { TypeOrmRolePermissionRepository } from './repository/type-orm-role-permission.repository';
+import { SocketModule } from '../socket';
 
 @Module({
 	imports: [
@@ -15,7 +16,8 @@ import { TypeOrmRolePermissionRepository } from './repository/type-orm-role-perm
 		CacheModule.register({ isGlobal: true }),
 		TypeOrmModule.forFeature([RolePermission]),
 		MikroOrmModule.forFeature([RolePermission]),
-		forwardRef(() => RoleModule)
+		forwardRef(() => RoleModule),
+		SocketModule
 	],
 	controllers: [RolePermissionController],
 	providers: [RolePermissionService, TypeOrmRolePermissionRepository],

@@ -237,4 +237,40 @@ export class UserOrganizationService extends TenantAwareCrudService<UserOrganiza
 
 		return await this.typeOrmUserOrganizationRepository.save(entities);
 	}
+
+	/**
+	 * Retrieves user-organization relations based on the given filter.
+	 *
+	 * @param filter - Partial UserOrganization filter (e.g. tenantId, organizationId)
+	 * @param includeEmployee - Whether to attach employee data to each user
+	 * @returns A list of UserOrganization entities, optionally enriched with employee data
+	 */
+	async findAllUserOrganizations(
+		filter: Partial<UserOrganization>,
+		includeEmployee = false
+	): Promise<UserOrganization[]> {
+		const { items } = await super.findAll({
+			where: filter,
+			relations: ['user']
+		});
+
+		if (!includeEmployee) return items;
+
+		const tenantId = RequestContext.currentTenantId();
+		const userIds = items.map((uo) => uo.user?.id).filter(Boolean);
+
+		const employees = await this.employeeService.findEmployeesByUserIds(userIds, tenantId);
+		const employeeMap = new Map<string, IEmployee>();
+		employees.forEach((e) => {
+			if (e.userId) employeeMap.set(e.userId, e);
+		});
+
+		return items.map((uo) => ({
+			...uo,
+			user: {
+				...uo.user,
+				employee: uo.user?.id ? employeeMap.get(uo.user.id) : undefined
+			}
+		}));
+	}
 }

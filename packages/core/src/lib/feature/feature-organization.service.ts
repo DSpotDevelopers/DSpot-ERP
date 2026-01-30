@@ -1,5 +1,5 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { IFeature, IFeatureOrganization, IFeatureOrganizationUpdateInput, ITenant } from '@gauzy/contracts';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import { IFeature, IFeatureOrganization, IFeatureOrganizationUpdateInput, ITenant, IUser } from '@gauzy/contracts';
 import { isNotEmpty } from '@gauzy/utils';
 import { TenantAwareCrudService } from './../core/crud';
 import { RequestContext } from './../core/context';
@@ -7,6 +7,9 @@ import { FeatureOrganization } from './feature-organization.entity';
 import { FeatureService } from './feature.service';
 import { TypeOrmFeatureOrganizationRepository } from './repository/type-orm-feature-organization.repository';
 import { MikroOrmFeatureOrganizationRepository } from './repository/mikro-orm-feature-organization.repository';
+import { SocketService } from '../socket/socket.service';
+import { UserService } from '../user/user.service';
+import { UserOrganizationService } from '../user-organization/user-organization.services';
 
 @Injectable()
 export class FeatureOrganizationService extends TenantAwareCrudService<FeatureOrganization> {
@@ -14,6 +17,9 @@ export class FeatureOrganizationService extends TenantAwareCrudService<FeatureOr
 		readonly typeOrmFeatureOrganizationRepository: TypeOrmFeatureOrganizationRepository,
 
 		readonly mikroOrmFeatureOrganizationRepository: MikroOrmFeatureOrganizationRepository,
+		private readonly _socketService: SocketService,
+		private readonly _userService: UserService,
+		private readonly _userOrganizationService: UserOrganizationService,
 
 		@Inject(forwardRef(() => FeatureService))
 		private readonly _featureService: FeatureService
@@ -42,12 +48,14 @@ export class FeatureOrganizationService extends TenantAwareCrudService<FeatureOr
 
 		try {
 			if (!total) {
+				// No existing record → create new feature organization entry
 				const featureOrganization: IFeatureOrganization = new FeatureOrganization({
 					...entity,
 					tenantId
 				});
 				await this.typeOrmRepository.save(featureOrganization);
 			} else {
+				// Update existing feature organization entries
 				featureOrganizations.map((item: IFeatureOrganization) => {
 					return new FeatureOrganization(
 						Object.assign(item, {
@@ -58,10 +66,37 @@ export class FeatureOrganizationService extends TenantAwareCrudService<FeatureOr
 				});
 				await this.typeOrmRepository.save(featureOrganizations);
 			}
+
+			let users: IUser[];
+
+			if (organizationId) {
+				// Organization-level update:
+				// notify only users assigned to this organization
+				const userOrgs = await this._userOrganizationService.findAllUserOrganizations(
+					{ organizationId, tenantId },
+					false
+				);
+				users = userOrgs.map((uo) => uo.user).filter((u): u is IUser => !!u);
+			} else {
+				// Tenant-level update:
+				// notify all users belonging to the tenant
+				const result = await this._userService.findAll({
+					where: { tenantId },
+					select: ['id']
+				});
+				users = result.items;
+			}
+			const userIds = users.map((u) => u.id);
+
+			this._socketService.emitToClientMany(userIds, 'feature:changed', {
+				featureId,
+				organizationId,
+				tenantId
+			});
 			return true;
 		} catch (error) {
 			console.log('Error while updating feature organization', error);
-			return false;
+			throw new BadRequestException(error);
 		}
 	}
 

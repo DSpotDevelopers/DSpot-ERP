@@ -649,7 +649,7 @@ export class TimerService {
 				if (!existingTimeout) {
 					const timeout = setTimeout(() => {
 						// Attempt to send timer update via socket; do not send event if socket not connected
-						this._socketService.sendTimerChanged(employeeId);
+						this._socketService.notifyEmployee(employeeId, 'timer:changed');
 
 						runningWeeklyLimitTimeouts.delete(employeeId);
 					}, remainingWeeklyLimit * 1000); // convert seconds to milliseconds
@@ -674,7 +674,7 @@ export class TimerService {
 
 			if (msUntilNextMondayEvent <= 0 && nextMonday.diff(nowLocal) > 0) {
 				const timeout = setTimeout(() => {
-					this._socketService.sendTimerChanged(employeeId);
+					this._socketService.notifyEmployee(employeeId, 'timer:changed');
 					weeklyResetTimeouts.delete(employeeId);
 				}, msUntilNextMondayEvent);
 				weeklyResetTimeouts.set(employeeId, timeout);
@@ -874,7 +874,7 @@ export class TimerService {
 
 		// Send a real-time event to the specified user via socket.
 		// No error is thrown if the user is not currently connected.
-		this._socketService.sendTimerChanged(employeeId);
+		this._socketService.notifyEmployee(employeeId, 'timer:changed');
 
 		// Return the newly created time log entry
 		return timeLog;
@@ -1035,7 +1035,7 @@ export class TimerService {
 
 		// Send a real-time event to the specified user via socket.
 		// No error is thrown if the user is not currently connected.
-		this._socketService.sendTimerChanged(employeeId);
+		this._socketService.notifyEmployee(employeeId, 'timer:changed');
 
 		// Return the last log
 		return lastLog;

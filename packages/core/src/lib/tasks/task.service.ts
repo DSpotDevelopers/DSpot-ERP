@@ -182,7 +182,7 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			if (updatedTask.status === TaskStatusEnum.DONE && task.status !== TaskStatusEnum.DONE) {
 				try {
 					this.logger.debug(`Task ${updatedTask.id} changed status to DONE`);
-					this._socketService.sendTimerChangedMany([...existingMemberIdSet]);
+					this._socketService.notifyEmployees([...existingMemberIdSet], 'timer:changed');
 				} catch (error) {
 					this.logger.error(`Error emitting DONE status event for task ${updatedTask.id}: ${error}`);
 				}
@@ -267,8 +267,8 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			]);
 
 			affectedEmployeeIds.forEach((employeeId) => {
-				this._socketService.sendTimerChanged(employeeId);
-				this._socketService.emitToClient(employeeId, 'tasks:changed', null);
+				this._socketService.notifyEmployee(employeeId, 'timer:changed');
+				this._socketService.notifyEmployee(employeeId, 'tasks:changed');
 			});
 
 			// Generate the activity log
@@ -1251,7 +1251,7 @@ export class TaskService extends TenantAwareCrudService<Task> {
 
 			// Send a real-time event to the specified user via socket.
 			// No error is thrown if the user is not currently connected.
-			this._socketService.sendTimerChanged(employeeId);
+			this._socketService.notifyEmployee(employeeId, 'timer:changed');
 
 			// TODO : Unsubscribe employee from task
 
@@ -1568,8 +1568,8 @@ export class TaskService extends TenantAwareCrudService<Task> {
 			for (const employeeId of affectedEmployeeIds) {
 				// Send a real-time event to the specified user via socket.
 				// No error is thrown if the user is not currently connected.
-				this._socketService.sendTimerChanged(employeeId);
-				this._socketService.emitToClient(employeeId, 'tasks:changed', null);
+				this._socketService.notifyEmployee(employeeId, 'timer:changed');
+				this._socketService.notifyEmployee(employeeId, 'tasks:changed');
 			}
 
 			return result;

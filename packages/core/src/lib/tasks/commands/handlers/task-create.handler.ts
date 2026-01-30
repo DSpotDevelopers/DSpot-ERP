@@ -195,7 +195,7 @@ export class TaskCreateHandler implements ICommandHandler<TaskCreateCommand> {
 					// Emit tasks:changed event to all members to update their task list in the timer
 					try {
 						employees.forEach((employee: IEmployee) => {
-							this._socketService.emitToClient(employee.id, 'tasks:changed', null);
+							this._socketService.notifyEmployee(employee.id, 'tasks:changed');
 						});
 					} catch (error) {
 						this.logger.error(`Error while sending tasks:changed event to members: ${error}`);

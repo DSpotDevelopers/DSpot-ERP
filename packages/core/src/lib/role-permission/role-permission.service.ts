@@ -24,6 +24,7 @@ import { RoleService } from './../role/role.service';
 import { DEFAULT_ROLE_PERMISSIONS } from './default-role-permissions';
 import { MikroOrmRolePermissionRepository } from './repository/mikro-orm-role-permission.repository';
 import { TypeOrmRolePermissionRepository } from './repository/type-orm-role-permission.repository';
+import { SocketService } from '../socket/socket.service';
 
 @Injectable()
 export class RolePermissionService extends TenantAwareCrudService<RolePermission> {
@@ -31,6 +32,7 @@ export class RolePermissionService extends TenantAwareCrudService<RolePermission
 		readonly typeOrmRolePermissionRepository: TypeOrmRolePermissionRepository,
 		readonly mikroOrmRolePermissionRepository: MikroOrmRolePermissionRepository,
 		private readonly _roleService: RoleService,
+		private readonly _socketService: SocketService,
 		private readonly _commandBus: CommandBus
 	) {
 		super(typeOrmRolePermissionRepository, mikroOrmRolePermissionRepository);
@@ -238,7 +240,12 @@ export class RolePermissionService extends TenantAwareCrudService<RolePermission
 				) {
 					throw new NotAcceptableException('You can not change/add your permissions for SUPER_ADMIN');
 				}
-				return await this.update(id, partialEntity);
+				const result = await this.update(id, partialEntity);
+				const updatedPermission = await this.findOneById(id);
+				this._socketService.emitToRoom(roleId, 'permission:changed', {
+					permission: updatedPermission
+				});
+				return result;
 			} else if (role.name === RolesEnum.ADMIN) {
 				/**
 				 * Reject request, if ADMIN try to update permissions for SUPER ADMIN role.
@@ -260,11 +267,30 @@ export class RolePermissionService extends TenantAwareCrudService<RolePermission
 						'You can not change/add your permissions to ADMIN, please ask your SUPER_ADMIN to give you more permissions'
 					);
 				}
-				return await this.update(id, partialEntity);
+				const result = await this.update(id, partialEntity);
+				const updatedPermission = await this.findOneById(id);
+				this._socketService.emitToRoom(roleId, 'permission:changed', {
+					permission: updatedPermission
+				});
+				return result;
 			}
 		} catch (err /*: WriteError*/) {
 			throw new BadRequestException(err.message);
 		}
+	}
+
+	/**
+	 * Retrieves a single RolePermission entity by its identifier.
+	 *
+	 * @param id - Unique identifier of the role permission.
+	 * @returns A Promise that resolves to the RolePermission entity,
+	 *          including the related role data.
+	 */
+	private async findOneById(id): Promise<IRolePermission> {
+		return this.typeOrmRepository.findOne({
+			where: { id },
+			relations: ['role']
+		});
 	}
 
 	/**
@@ -414,7 +440,7 @@ export class RolePermissionService extends TenantAwareCrudService<RolePermission
 	}
 
 	public async migrateImportRecord(permissions: IRolePermissionMigrateInput[]) {
-		let records: IImportRecord[] = [];
+		const records: IImportRecord[] = [];
 		const roles: IRole[] = (
 			await this._roleService.findAll({
 				where: {
@@ -462,7 +488,7 @@ export class RolePermissionService extends TenantAwareCrudService<RolePermission
 		tenantId: string,
 		roleId: string,
 		permissions: string[],
-		includeRole: boolean = false
+		includeRole = false
 	): Promise<boolean> {
 		switch (this.ormType) {
 			case MultiORMEnum.TypeORM:

@@ -469,6 +469,7 @@ export class EmployeeService extends TenantAwareCrudService<Employee> {
 
 			// Tables joins with relations
 			query.leftJoin(`${query.alias}.user`, 'user');
+			query.leftJoin('user.organizations', 'userOrganization');
 			query.leftJoin(`${query.alias}.tags`, 'tags');
 			query.leftJoinAndSelect(`${query.alias}.organizationEmploymentTypes`, 'organizationEmploymentTypes');
 
@@ -511,8 +512,9 @@ export class EmployeeService extends TenantAwareCrudService<Employee> {
 						web.andWhere(p(`"${qb.alias}"."tenantId" = :tenantId`), { tenantId });
 
 						if (isNotEmpty(where?.organizationId)) {
-							const organizationId = where.organizationId;
-							web.andWhere(p(`"${qb.alias}"."organizationId" = :organizationId`), { organizationId });
+							web.andWhere(`"userOrganization"."organizationId" = :organizationId`, {
+								organizationId: where.organizationId
+							});
 						}
 					})
 				);
@@ -697,6 +699,49 @@ export class EmployeeService extends TenantAwareCrudService<Employee> {
 		} catch (error) {
 			this.logger.error('Error finding employee by ID', error);
 			return null;
+		}
+	}
+
+	async findByIds(employeeIds: string[], options?: FindManyOptions<Employee>): Promise<IEmployee[]> {
+		try {
+			if (!employeeIds.length) {
+				return [];
+			}
+
+			const where = {
+				id: In(employeeIds),
+				isActive: true,
+				isArchived: false
+			};
+
+			const queryOptions: FindManyOptions<Employee> = {
+				...options,
+				where: {
+					...where,
+					...(options?.where || {})
+				},
+				relations: {
+					user: true,
+					...(options?.relations || {})
+				}
+			};
+
+			switch (this.ormType) {
+				case MultiORMEnum.MikroORM: {
+					const { where: mikroWhere, mikroOptions } = parseTypeORMFindToMikroOrm<Employee>(queryOptions);
+					const employees = await this.mikroOrmRepository.find(mikroWhere, mikroOptions);
+					return employees.map((e) => this.serialize(e as Employee));
+				}
+
+				case MultiORMEnum.TypeORM:
+					return await this.typeOrmRepository.find(queryOptions);
+
+				default:
+					throw new Error(`Not implemented for ORM type: ${this.ormType}`);
+			}
+		} catch (error) {
+			this.logger.error('Error finding employees by IDs', error);
+			return [];
 		}
 	}
 }

@@ -11,12 +11,18 @@ import { RolePermissionModule } from '../role-permission/role-permission.module'
 import { CommandHandlers } from './commands/handlers';
 import { TypeOrmFeatureRepository } from './repository/type-orm-feature.repository';
 import { TypeOrmFeatureOrganizationRepository } from './repository/type-orm-feature-organization.repository';
+import { UserModule } from '../user';
+import { SocketModule } from '../socket';
+import { UserOrganizationModule } from '../user-organization/user-organization.module';
 
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([Feature, FeatureOrganization]),
 		MikroOrmModule.forFeature([Feature, FeatureOrganization]),
 		forwardRef(() => RolePermissionModule),
+		forwardRef(() => UserModule),
+		forwardRef(() => UserOrganizationModule),
+		SocketModule,
 		CqrsModule
 	],
 	controllers: [FeatureToggleController],

@@ -26,7 +26,7 @@ import { SocketModule } from '../socket/socket.module';
 		forwardRef(() => UserModule),
 		forwardRef(() => AuthModule),
 		SocketModule,
-		RoleModule,
+		forwardRef(() => RoleModule),
 		CqrsModule
 	],
 	controllers: [EmployeeController],
