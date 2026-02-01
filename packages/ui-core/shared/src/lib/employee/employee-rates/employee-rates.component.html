@@ -1,6 +1,6 @@
 <div class="content">
 	<div class="employee-form">
-		<form [formGroup]="form" (ngSubmit)="onSubmit()">
+		<form [formGroup]="form">
 			<div class="row">
 				<div class="col">
 					<nb-card>
@@ -131,7 +131,13 @@
 				</div>
 			</div>
 			<div class="actions">
-				<button [disabled]="form.invalid" type="submit" nbButton status="success">
+				<button
+					[disabled]="form.invalid"
+					type="submit"
+					nbButton
+					status="success"
+					[preventDoubleSubmit]="onSubmit.bind(this)"
+				>
 					{{ 'BUTTONS.SAVE' | translate }}
 				</button>
 			</div>

@@ -159,7 +159,12 @@
 					</div>
 				</div>
 				<div class="actions">
-					<button [disabled]="form.invalid" (click)="submitForm()" nbButton status="success">
+					<button
+						[disabled]="form.invalid"
+						[preventDoubleSubmit]="submitForm.bind(this)"
+						nbButton
+						status="success"
+					>
 						{{ 'BUTTONS.SAVE' | translate }}
 					</button>
 				</div>

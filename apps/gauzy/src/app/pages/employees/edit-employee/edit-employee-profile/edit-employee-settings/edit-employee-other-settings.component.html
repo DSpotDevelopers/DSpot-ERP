@@ -1,4 +1,4 @@
-<form class="main-form" #ngForm="ngForm" [formGroup]="form" (ngSubmit)="onSubmit(ngForm)" novalidate>
+<form class="main-form" #ngForm="ngForm" [formGroup]="form" novalidate>
 	<aside class="aside-nav">
 		<h4 class="settings-section-header">
 			{{ 'EMPLOYEES_PAGE.EDIT_EMPLOYEE.SETTINGS_SECTION' | translate }}
@@ -200,7 +200,7 @@
 			</nb-accordion>
 		</div>
 		<div class="actions">
-			<button nbButton status="success">
+			<button nbButton status="success" [preventDoubleSubmit]="onSubmit.bind(this)">
 				{{ 'BUTTONS.SAVE' | translate }}
 			</button>
 		</div>

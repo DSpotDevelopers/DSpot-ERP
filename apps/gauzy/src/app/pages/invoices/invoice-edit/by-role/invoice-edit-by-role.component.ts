@@ -567,14 +567,14 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 
 			if (this.isEstimate) {
 				this.toastrService.success('INVOICES_PAGE.INVOICES_EDIT_ESTIMATE');
-				this.router.navigate(['/pages/accounting/invoices/estimates'], {
+				await this.router.navigate(['/pages/accounting/invoices/estimates'], {
 					queryParams: {
 						date: moment(invoiceDate).format('YYYY-MM-DD')
 					}
 				});
 			} else {
 				this.toastrService.success('INVOICES_PAGE.INVOICES_EDIT_INVOICE');
-				this.router.navigate(['/pages/accounting/invoices'], {
+				await this.router.navigate(['/pages/accounting/invoices'], {
 					queryParams: {
 						date: moment(invoiceDate).format('YYYY-MM-DD')
 					}

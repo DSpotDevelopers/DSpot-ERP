@@ -398,7 +398,13 @@
 						<button class="gray mr-2" status="basic" outline nbButton nbStepperPrevious>
 							{{ 'BUTTONS.PREVIOUS' | translate }}
 						</button>
-						<button (click)="submitForm()" nbButton status="success" class="mr-2 ml-2" nbStepperNext>
+						<button
+							[preventDoubleSubmit]="submitForm.bind(this)"
+							nbButton
+							status="success"
+							class="mr-2 ml-2"
+							nbStepperNext
+						>
 							{{ 'BUTTONS.SAVE' | translate }}
 						</button>
 					</div>

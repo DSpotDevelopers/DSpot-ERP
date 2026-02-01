@@ -13,17 +13,14 @@
 						></ga-location-form>
 					</div>
 					<div class="col-8">
-						<ga-leaflet-map
-							#leafletTemplate
-							(mapClicked)="onMapClicked($event)"
-						></ga-leaflet-map>
+						<ga-leaflet-map #leafletTemplate (mapClicked)="onMapClicked($event)"></ga-leaflet-map>
 					</div>
 				</div>
 			</div>
 			<div class="actions">
 				<button
 					[disabled]="form.invalid"
-					(click)="submitForm()"
+					[preventDoubleSubmit]="submitForm.bind(this)"
 					nbButton
 					status="success"
 				>

@@ -12,6 +12,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { CandidateStore, EmployeeStore } from '@gauzy/ui-core/core';
 import { LeafletMapModule, LocationFormModule } from '../../forms';
 import { EmployeeLocationComponent } from './employee-location.component';
+import { DirectivesModule } from '../../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -25,7 +26,8 @@ import { EmployeeLocationComponent } from './employee-location.component';
 		NbActionsModule,
 		TranslateModule.forChild(),
 		LocationFormModule,
-		LeafletMapModule
+		LeafletMapModule,
+		DirectivesModule
 	],
 	exports: [EmployeeLocationComponent],
 	declarations: [EmployeeLocationComponent],

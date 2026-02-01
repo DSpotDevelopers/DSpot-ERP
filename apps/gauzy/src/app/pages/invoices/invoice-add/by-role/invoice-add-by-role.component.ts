@@ -631,7 +631,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				this.getTranslation('INVOICES_PAGE.INVOICES_ADD_ESTIMATE'),
 				this.getTranslation('TOASTR.TITLE.SUCCESS')
 			);
-			this.router.navigate(['/pages/accounting/invoices/estimates'], {
+			await this.router.navigate(['/pages/accounting/invoices/estimates'], {
 				queryParams: {
 					date: moment(invoiceDate).format('YYYY-MM-DD')
 				}
@@ -641,7 +641,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				this.getTranslation('INVOICES_PAGE.INVOICES_ADD_INVOICE'),
 				this.getTranslation('TOASTR.TITLE.SUCCESS')
 			);
-			this.router.navigate(['/pages/accounting/invoices'], {
+			await this.router.navigate(['/pages/accounting/invoices'], {
 				queryParams: {
 					date: moment(invoiceDate).format('YYYY-MM-DD')
 				}
@@ -819,7 +819,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				this.getTranslation('INVOICES_PAGE.INVOICES_ADD_ESTIMATE'),
 				this.getTranslation('TOASTR.TITLE.SUCCESS')
 			);
-			this.router.navigate(['/pages/accounting/invoices/estimates'], {
+			await this.router.navigate(['/pages/accounting/invoices/estimates'], {
 				queryParams: {
 					date: moment(invoiceDate).format('YYYY-MM-DD')
 				}
@@ -829,7 +829,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				this.getTranslation('INVOICES_PAGE.INVOICES_ADD_INVOICE'),
 				this.getTranslation('TOASTR.TITLE.SUCCESS')
 			);
-			this.router.navigate(['/pages/accounting/invoices'], {
+			await this.router.navigate(['/pages/accounting/invoices'], {
 				queryParams: {
 					date: moment(invoiceDate).format('YYYY-MM-DD')
 				}
