@@ -21,20 +21,8 @@
 					/>
 				</defs>
 				<g fill="none" fill-rule="evenodd">
-					<circle
-						cx="34"
-						cy="34"
-						r="34"
-						fill="#0091FF"
-						opacity=".3"
-					/>
-					<circle
-						cx="34"
-						cy="34"
-						r="26"
-						fill="#0091FF"
-						opacity=".9"
-					/>
+					<circle cx="34" cy="34" r="34" fill="#0091FF" opacity=".3" />
+					<circle cx="34" cy="34" r="26" fill="#0091FF" opacity=".9" />
 					<use fill="#FFF" fill-rule="nonzero" xlink:href="#a" />
 				</g>
 			</svg>
@@ -47,6 +35,7 @@
 				(mouseleave)="hoverState = false"
 			/>
 		</div>
+		lkdslk
 		<nb-badge
 			*ngIf="selectedEmployee && selectedEmployee.isVetted"
 			status="success"
@@ -56,33 +45,20 @@
 		>
 		</nb-badge>
 		<div *ngIf="selectedEmployee">
-			<div
-				class="employee-optional-info"
-				*ngIf="selectedEmployee.jobSuccess"
-			>
-				{{ 'EMPLOYEES_PAGE.EDIT_EMPLOYEE.JOB_SUCCESS' | translate }}:
-				{{ selectedEmployee.jobSuccess }}%
+			<div class="employee-optional-info" *ngIf="selectedEmployee.jobSuccess">
+				{{ 'EMPLOYEES_PAGE.EDIT_EMPLOYEE.JOB_SUCCESS' | translate }}: {{ selectedEmployee.jobSuccess }}%
 			</div>
-			<div
-				class="employee-optional-info"
-				*ngIf="selectedEmployee.totalJobs"
-			>
+			<div class="employee-optional-info" *ngIf="selectedEmployee.totalJobs">
 				{{ 'EMPLOYEES_PAGE.EDIT_EMPLOYEE.TOTAL_JOBS' | translate }}:
 				{{ selectedEmployee.totalJobs }}
 			</div>
-			<div
-				class="employee-optional-info"
-				*ngIf="selectedEmployee.totalWorkHours"
-			>
+			<div class="employee-optional-info" *ngIf="selectedEmployee.totalWorkHours">
 				{{ 'EMPLOYEES_PAGE.EDIT_EMPLOYEE.TOTAL_HOURS' | translate }}:
 				{{ selectedEmployee.totalWorkHours }}
 			</div>
 			<div
 				class="employee-optional-info"
-				*ngIf="
-					selectedEmployee.billRateCurrency &&
-					selectedEmployee.billRateValue
-				"
+				*ngIf="selectedEmployee.billRateCurrency && selectedEmployee.billRateValue"
 			>
 				{{ 'EMPLOYEES_PAGE.EDIT_EMPLOYEE.RATE' | translate }}:
 				{{ selectedEmployee.billRateCurrency }}
@@ -97,9 +73,8 @@
 			<div class="row">
 				<div class="col">
 					<div class="form-group">
-						<label class="label" for="usernameInput">{{
-							'FORM.USERNAME' | translate
-						}}</label>
+						kjkjh
+						<label class="label" for="usernameInput">{{ 'FORM.USERNAME' | translate }}</label>
 						<input
 							fullWidth
 							id="usernameInput"
@@ -112,9 +87,7 @@
 				</div>
 				<div class="col">
 					<div class="form-group">
-						<label for="emailInput" class="label">{{
-							'FORM.EMAIL' | translate
-						}}</label>
+						<label for="emailInput" class="label">{{ 'FORM.EMAIL' | translate }}</label>
 						<input
 							fullWidth
 							id="emailInput"
@@ -130,35 +103,27 @@
 			<div class="row">
 				<div class="col">
 					<div class="form-group">
-						<label class="label" for="firstNameInput">{{
-							'FORM.LABELS.FIRST_NAME' | translate
-						}}</label>
+						<label class="label" for="firstNameInput">{{ 'FORM.LABELS.FIRST_NAME' | translate }}</label>
 						<input
 							fullWidth
 							id="firstNameInput"
 							type="text"
 							nbInput
 							formControlName="firstName"
-							placeholder="{{
-								'FORM.PLACEHOLDERS.FIRST_NAME' | translate
-							}}"
+							placeholder="{{ 'FORM.PLACEHOLDERS.FIRST_NAME' | translate }}"
 						/>
 					</div>
 				</div>
 				<div class="col">
 					<div class="form-group">
-						<label for="lastNameInput" class="label">{{
-							'FORM.LABELS.LAST_NAME' | translate
-						}}</label>
+						<label for="lastNameInput" class="label">{{ 'FORM.LABELS.LAST_NAME' | translate }}</label>
 						<input
 							fullWidth
 							id="lastNameInput"
 							type="text"
 							nbInput
 							formControlName="lastName"
-							placeholder="{{
-								'FORM.PLACEHOLDERS.LAST_NAME' | translate
-							}}"
+							placeholder="{{ 'FORM.PLACEHOLDERS.LAST_NAME' | translate }}"
 						/>
 					</div>
 				</div>
@@ -170,7 +135,7 @@
 							'FORM.LABELS.PREFERRED_LANGUAGE' | translate
 						}}</label>
 						<ngx-language-selector
-							[placeholder]="'FORM.PLACEHOLDERS.PREFERRED_LANGUAGE'| translate"
+							[placeholder]="'FORM.PLACEHOLDERS.PREFERRED_LANGUAGE' | translate"
 							class="d-block"
 							selectBy="object"
 							[template]="'ng-select'"
@@ -181,18 +146,14 @@
 				</div>
 				<div class="col-sm-6">
 					<div class="form-group">
-						<label for="profileLinkInput" class="label">{{
-							'FORM.LABELS.PROFILE_LINK' | translate
-						}}</label>
+						<label for="profileLinkInput" class="label">{{ 'FORM.LABELS.PROFILE_LINK' | translate }}</label>
 						<input
 							fullWidth
 							id="profileLinkInput"
 							type="text"
 							nbInput
 							formControlName="profile_link"
-							placeholder="{{
-								'FORM.PLACEHOLDERS.PROFILE_LINK' | translate
-							}}"
+							placeholder="{{ 'FORM.PLACEHOLDERS.PROFILE_LINK' | translate }}"
 						/>
 					</div>
 				</div>
@@ -201,7 +162,7 @@
 			<div class="actions">
 				<button
 					[disabled]="form.invalid"
-					(click)="submitForm()"
+					[preventDoubleSubmit]="submitForm.bind(this)"
 					nbButton
 					status="success"
 				>

@@ -14,6 +14,7 @@ import { CandidateStore, EmployeeStore } from '@gauzy/ui-core/core';
 import { EmployeeRatesComponent } from './employee-rates.component';
 import { CurrencyModule } from '../../modules/currency';
 import { PipesModule } from '../../pipes/pipes.module';
+import { DirectivesModule } from '../../directives/directives.module';
 
 @NgModule({
 	imports: [
@@ -28,7 +29,8 @@ import { PipesModule } from '../../pipes/pipes.module';
 		NbActionsModule,
 		TranslateModule.forChild(),
 		PipesModule,
-		CurrencyModule
+		CurrencyModule,
+		DirectivesModule
 	],
 	exports: [EmployeeRatesComponent],
 	declarations: [EmployeeRatesComponent],

@@ -10,10 +10,10 @@ import { EmployeeStore } from '@gauzy/ui-core/core';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ga-edit-employee-settings',
-    templateUrl: './edit-employee-other-settings.component.html',
-    styleUrls: ['./edit-employee-other-settings.component.scss'],
-    standalone: false
+	selector: 'ga-edit-employee-settings',
+	templateUrl: './edit-employee-other-settings.component.html',
+	styleUrls: ['./edit-employee-other-settings.component.scss'],
+	standalone: false
 })
 export class EditEmployeeOtherSettingsComponent implements OnInit, OnDestroy {
 	listOfTimeFormats = DEFAULT_TIME_FORMATS;
@@ -109,11 +109,10 @@ export class EditEmployeeOtherSettingsComponent implements OnInit, OnDestroy {
 	/**
 	 * Handles the form submission, updating employee and user settings if valid.
 	 *
-	 * @param {NgForm} form - The form reference for submission.
 	 * @returns {void}
 	 */
-	onSubmit(form: NgForm): void {
-		if (form.invalid) return;
+	onSubmit(): void {
+		if (this.form.invalid) return;
 
 		const { organizationId, tenantId } = this.selectedEmployee;
 		const {

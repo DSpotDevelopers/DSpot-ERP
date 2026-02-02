@@ -535,7 +535,13 @@
 		<button class="mr-3" (click)="navigateToCancelProject()" nbButton status="basic" outline>
 			{{ 'BUTTONS.CANCEL' | translate }}
 		</button>
-		<button class="mr-3" nbButton status="success" [disabled]="form.invalid" (click)="onSubmit()">
+		<button
+			class="mr-3"
+			nbButton
+			status="success"
+			[disabled]="form.invalid"
+			[preventDoubleSubmit]="onSubmit.bind(this)"
+		>
 			{{ 'BUTTONS.SAVE' | translate }}
 		</button>
 		<button *ngIf="project?.id" class="mr-3" nbButton status="success" (click)="createProjectModuleDialog()">

@@ -22,17 +22,18 @@ export class PreventDoubleSubmitDirective {
 		if (this.busy) return;
 
 		this.busy = true;
+		const unlock = () => setTimeout(() => (this.busy = false), 500);
 
 		try {
 			const result = this.preventDoubleSubmit?.();
 
 			if (isObservable(result)) {
-				await firstValueFrom(result.pipe(finalize(() => (this.busy = false))));
+				await firstValueFrom(result.pipe(finalize(() => setTimeout(unlock))));
 			} else if (result instanceof Promise) {
 				await result;
-				this.busy = false;
+				unlock();
 			} else {
-				this.busy = false;
+				unlock();
 			}
 		} catch (error) {
 			this.busy = false;

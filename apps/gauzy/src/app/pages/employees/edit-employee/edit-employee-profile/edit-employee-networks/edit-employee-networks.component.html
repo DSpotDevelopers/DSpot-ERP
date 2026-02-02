@@ -1,42 +1,30 @@
 <nb-card class="m-3">
 	<nb-card-body>
-		<form [formGroup]="form" (ngSubmit)="submitForm()" autocomplete-off>
+		<form [formGroup]="form" autocomplete-off>
 			<div class="row">
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label
-							class="label"
-							for="linkedIn"
-							[innerHtml]="'FORM.LABELS.LINKEDIN' | translate"
-						></label>
+						<label class="label" for="linkedIn" [innerHtml]="'FORM.LABELS.LINKEDIN' | translate"></label>
 						<input
 							fullWidth
 							id="linkedIn"
 							type="text"
 							nbInput
 							formControlName="linkedInUrl"
-							[placeholder]="
-								'FORM.PLACEHOLDERS.LINKEDIN' | translate
-							"
+							[placeholder]="'FORM.PLACEHOLDERS.LINKEDIN' | translate"
 						/>
 					</div>
 				</div>
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label
-							class="label"
-							for="facebook"
-							[innerHtml]="'FORM.LABELS.FACEBOOK' | translate"
-						></label>
+						<label class="label" for="facebook" [innerHtml]="'FORM.LABELS.FACEBOOK' | translate"></label>
 						<input
 							fullWidth
 							id="facebook"
 							type="text"
 							nbInput
 							formControlName="facebookUrl"
-							[placeholder]="
-								'FORM.PLACEHOLDERS.FACEBOOK' | translate
-							"
+							[placeholder]="'FORM.PLACEHOLDERS.FACEBOOK' | translate"
 						/>
 					</div>
 				</div>
@@ -44,39 +32,27 @@
 			<div class="row">
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label
-							class="label"
-							for="instagram"
-							[innerHtml]="'FORM.LABELS.INSTAGRAM' | translate"
-						></label>
+						<label class="label" for="instagram" [innerHtml]="'FORM.LABELS.INSTAGRAM' | translate"></label>
 						<input
 							fullWidth
 							id="instagram"
 							type="text"
 							nbInput
 							formControlName="instagramUrl"
-							[placeholder]="
-								'FORM.PLACEHOLDERS.INSTAGRAM' | translate
-							"
+							[placeholder]="'FORM.PLACEHOLDERS.INSTAGRAM' | translate"
 						/>
 					</div>
 				</div>
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label
-							class="label"
-							for="twitter"
-							[innerHtml]="'FORM.LABELS.TWITTER' | translate"
-						></label>
+						<label class="label" for="twitter" [innerHtml]="'FORM.LABELS.TWITTER' | translate"></label>
 						<input
 							fullWidth
 							id="twitter"
 							type="text"
 							nbInput
 							formControlName="twitterUrl"
-							[placeholder]="
-								'FORM.PLACEHOLDERS.TWITTER' | translate
-							"
+							[placeholder]="'FORM.PLACEHOLDERS.TWITTER' | translate"
 						/>
 					</div>
 				</div>
@@ -84,39 +60,27 @@
 			<div class="row">
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label
-							class="label"
-							for="github"
-							[innerHtml]="'FORM.LABELS.GITHUB' | translate"
-						></label>
+						<label class="label" for="github" [innerHtml]="'FORM.LABELS.GITHUB' | translate"></label>
 						<input
 							fullWidth
 							id="github"
 							type="text"
 							nbInput
 							formControlName="githubUrl"
-							[placeholder]="
-								'FORM.PLACEHOLDERS.GITHUB' | translate
-							"
+							[placeholder]="'FORM.PLACEHOLDERS.GITHUB' | translate"
 						/>
 					</div>
 				</div>
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label
-							class="label"
-							for="gitlab"
-							[innerHtml]="'FORM.LABELS.GITLAB' | translate"
-						></label>
+						<label class="label" for="gitlab" [innerHtml]="'FORM.LABELS.GITLAB' | translate"></label>
 						<input
 							fullWidth
 							id="gitlab"
 							type="text"
 							nbInput
 							formControlName="gitlabUrl"
-							[placeholder]="
-								'FORM.PLACEHOLDERS.GITLAB' | translate
-							"
+							[placeholder]="'FORM.PLACEHOLDERS.GITLAB' | translate"
 						/>
 					</div>
 				</div>
@@ -124,20 +88,14 @@
 			<div class="row">
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label
-							class="label"
-							for="upwork"
-							[innerHtml]="'FORM.LABELS.UPWORK' | translate"
-						></label>
+						<label class="label" for="upwork" [innerHtml]="'FORM.LABELS.UPWORK' | translate"></label>
 						<input
 							fullWidth
 							id="upwork"
 							type="text"
 							nbInput
 							formControlName="upworkUrl"
-							[placeholder]="
-								'FORM.PLACEHOLDERS.UPWORK' | translate
-							"
+							[placeholder]="'FORM.PLACEHOLDERS.UPWORK' | translate"
 						/>
 					</div>
 				</div>
@@ -146,9 +104,7 @@
 						<label
 							class="label"
 							for="stackoverflow"
-							[innerHtml]="
-								'FORM.LABELS.STACK_OVERFLOW' | translate
-							"
+							[innerHtml]="'FORM.LABELS.STACK_OVERFLOW' | translate"
 						></label>
 						<input
 							fullWidth
@@ -156,9 +112,7 @@
 							type="text"
 							nbInput
 							formControlName="stackoverflowUrl"
-							[placeholder]="
-								'FORM.PLACEHOLDERS.STACK_OVERFLOW' | translate
-							"
+							[placeholder]="'FORM.PLACEHOLDERS.STACK_OVERFLOW' | translate"
 						/>
 					</div>
 				</div>
@@ -166,6 +120,7 @@
 			<div class="actions">
 				<button
 					[disabled]="form.invalid"
+					[preventDoubleSubmit]="submitForm.bind(this)"
 					nbButton
 					type="submit"
 					status="success"

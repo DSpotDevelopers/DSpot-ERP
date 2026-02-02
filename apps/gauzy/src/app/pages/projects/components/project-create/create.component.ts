@@ -9,10 +9,10 @@ import { ProjectMutationComponent } from '@gauzy/ui-core/shared';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-project-create-mutation',
-    templateUrl: './create.component.html',
-    styleUrls: ['./create.component.scss'],
-    standalone: false
+	selector: 'ngx-project-create-mutation',
+	templateUrl: './create.component.html',
+	styleUrls: ['./create.component.scss'],
+	standalone: false
 })
 export class ProjectCreateMutationComponent extends TranslationBaseComponent implements OnInit {
 	/** Project Mutation Component*/
@@ -58,7 +58,7 @@ export class ProjectCreateMutationComponent extends TranslationBaseComponent imp
 				name: project.name
 			});
 
-			this.navigateToProjects();
+			await this.navigateToProjects();
 		} catch (error) {
 			console.log('Error while creating organization project', error?.message);
 			this._errorHandlingService.handleError(error);
@@ -71,6 +71,6 @@ export class ProjectCreateMutationComponent extends TranslationBaseComponent imp
 	 * Navigates to the projects page.
 	 */
 	navigateToProjects() {
-		this._router.navigate(['/pages/organization/projects']);
+		return this._router.navigate(['/pages/organization/projects']);
 	}
 }
