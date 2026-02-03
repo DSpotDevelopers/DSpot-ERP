@@ -13,8 +13,6 @@ import {
 	SidebarMenuService,
 	Store
 } from '../../services';
-import { ActivatedRoute, Router } from '@angular/router';
-import { RouteFeatureService } from '../../services/feature/router-feature.service';
 
 @UntilDestroy()
 @Directive({
@@ -27,11 +25,7 @@ export class BaseNavMenuComponent extends TranslationBaseComponent implements On
 		protected readonly _store: Store,
 		protected readonly _sidebarMenuService: SidebarMenuService,
 		protected readonly _translateService: TranslateService,
-		private readonly _router: Router,
-		private readonly _activatedRoute: ActivatedRoute,
-
-		private readonly _featureSocketService: FeatureSocketService,
-		private readonly _routeFeatureService: RouteFeatureService
+		private readonly _featureSocketService: FeatureSocketService
 	) {
 		super(_translateService);
 	}
@@ -42,12 +36,7 @@ export class BaseNavMenuComponent extends TranslationBaseComponent implements On
 			.pipe(
 				filter(Boolean),
 				tap(() => {
-					const featureKey = this._routeFeatureService.currentFeatureKey;
-					console.log('[Socket] Feature changed:', featureKey);
-
-					// jeśli feature jest nieaktywny w store → reload
-
-					window.location.reload(); // natychmiast reloaduje, dalszy kod się nie wykona
+					window.location.reload();
 				}),
 				untilDestroyed(this)
 			)

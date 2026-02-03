@@ -17,7 +17,6 @@ import {
 	DEFAULT_DATE_PICKER_CONFIG,
 	DEFAULT_SELECTOR_VISIBILITY,
 	DateRangePickerBuilderService,
-	FeatureSocketService,
 	IDatePickerConfig,
 	ISelectorVisibility,
 	JitsuService,
@@ -55,8 +54,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 		private readonly _dateRangePickerBuilderService: DateRangePickerBuilderService,
 		private readonly _navigationService: NavigationService,
 		private readonly _usersSocketService: UsersSocketService,
-		private readonly rolePermissionSocketService: RolePermissionSocketService,
-		private readonly _featureSocketService: FeatureSocketService
+		private readonly rolePermissionSocketService: RolePermissionSocketService
 	) {
 		this.getActivateRouterDataEvent();
 		this.getPreferredLanguage();
