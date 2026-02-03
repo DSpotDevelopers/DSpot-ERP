@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { InviteGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { EmployeesComponent } from './employees.component';
 import { ManageEmployeeInviteComponent } from './manage-employee-invite/manage-employee-invite.component';
@@ -45,7 +45,8 @@ const routes: Routes = [
 				project: false,
 				employee: false,
 				date: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_EMPLOYEES
 		}
 	},
 	{
@@ -136,7 +137,8 @@ const routes: Routes = [
 				project: false,
 				employee: false,
 				date: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_MANAGE_INVITE
 		}
 	},
 	{

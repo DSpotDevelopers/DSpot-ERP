@@ -4,7 +4,7 @@ import { DangerZoneComponent } from './danger-zone/danger-zone.component';
 import { SettingsComponent } from './settings.component';
 import { EmailHistoryComponent } from './email-history/email-history.component';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { SmsGatewayComponent } from './sms-gateway/sms-gateway.component';
 
 const routes: Routes = [
@@ -35,7 +35,8 @@ const routes: Routes = [
 						employee: false,
 						date: false,
 						organization: true
-					}
+					},
+					featureKey: FeatureEnum.FEATURE_EMAIL_HISTORY
 				}
 			},
 			{
@@ -81,7 +82,8 @@ const routes: Routes = [
 						employee: false,
 						date: false,
 						organization: false
-					}
+					},
+					featureKey: FeatureEnum.FEATURE_SMS_GATEWAY
 				}
 			},
 			{

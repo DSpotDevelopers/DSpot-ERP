@@ -1,7 +1,7 @@
 import { Routes, RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { TaskComponent } from './components/task/task.component';
 import { TaskSettingsComponent } from './components/task/task-settings/task-settings.component';
 
@@ -16,11 +16,13 @@ const routes: Routes = [
 			},
 			{
 				path: 'dashboard',
-				component: TaskComponent
+				component: TaskComponent,
+				data: { featureKey: FeatureEnum.FEATURE_DASHBOARD_TASK }
 			},
 			{
 				path: 'team',
-				component: TaskComponent
+				component: TaskComponent,
+				data: { featureKey: FeatureEnum.FEATURE_TEAM_TASK }
 			},
 			{
 				path: 'me',
@@ -28,7 +30,8 @@ const routes: Routes = [
 				data: {
 					selectors: {
 						team: false
-					}
+					},
+					featureKey: FeatureEnum.FEATURE_MY_TASK
 				}
 			},
 			{

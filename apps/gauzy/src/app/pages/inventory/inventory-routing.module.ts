@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
 import { InventoryComponent } from './components/inventory.component';
 import { ProductFormComponent } from './components/edit-inventory-item/product-form.component';
@@ -19,7 +19,8 @@ const routes: Routes = [
 			permissions: {
 				only: [...ORG_PERMISSIONS, PermissionsEnum.ORG_INVENTORY_VIEW],
 				redirectTo: '/pages/dashboard'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_ORGANIZATION_INVENTORY
 		},
 		children: [
 			{

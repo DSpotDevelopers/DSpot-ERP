@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
 import { IncomeComponent } from './income.component';
 
@@ -17,7 +17,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.ORG_INCOMES_VIEW],
 				redirectTo
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_INCOME
 		}
 	}
 ];

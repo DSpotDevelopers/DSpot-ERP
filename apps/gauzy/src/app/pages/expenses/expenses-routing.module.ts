@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { ExpensesComponent } from './expenses.component';
 import { ExpenseCategoriesComponent } from './expense-categories/expense-categories.component';
 
@@ -18,7 +18,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.ORG_EXPENSES_VIEW],
 				redirectTo
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_EXPENSE
 		}
 	},
 	{

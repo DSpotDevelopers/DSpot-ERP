@@ -1,7 +1,7 @@
 import { Routes, RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { EmailTemplatesComponent } from './email-templates.component';
 
 const routes: Routes = [
@@ -19,7 +19,8 @@ const routes: Routes = [
 				employee: false,
 				date: false,
 				organization: true
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_EMAIL_TEMPLATE
 		}
 	}
 ];

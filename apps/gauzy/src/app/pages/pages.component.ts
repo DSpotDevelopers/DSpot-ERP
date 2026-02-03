@@ -14,6 +14,7 @@ import {
 	NavMenuBuilderService,
 	NavMenuSectionItem,
 	PermissionsService,
+	RouteFeatureService,
 	SocketConnectionService,
 	Store,
 	UsersService
@@ -53,12 +54,17 @@ export class PagesComponent extends TranslationBaseComponent implements AfterVie
 		private readonly _integrationEntitySettingServiceStoreService: IntegrationEntitySettingServiceStoreService,
 		private readonly _navMenuBuilderService: NavMenuBuilderService,
 		private readonly _permissionsService: PermissionsService,
-		private readonly _socketConnectionService: SocketConnectionService
+		private readonly _socketConnectionService: SocketConnectionService,
+		private readonly _routeFeatureService: RouteFeatureService
 	) {
 		super(translate);
 	}
 
 	async ngOnInit() {
+		const featureKey = this._routeFeatureService.currentFeatureKey;
+		if (featureKey && !this.store.hasFeatureEnabled(featureKey)) {
+			await this.router.navigate(['/pages/help']);
+		}
 		this.route.data
 			.pipe(
 				filter(({ user }: Data) => !!user),

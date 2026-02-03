@@ -1,6 +1,7 @@
 import { Route } from '@angular/router';
 import { PageRouteRegistryService } from '@gauzy/ui-core/core';
 import { ProposalLayoutComponent } from './components/proposal-layout.component';
+import { FeatureEnum } from '@gauzy/contracts';
 
 /**
  * Creates proposal routes for the application
@@ -12,6 +13,9 @@ export const createProposalsRoutes = (_pageRouteRegistryService: PageRouteRegist
 	{
 		path: '',
 		component: ProposalLayoutComponent,
-		children: _pageRouteRegistryService.getPageLocationRoutes('proposals')
+		children: _pageRouteRegistryService.getPageLocationRoutes('proposals'),
+		data: {
+			featureKey: FeatureEnum.FEATURE_PROPOSAL
+		}
 	}
 ];

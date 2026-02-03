@@ -1,7 +1,7 @@
 import { Routes, RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { TagsComponent } from './tags.component';
 
 const routes: Routes = [
@@ -13,7 +13,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.ALL_ORG_VIEW, PermissionsEnum.ORG_TAGS_VIEW],
 				redirectTo: '/pages/dashboard'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_ORGANIZATION_TAG
 		}
 	}
 ];

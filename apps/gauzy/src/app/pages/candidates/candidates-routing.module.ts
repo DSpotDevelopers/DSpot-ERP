@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { InviteGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { EditCandidateInterviewComponent } from './edit-candidate/edit-candidate-profile/edit-candidate-interview/edit-candidate-interview.component';
 import { CandidatesComponent } from './candidates.component';
@@ -35,7 +35,8 @@ const routes: Routes = [
 			},
 			selectors: {
 				project: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_EMPLOYEE_CANDIDATE
 		}
 	},
 	{
@@ -209,7 +210,8 @@ const routes: Routes = [
 				project: false,
 				employee: false,
 				date: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_MANAGE_INVITE
 		}
 	},
 	{
@@ -220,7 +222,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.ORG_CANDIDATES_INTERVIEW_EDIT],
 				redirectTo: '/pages/dashboard'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_MANAGE_INTERVIEW
 		},
 		children: [
 			{

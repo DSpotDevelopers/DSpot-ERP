@@ -129,16 +129,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 				untilDestroyed(this)
 			)
 			.subscribe();
-
-		this._featureSocketService.featureChanged$
-			.pipe(
-				filter(Boolean),
-				tap(() => {
-					window.location.reload();
-				}),
-				untilDestroyed(this)
-			)
-			.subscribe();
 	}
 
 	/**

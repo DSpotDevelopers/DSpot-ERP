@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { BookmarkQueryParamsResolver } from '@gauzy/ui-core/core';
 import { DateRangePickerResolver } from '@gauzy/ui-core/shared';
 import { WeeklyTimeReportsComponent } from './weekly-time-reports/weekly-time-reports.component';
+import { FeatureEnum } from '@gauzy/contracts';
 
 const routes: Routes = [
 	{
@@ -12,7 +13,8 @@ const routes: Routes = [
 			datePicker: {
 				unitOfTime: 'week',
 				isLockDatePicker: true
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_REPORT
 		},
 		resolve: {
 			dates: DateRangePickerResolver,

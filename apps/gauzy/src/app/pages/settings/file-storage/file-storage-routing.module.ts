@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
 import { FileStorageComponent } from './file-storage.component';
 
@@ -14,7 +14,8 @@ const routes: Routes = [
 				only: [PermissionsEnum.FILE_STORAGE_VIEW],
 				redirectTo: '/pages/settings'
 			},
-			selectors: false
+			selectors: false,
+			featureKey: FeatureEnum.FEATURE_FILE_STORAGE
 		}
 	}
 ];

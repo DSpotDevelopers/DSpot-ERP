@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ContactType, PermissionsEnum } from '@gauzy/contracts';
+import { ContactType, FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
 import { ContactsComponent } from './contacts.component';
 
@@ -26,7 +26,8 @@ const routes: Routes = [
 				employee: false,
 				date: false,
 				organization: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_CONTACT
 		}
 	},
 	{
@@ -39,7 +40,8 @@ const routes: Routes = [
 				project: false,
 				date: true
 			},
-			contactType: ContactType.CLIENT
+			contactType: ContactType.CLIENT,
+			featureKey: FeatureEnum.FEATURE_CONTACT
 		}
 	},
 	{
@@ -52,7 +54,8 @@ const routes: Routes = [
 				project: false,
 				date: true
 			},
-			contactType: ContactType.CUSTOMER
+			contactType: ContactType.CUSTOMER,
+			featureKey: FeatureEnum.FEATURE_CONTACT
 		}
 	},
 	{
@@ -65,7 +68,8 @@ const routes: Routes = [
 				project: false,
 				date: true
 			},
-			contactType: ContactType.LEAD
+			contactType: ContactType.LEAD,
+			featureKey: FeatureEnum.FEATURE_CONTACT
 		}
 	},
 	{

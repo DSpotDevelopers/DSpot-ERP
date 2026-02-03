@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PermissionsGuard, BookmarkQueryParamsResolver } from '@gauzy/ui-core/core';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { DateRangePickerResolver } from '@gauzy/ui-core/shared';
 import { DashboardComponent } from './dashboard.component';
 import { HumanResourcesComponent } from './human-resources/human-resources.component';
@@ -14,7 +14,7 @@ const routes: Routes = [
 	{
 		path: '',
 		component: DashboardComponent,
-		data: { tabsetId: 'dashboard' },
+		data: { tabsetId: 'dashboard', featureKey: FeatureEnum.FEATURE_DASHBOARD },
 		children: [
 			{
 				path: '',
