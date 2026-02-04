@@ -1,6 +1,6 @@
 import { Routes, RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { PermissionsGuard } from '@gauzy/ui-core/core';
+import { FeatureGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { TaskComponent } from './components/task/task.component';
 import { TaskSettingsComponent } from './components/task/task-settings/task-settings.component';
@@ -8,6 +8,7 @@ import { TaskSettingsComponent } from './components/task/task-settings/task-sett
 const routes: Routes = [
 	{
 		path: '',
+		canActivate: [FeatureGuard],
 		children: [
 			{
 				path: '',

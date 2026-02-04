@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
-import { PermissionsGuard } from '@gauzy/ui-core/core';
+import { FeatureGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { IncomeComponent } from './income.component';
 
 export function redirectTo() {
@@ -12,7 +12,7 @@ const routes: Routes = [
 	{
 		path: '',
 		component: IncomeComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			permissions: {
 				only: [PermissionsEnum.ORG_INCOMES_VIEW],

@@ -1,12 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { FeatureEnum } from '@gauzy/contracts';
+import { FeatureGuard } from '@gauzy/ui-core/core';
 import { AppointmentCalendarComponent, ManageAppointmentComponent } from '@gauzy/ui-core/shared';
 
 const routes: Routes = [
 	{
 		path: '',
 		component: AppointmentCalendarComponent,
+		canActivate: [FeatureGuard],
 		data: {
 			featureKey: FeatureEnum.FEATURE_EMPLOYEE_APPOINTMENT
 		}

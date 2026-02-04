@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
-import { InviteGuard, PermissionsGuard } from '@gauzy/ui-core/core';
+import { FeatureGuard, InviteGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { EditCandidateInterviewComponent } from './edit-candidate/edit-candidate-profile/edit-candidate-interview/edit-candidate-interview.component';
 import { CandidatesComponent } from './candidates.component';
 import { ManageCandidateInviteComponent } from './manage-candidate-invite/manage-candidate-invite.component';
@@ -27,7 +27,7 @@ const routes: Routes = [
 	{
 		path: '',
 		component: CandidatesComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			permissions: {
 				only: [PermissionsEnum.ORG_CANDIDATES_VIEW],

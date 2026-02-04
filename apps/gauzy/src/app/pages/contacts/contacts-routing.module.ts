@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ContactType, FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
-import { PermissionsGuard } from '@gauzy/ui-core/core';
+import { FeatureGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { ContactsComponent } from './contacts.component';
 
 const CONTACT_VIEW_PERMISSION = {
@@ -33,7 +33,7 @@ const routes: Routes = [
 	{
 		path: 'clients',
 		component: ContactsComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			...CONTACT_VIEW_PERMISSION,
 			selectors: {
@@ -47,7 +47,7 @@ const routes: Routes = [
 	{
 		path: 'customers',
 		component: ContactsComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			...CONTACT_VIEW_PERMISSION,
 			selectors: {
@@ -61,7 +61,7 @@ const routes: Routes = [
 	{
 		path: 'leads',
 		component: ContactsComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			...CONTACT_VIEW_PERMISSION,
 			selectors: {
