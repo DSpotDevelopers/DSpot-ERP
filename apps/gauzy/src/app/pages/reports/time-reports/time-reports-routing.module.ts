@@ -11,6 +11,9 @@ const routes: Routes = [
 		data: {
 			datePicker: {
 				unitOfTime: 'week'
+			},
+			selectors: {
+				team: false
 			}
 		},
 		resolve: {

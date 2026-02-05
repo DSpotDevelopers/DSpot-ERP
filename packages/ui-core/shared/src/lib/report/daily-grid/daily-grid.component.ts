@@ -8,6 +8,7 @@ import {
 	IGetTimeLogReportInput,
 	IReportDayData,
 	IReportDayGroupByDate,
+	IReportDayGroupByTask,
 	ITimeLogFilters,
 	ReportGroupByFilter,
 	ReportGroupFilterEnum
@@ -163,64 +164,128 @@ export class DailyGridComponent extends BaseSelectorFilterComponent implements O
 
 	exportToCsv() {
 		const data = [];
-		//TODO: fix with GZY-106: Custom Grouping Options for CSV Export in Time and Activity Report
-		const dailyData = this.dailyLogs as unknown as IReportDayGroupByDate;
 
-		if (!dailyData || !Array.isArray(dailyData)) {
-			//TODO: replace with GZY-108: Error Handling on the Web Page
-			console.error('dailyData is undefined or not an array', dailyData);
+		if (!this.dailyLogs || !Array.isArray(this.dailyLogs)) {
+			console.error('dailyLogs is empty or invalid');
 			return;
 		}
 
-		dailyData.forEach((entry) => {
-			if (!entry.logs?.length) {
-				console.log('No logs found for entry:', entry);
-				return;
-			}
+		switch (this.groupBy) {
+			case ReportGroupFilterEnum.date: {
+				const dailyData = this.dailyLogs as unknown as IReportDayGroupByDate[];
 
-			entry.logs.forEach((log) => {
-				const projectName = log?.project?.name;
-				const membersCount = log?.project?.membersCount || 'N/A';
-				const client = log?.project?.organizationContact?.name || 'N/A';
+				dailyData.forEach((entry) => {
+					if (!entry.logs?.length) return;
 
-				log.employeeLogs?.forEach((employee) => {
-					const employeeFullName = employee?.employee?.fullName || 'N/A';
+					entry.logs.forEach((log) => {
+						const projectName = log.project?.name || 'N/A';
+						const membersCount = log.project?.membersCount || 'N/A';
+						const client = log.project?.organizationContact?.name || 'N/A';
 
-					employee.tasks?.forEach((task) => {
-						data.push({
-							date: this.dateFormatPipe.transform(entry.date),
-							totalTime: this.durationFormatPipe.transform(entry?.sum || 0),
-							averageActivity: `${entry?.activity || 0}%`,
-							employee: employeeFullName,
-							client,
-							project: `${projectName} ${this.getTranslation('SM_TABLE.MEMBERS_COUNT')}: ${membersCount}`,
-							title: task?.task?.title || 'N/A',
-							notes: this.truncatePipe.transform(task?.description || 'N/A', 40),
-							time: this.durationFormatPipe.transform(task?.duration || 0),
-							activity: `${employee?.activity || 0}%`
+						log.employeeLogs?.forEach((employee) => {
+							const employeeFullName = employee?.employee?.fullName || 'N/A';
+
+							employee.tasks?.forEach((task) => {
+								data.push({
+									date: this.dateFormatPipe.transform(entry.date),
+									totalTime: this.durationFormatPipe.transform(entry?.sum || 0),
+									averageActivity: `${entry?.activity || 0}%`,
+									employee: employeeFullName,
+									client,
+									project: `${projectName} ${this.getTranslation(
+										'SM_TABLE.MEMBERS_COUNT'
+									)}: ${membersCount}`,
+									title: task?.task?.title || 'N/A',
+									notes: this.truncatePipe.transform(task?.description || 'N/A', 40),
+									time: this.durationFormatPipe.transform(task?.duration || 0),
+									activity: `${employee?.activity || 0}%`
+								});
+							});
 						});
 					});
 				});
-			});
-		});
+				break;
+			}
 
-		if (!data || data.length === 0) {
-			console.error('No valid data to export');
+			case ReportGroupFilterEnum.task: {
+				const taskData = this.dailyLogs as unknown as IReportDayGroupByTask[];
+
+				taskData.forEach((taskGroup) => {
+					const totalTime = this.durationFormatPipe.transform(taskGroup.sum || 0);
+					taskGroup.logs?.forEach((day) => {
+						day.projectLogs?.forEach((projectLog) => {
+							const projectName = projectLog.project?.name || 'N/A';
+							const membersCount = projectLog.project?.membersCount || 'N/A';
+							const clientDefault = projectLog.project?.organizationContact?.name || 'N/A';
+
+							projectLog.employeeLogs?.forEach((employeeLog) => {
+								const employeeName = employeeLog.employee?.fullName || 'N/A';
+								const averageActivity = `${employeeLog.activity || 0}%`;
+
+								employeeLog.tasks?.forEach((task) => {
+									if (
+										(!taskGroup.task && !task.task) ||
+										(taskGroup.task && task.task && task.task.id === taskGroup.task.id)
+									) {
+										data.push({
+											title: task.task?.title || taskGroup.task?.title || 'No To Do',
+											totalTime,
+											averageActivity,
+											date: this.dateFormatPipe.transform(day.date),
+											employee: employeeName,
+											client: task.client?.name || clientDefault,
+											project: `${projectName} ${this.getTranslation(
+												'SM_TABLE.MEMBERS_COUNT'
+											)}: ${membersCount}`,
+											notes: this.truncatePipe.transform(task.description || 'N/A', 40),
+											time: this.durationFormatPipe.transform(task.duration || 0),
+											activity: `${employeeLog.activity || 0}%`
+										});
+									}
+								});
+							});
+						});
+					});
+				});
+				break;
+			}
+
+			default:
+				console.warn('CSV export not supported for groupBy:', this.groupBy);
+				return;
+		}
+
+		if (!data.length) {
+			console.error('No data to export');
 			return;
 		}
 
-		const headers = [
-			this.getTranslation('REPORT_PAGE.DATE'),
-			this.getTranslation('REPORT_PAGE.TOTAL_TIME'),
-			this.getTranslation('REPORT_PAGE.AVERAGE_ACTIVITY'),
-			this.getTranslation('REPORT_PAGE.EMPLOYEE'),
-			this.getTranslation('REPORT_PAGE.CLIENT'),
-			this.getTranslation('REPORT_PAGE.PROJECT'),
-			this.getTranslation('REPORT_PAGE.TO_DO'),
-			this.getTranslation('REPORT_PAGE.NOTES'),
-			this.getTranslation('REPORT_PAGE.TIME'),
-			this.getTranslation('REPORT_PAGE.ACTIVITY')
-		];
+		const headers =
+			this.groupBy === ReportGroupFilterEnum.task
+				? [
+						this.getTranslation('REPORT_PAGE.TO_DO'),
+						this.getTranslation('REPORT_PAGE.TOTAL_TIME'),
+						this.getTranslation('REPORT_PAGE.AVERAGE_ACTIVITY'),
+						this.getTranslation('REPORT_PAGE.DATE'),
+						this.getTranslation('REPORT_PAGE.EMPLOYEE'),
+						this.getTranslation('REPORT_PAGE.CLIENT'),
+						this.getTranslation('REPORT_PAGE.PROJECT'),
+						this.getTranslation('REPORT_PAGE.NOTES'),
+						this.getTranslation('REPORT_PAGE.TIME'),
+						this.getTranslation('REPORT_PAGE.ACTIVITY')
+				  ]
+				: [
+						this.getTranslation('REPORT_PAGE.DATE'),
+						this.getTranslation('REPORT_PAGE.TOTAL_TIME'),
+						this.getTranslation('REPORT_PAGE.AVERAGE_ACTIVITY'),
+						this.getTranslation('REPORT_PAGE.EMPLOYEE'),
+						this.getTranslation('REPORT_PAGE.CLIENT'),
+						this.getTranslation('REPORT_PAGE.PROJECT'),
+						this.getTranslation('REPORT_PAGE.TO_DO'),
+						this.getTranslation('REPORT_PAGE.NOTES'),
+						this.getTranslation('REPORT_PAGE.TIME'),
+						this.getTranslation('REPORT_PAGE.ACTIVITY')
+				  ];
 
 		const fileName = this.getTranslation('REPORT_PAGE.TIME_AND_ACTIVITY_REPORT');
 		generateCsv(data, headers, fileName);

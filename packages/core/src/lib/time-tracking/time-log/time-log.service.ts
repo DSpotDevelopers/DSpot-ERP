@@ -45,6 +45,7 @@ import {
 	GetTimeLogGroupByDateCommand,
 	GetTimeLogGroupByEmployeeCommand,
 	GetTimeLogGroupByProjectCommand,
+	GetTimeLogGroupByTaskCommand,
 	IGetConflictTimeLogCommand,
 	TimeLogCreateCommand,
 	TimeLogDeleteCommand,
@@ -361,6 +362,9 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			case ReportGroupFilterEnum.client:
 				invoiceData = await this.commandBus.execute(new GetTimeLogGroupByClientCommand(timeLogs, {}, timeZone));
 				break;
+			case ReportGroupFilterEnum.task:
+				invoiceData = await this.commandBus.execute(new GetTimeLogGroupByTaskCommand(timeLogs, {}, timeZone));
+				break;
 			default:
 				invoiceData = await this.commandBus.execute(new GetTimeLogGroupByDateCommand(timeLogs, {}, timeZone));
 				break;
@@ -643,6 +647,11 @@ export class TimeLogService extends TenantAwareCrudService<TimeLog> {
 			case ReportGroupFilterEnum.client:
 				dailyLogs = await this.commandBus.execute(
 					new GetTimeLogGroupByClientCommand(logs, logActivity, timeZone)
+				);
+				break;
+			case ReportGroupFilterEnum.task:
+				dailyLogs = await this.commandBus.execute(
+					new GetTimeLogGroupByTaskCommand(logs, logActivity, timeZone)
 				);
 				break;
 			default:
