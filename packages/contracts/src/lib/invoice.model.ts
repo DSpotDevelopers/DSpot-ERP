@@ -19,6 +19,7 @@ export interface InvoiceStats {
 export interface IInvoice extends IBasePerTenantAndOrganizationEntityModel {
 	invoiceDate: Date;
 	invoiceNumber: number;
+	semanticId?: string;
 	dueDate: Date;
 	discountValue: number;
 	discountType: DiscountTaxTypeEnum;
@@ -58,6 +59,7 @@ export interface IInvoice extends IBasePerTenantAndOrganizationEntityModel {
 export interface IInvoiceCreateInput extends IBasePerTenantAndOrganizationEntityModel {
 	invoiceDate?: Date;
 	invoiceNumber?: number;
+	semanticId?: string;
 	dueDate?: Date;
 	currency?: string;
 	discountValue?: number;

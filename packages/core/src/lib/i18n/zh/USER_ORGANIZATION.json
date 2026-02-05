@@ -12,6 +12,7 @@
 		"ESTIMATE": "估算",
 		"FROM": "从",
 		"INVOICE": "发票",
+		"INVOICE_SEMANTIC_ID": "发票ID",
 		"INVOICES_SELECT_DISCOUNT_VALUE": "折扣值",
 		"INVOICES_SELECT_NOTES": "备注",
 		"NO": "否",

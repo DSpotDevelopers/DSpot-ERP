@@ -12,6 +12,7 @@ import {
 	ToastrService
 } from '@gauzy/ui-core/core';
 import moment from 'moment';
+import { IInvoiceFieldChange } from '../invoice-changes-notification/invoice-changes-notification.component';
 
 @Component({
 	selector: 'ga-invoice-email',
@@ -26,6 +27,7 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 	invoiceItems: IInvoiceItem[];
 	createdInvoice: IInvoice;
 	shouldSendEmail = true;
+	invoiceChanges: IInvoiceFieldChange[] = [];
 
 	constructor(
 		public readonly translateService: TranslateService,
@@ -58,8 +60,45 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 		const { email } = this.form.value;
 
 		if (!this.invoice.id) {
+			// Store original invoice values to detect changes
+			const originalInvoiceNumber = this.invoice.invoiceNumber;
+			const originalSemanticId = this.invoice.semanticId;
+
 			const createdInvoice = await this.createInvoiceEstimate(InvoiceStatusTypesEnum.SENT);
-			if (createdInvoice) await this.createInvoiceEstimateItems();
+
+			if (createdInvoice) {
+				// Track changes if invoice number changed
+				if (originalInvoiceNumber !== createdInvoice.invoiceNumber) {
+					// Update invoice with created values
+					this.invoice.invoiceNumber = createdInvoice.invoiceNumber;
+
+					this.invoiceChanges.push({
+						field: 'invoiceNumber',
+						label: this.isEstimate
+							? 'INVOICES_PAGE.ESTIMATE_NUMBER'
+							: 'INVOICES_PAGE.INVOICE_NUMBER',
+						oldValue: originalInvoiceNumber,
+						newValue: createdInvoice.invoiceNumber,
+						copyable: true
+					});
+				}
+
+				// Track changes if semantic ID changed
+				if (originalSemanticId !== createdInvoice.semanticId) {
+					// Update invoice with created values
+					this.invoice.semanticId = createdInvoice.semanticId;
+
+					this.invoiceChanges.push({
+						field: 'semanticId',
+						label: 'INVOICES_PAGE.SEMANTIC_ID',
+						oldValue: originalSemanticId,
+						newValue: createdInvoice.semanticId,
+						copyable: true
+					});
+				}
+
+				await this.createInvoiceEstimateItems();
+			}
 		}
 
 		if (this.shouldSendEmail) {
@@ -69,7 +108,8 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 				this.invoice.id ? this.invoice?.id : this.createdInvoice?.id,
 				this.isEstimate,
 				organizationId,
-				tenantId
+				tenantId,
+				this.invoice.semanticId
 			);
 
 			this.toastrService.success('INVOICES_PAGE.EMAIL.EMAIL_SENT');
@@ -85,7 +125,9 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 
 		this.dialogRef.close({
 			success: true,
-			email: this.shouldSendEmail ? null : email
+			email: this.shouldSendEmail ? null : email,
+			changes: this.invoiceChanges,
+			isEstimate: this.isEstimate
 		});
 	}
 

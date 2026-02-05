@@ -43,6 +43,9 @@ export interface IUser extends IBasePerTenantEntityModel, IRelationalImageAsset 
 	firstName?: string;
 	lastName?: string;
 	email?: string;
+	initials?: string;
+	userNumber?: number;
+	lastInvoiceNumber?: number;
 	phoneNumber?: string;
 	username?: string;
 	timeZone?: string;

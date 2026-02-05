@@ -3065,6 +3065,7 @@
 		"COMMENT": "评论",
 		"COMMENTS": "评论",
 		"HEADER": "发票",
+		"SEMANTIC_ID": "发票ID",
 		"INVOICE_NUMBER": "发票编号",
 		"ESTIMATE_NUMBER": "估算编号",
 		"INVOICE_DATE": "发票日期",
@@ -3307,6 +3308,13 @@
 			"GENERATE": "生成一个{{ text }}的链接，任何拥有该链接的人都可以查看。",
 			"ACCESS": "任何拥有该链接的人都可以查看{{ text }}。",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "复制公开链接到剪贴板"
+		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "发票已自动调整",
+			"ESTIMATE_UPDATED_TITLE": "报价已自动调整",
+			"MESSAGE": "为确保唯一性，某些值已自动调整。请查看以下更改。",
+			"COPIED_TO_CLIPBOARD": "{{ field }} 已复制到剪贴板",
+			"COPY_FAILED": "复制到剪贴板失败"
 		},
 		"ERRORS": {
 			"DELETE": "删除发票时发生错误",

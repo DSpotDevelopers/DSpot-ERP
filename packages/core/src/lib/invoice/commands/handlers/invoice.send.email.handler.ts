@@ -12,12 +12,13 @@ export class InvoiceSendEmailHandler
 
 	public async execute(command: InvoiceSendEmailCommand): Promise<any> {
 		const { languageCode, email, params, origin } = command;
-		const { invoiceNumber, invoiceId, isEstimate, organizationId } = params;
+		const { invoiceNumber, semanticId, invoiceId, isEstimate, organizationId } = params;
 
 		return await this.invoiceService.sendEmail(
 			languageCode,
 			email,
 			invoiceNumber,
+			semanticId,
 			invoiceId,
 			isEstimate,
 			origin,

@@ -12,6 +12,7 @@
 		"ESTIMATE": "Offerte",
 		"FROM": "VAN",
 		"INVOICE": "Factuur",
+		"INVOICE_SEMANTIC_ID": "Factuur-ID",
 		"INVOICES_SELECT_DISCOUNT_VALUE": "Kortingswaarde",
 		"INVOICES_SELECT_NOTES": "Notities",
 		"NO": "Nee",

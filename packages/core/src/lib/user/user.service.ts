@@ -289,6 +289,36 @@ export class UserService extends TenantAwareCrudService<User> {
 	}
 
 	/**
+	 * Generates initials from first name and last name.
+	 * Takes the first character of each name and converts to uppercase.
+	 * Falls back to 'XX' if names are not provided.
+	 *
+	 * @param firstName - The user's first name
+	 * @param lastName - The user's last name
+	 * @returns The generated initials (e.g., "VE" for "Victor Escobar")
+	 */
+	generateInitials(firstName?: string, lastName?: string): string {
+		const firstInitial = firstName?.charAt(0)?.toUpperCase() || 'X';
+		const lastInitial = lastName?.charAt(0)?.toUpperCase() || 'X';
+		return `${firstInitial}${lastInitial}`;
+	}
+
+	/**
+	 * Gets the next available user number for semantic document IDs.
+	 * This number is globally unique across all users.
+	 *
+	 * @returns The next user number (MAX(userNumber) + 1)
+	 */
+	async getNextUserNumber(): Promise<number> {
+		const result = await this.typeOrmRepository
+			.createQueryBuilder('user')
+			.select('COALESCE(MAX(user.userNumber), 0)', 'maxUserNumber')
+			.getRawOne<{ maxUserNumber: string }>();
+
+		return parseInt(result.maxUserNumber, 10) + 1;
+	}
+
+	/**
 	 * Updates the password for a user.
 	 *
 	 * @param id - The ID of the user whose password is to be changed.

@@ -122,6 +122,45 @@ export class InvoiceController extends CrudController<Invoice> {
 	}
 
 	/**
+	 * GET highest invoice number
+	 *
+	 * @returns
+	 */
+	@Permissions(
+		PermissionsEnum.INVOICES_VIEW,
+		PermissionsEnum.ORG_INVOICES_VIEW,
+		PermissionsEnum.INVOICES_HANDLE,
+		PermissionsEnum.ALL_ORG_VIEW
+	)
+	@Get('exists-invoice-number')
+	async existsInvoiceNumber(
+		@Query('invoiceNumber') invoiceNumber: number,
+		@Query('excludeIds') excludeIds?: string[]
+	): Promise<{ exists: boolean }> {
+		return await this.invoiceService.existsInvoiceNumber(invoiceNumber, excludeIds);
+	}
+
+	/**
+	 * GET next semantic ID for a user
+	 * Returns the semantic ID that would be assigned to the next invoice for the specified user
+	 *
+	 * @param userId - The ID of the user
+	 * @returns The next semantic ID preview
+	 */
+	@Permissions(
+		PermissionsEnum.INVOICES_VIEW,
+		PermissionsEnum.ORG_INVOICES_VIEW,
+		PermissionsEnum.INVOICES_HANDLE,
+		PermissionsEnum.ALL_ORG_VIEW
+	)
+	@Get('next-semantic-id/:userId')
+	async getNextSemanticId(
+		@Param('userId', UUIDValidationPipe) userId: string
+	): Promise<{ semanticId: string; initials: string; userNumber: number; nextInvoiceSequence: number }> {
+		return await this.invoiceService.getNextSemanticId(userId);
+	}
+
+	/**
 	 * GET all invoices
 	 *
 	 * @param options

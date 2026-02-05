@@ -56,6 +56,18 @@ export class Invoice extends TenantOrganizationBaseEntity implements IInvoice {
 	})
 	invoiceNumber: number;
 
+	/**
+	 * Semantic ID for the invoice (e.g., "JD-1-100")
+	 * Format: {userInitials}-{userNumber}-{invoiceSequence}
+	 * Globally unique identifier for easy reference
+	 */
+	@ApiPropertyOptional({ type: () => String })
+	@IsString()
+	@IsOptional()
+	@ColumnIndex()
+	@MultiORMColumn({ nullable: true, unique: true })
+	semanticId?: string;
+
 	@ApiProperty({ type: () => Date })
 	@IsDate()
 	@MultiORMColumn({ nullable: true })

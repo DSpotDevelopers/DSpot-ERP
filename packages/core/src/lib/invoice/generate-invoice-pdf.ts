@@ -156,15 +156,30 @@ export async function generateInvoicePdfDefinition(
 							`${invoice.fromUser?.name ?? organization.name}`
 						]
 					},
-					{
-						fontSize: 16,
-						bold: true,
-						width: '50%',
-						alignment: 'right',
-						text: `${invoice.isEstimate ? translatedText.estimate : translatedText.invoice} ${
-							translatedText.number
-						}: ${invoice.invoiceNumber}`
-					}
+				{
+					width: '50%',
+					alignment: 'right',
+					stack: [
+						// Show Semantic ID first (only for invoices, not estimates)
+						...(invoice.semanticId && !invoice.isEstimate
+							? [
+									{
+										fontSize: 16,
+										bold: true,
+										text: `${translatedText.invoiceId || 'Invoice ID'}: ${invoice.semanticId}`
+									}
+							  ]
+							: []),
+						// Show Invoice/Estimate Number
+						{
+							fontSize: 16,
+							bold: true,
+							text: `${invoice.isEstimate ? translatedText.estimate : translatedText.invoice} ${
+								translatedText.number
+							}: ${invoice.invoiceNumber}`
+						}
+					]
+				}
 				]
 			},
 			' ',

@@ -2923,6 +2923,7 @@
 		"COMMENT": "Comme",
 		"COMMENTS": "Commentaires",
 		"HEADER": "Factures",
+		"SEMANTIC_ID": "ID de Facture",
 		"INVOICE_NUMBER": "Numéro de facture",
 		"ESTIMATE_NUMBER": "Numéro d'estimation",
 		"INVOICE_DATE": "Date de la facture",
@@ -3163,7 +3164,14 @@
 			"HEADER": "Générer un lien public",
 			"GENERATE": "Générer un lien vers le {{ text }} que n'importe qui ayant le lien peut visualiser.",
 			"ACCESS": "Toute personne ayant accès à ce lien peut voir le {{ text }}.",
-			"COPY_TO_CLIPBOARD_TOOLTIP": "Copy public link to clipboard"
+			"COPY_TO_CLIPBOARD_TOOLTIP": "Copier le lien public dans le presse-papiers"
+		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "Facture Ajustée Automatiquement",
+			"ESTIMATE_UPDATED_TITLE": "Devis Ajusté Automatiquement",
+			"MESSAGE": "Pour garantir l'unicité, certaines valeurs ont été ajustées automatiquement. Veuillez vérifier les modifications ci-dessous.",
+			"COPIED_TO_CLIPBOARD": "{{ field }} copié dans le presse-papiers",
+			"COPY_FAILED": "Échec de la copie dans le presse-papiers"
 		}
 	},
 	"PAYMENTS_PAGE": {

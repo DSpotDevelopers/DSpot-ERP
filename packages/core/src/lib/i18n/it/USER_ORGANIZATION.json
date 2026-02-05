@@ -12,6 +12,7 @@
 		"ESTIMATE": "Preventivo",
 		"FROM": "DA",
 		"INVOICE": "Fattura",
+		"INVOICE_SEMANTIC_ID": "ID Fattura",
 		"INVOICES_SELECT_DISCOUNT_VALUE": "Valore dello sconto",
 		"INVOICES_SELECT_NOTES": "Note",
 		"NO": "No",

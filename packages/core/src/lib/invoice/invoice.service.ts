@@ -1,9 +1,11 @@
 import { PaginationParams, TenantAwareCrudService } from './../core/crud';
 import { Invoice } from './invoice.entity';
-import { Between, In, Not, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { User } from '../user/user.entity';
+import { Between, In, Not, IsNull, LessThanOrEqual, MoreThanOrEqual, DeepPartial, ILike } from 'typeorm';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EmailService } from './../email-send/email.service';
 import {
+	ID,
 	IInvoice,
 	IOrganization,
 	InvoiceErrors,
@@ -25,6 +27,8 @@ import { TypeOrmInvoiceRepository } from './repository/type-orm-invoice.reposito
 import { MikroOrmInvoiceRepository } from './repository/mikro-orm-invoice.repository';
 import { RequestContext } from '../core/context';
 import { CountryService } from '../country/country.service';
+import { IPartialEntity } from '../core/crud/icrud.service';
+import { retryQuery } from '../core';
 
 @Injectable()
 export class InvoiceService extends TenantAwareCrudService<Invoice> {
@@ -200,10 +204,113 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 		}
 	}
 
+	/**
+	 * Validate invoice number
+	 *
+	 * @param invoiceNumber
+	 * @returns
+	 */
+	async existsInvoiceNumber(invoiceNumber: number, excludeIds?: string[]): Promise<{ exists: boolean }> {
+		const query = this.typeOrmRepository.createQueryBuilder(this.tableName);
+
+		query.where(`${query.alias}.invoiceNumber = :invoiceNumber`, { invoiceNumber });
+
+		if (excludeIds && excludeIds.length > 0) {
+			query.andWhere(`${query.alias}.id NOT IN (:...excludeIds)`, { excludeIds });
+		}
+
+		const count = await query.getCount();
+
+		return { exists: count > 0 };
+	}
+
+	/**
+	 * Get the next semantic ID for a user (preview, not committed)
+	 * Format: {initials}-{userNumber}-{lastInvoiceNumber + 1}
+	 *
+	 * @param userId - The ID of the user
+	 * @returns The next semantic ID that would be assigned
+	 */
+	async getNextSemanticId(userId: ID): Promise<{ semanticId: string; initials: string; userNumber: number; nextInvoiceSequence: number }> {
+		const user = await this.typeOrmRepository.manager.findOne(User, {
+			where: { id: userId },
+			select: ['id', 'initials', 'userNumber', 'lastInvoiceNumber']
+		});
+
+		if (!user) {
+			throw new BadRequestException('User not found');
+		}
+
+		if (!user.initials || !user.userNumber) {
+			throw new BadRequestException('User does not have initials or userNumber assigned. Please contact an administrator.');
+		}
+
+		const nextInvoiceSequence = (user.lastInvoiceNumber || 0) + 1;
+		const semanticId = `${user.initials}-${user.userNumber}-${nextInvoiceSequence}`;
+
+		return {
+			semanticId,
+			initials: user.initials,
+			userNumber: user.userNumber,
+			nextInvoiceSequence
+		};
+	}
+
+	async create(input: IPartialEntity<Invoice>): Promise<Invoice> {
+		return await retryQuery(async (): Promise<Invoice> => {
+			return await this.typeOrmRepository.manager.transaction(
+				'SERIALIZABLE',
+				async transactionManager => {
+					// Get the highest invoice number
+					const { highestInvoiceNumber } = await transactionManager
+						.createQueryBuilder(Invoice, 'invoice')
+						.select('COALESCE(MAX(invoice.invoiceNumber), 0)', 'highestInvoiceNumber')
+						.getRawOne<{ highestInvoiceNumber: string }>();
+
+					const nextInvoiceNumber = highestInvoiceNumber ? +highestInvoiceNumber + 1 : 1;
+
+					// Generate semantic ID if fromUserId is provided
+					let semanticId: string | undefined;
+					if (input.fromUserId) {
+						// Get user with lock to prevent race conditions
+						const user = await transactionManager.findOne(User, {
+							where: { id: input.fromUserId },
+							select: ['id', 'initials', 'userNumber', 'lastInvoiceNumber'],
+							lock: { mode: 'pessimistic_write' },
+							loadEagerRelations: false
+						});
+
+						if (user && user.initials && user.userNumber !== null && user.userNumber !== undefined) {
+							const nextInvoiceSequence = (user.lastInvoiceNumber || 0) + 1;
+							semanticId = `${user.initials}-${user.userNumber}-${nextInvoiceSequence}`;
+
+							// Update the user's lastInvoiceNumber
+							await transactionManager.update(User, user.id, {
+								lastInvoiceNumber: nextInvoiceSequence
+							});
+						}
+					}
+
+					const invoice = transactionManager.create(Invoice, {
+						...input,
+						...((nextInvoiceNumber ?? input.invoiceNumber) != null && {
+							invoiceNumber: nextInvoiceNumber ?? input.invoiceNumber
+						}),
+						...( (semanticId ?? input.semanticId) != null && {
+							semanticId: semanticId ?? input.semanticId
+						  })
+					} as DeepPartial<Invoice>);
+
+					return await transactionManager.save(invoice);
+				});
+		});
+	}
+
 	async sendEmail(
 		languageCode: LanguagesEnum,
 		email: string,
 		invoiceNumber: number,
+		semanticId: string,
 		invoiceId: string,
 		isEstimate: boolean,
 		origin: string,
@@ -224,6 +331,7 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 					email,
 					base64,
 					invoiceNumber,
+					semanticId,
 					invoiceId,
 					isEstimate,
 					estimateEmail.token,
@@ -293,6 +401,7 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 
 			invoice: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE', { lang: language }),
 			estimate: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ESTIMATE', { lang: language }),
+			semanticId: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE_SEMANTIC_ID', { lang: language }),
 			number: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.NUMBER', { lang: language }),
 			from: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.FROM', { lang: language }),
 			to: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.TO', { lang: language }),
@@ -362,6 +471,7 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 
 			invoice: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE', { lang: language }),
 			estimate: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ESTIMATE', { lang: language }),
+			semanticId: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE_SEMANTIC_ID', { lang: language }),
 			number: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.NUMBER', { lang: language }),
 			from: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.FROM', { lang: language }),
 			to: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.TO', { lang: language }),
@@ -501,6 +611,11 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 				filter.where.toContact = {
 					id: In(where.toContact)
 				};
+			}
+
+			// Filter by semantic ID (partial match, case insensitive)
+			if ('semanticId' in where && where.semanticId) {
+				filter.where.semanticId = ILike(`%${where.semanticId}%`);
 			}
 
 			if ('invoiceDate' in where) {

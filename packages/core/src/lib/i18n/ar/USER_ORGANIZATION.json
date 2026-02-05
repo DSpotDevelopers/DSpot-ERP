@@ -12,6 +12,7 @@
 		"ESTIMATE": "تقدير",
 		"FROM": "من",
 		"INVOICE": "فاتورة",
+		"INVOICE_SEMANTIC_ID": "معرف الفاتورة",
 		"INVOICES_SELECT_DISCOUNT_VALUE": "قيمة الخصم",
 		"INVOICES_SELECT_NOTES": "ملاحظات",
 		"NO": "لا",

@@ -12,6 +12,7 @@
 		"ESTIMATE": "Devis",
 		"FROM": "DE",
 		"INVOICE": "Facture",
+		"INVOICE_SEMANTIC_ID": "ID de Facture",
 		"INVOICES_SELECT_DISCOUNT_VALUE": "Valeur de la remise",
 		"INVOICES_SELECT_NOTES": "Notes",
 		"NO": "Non",

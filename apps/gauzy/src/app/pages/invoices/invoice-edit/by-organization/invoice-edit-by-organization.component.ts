@@ -199,6 +199,7 @@ export class InvoiceEditByOrganizationComponent extends PaginationFilterBaseComp
 		this.form = this.fb.group({
 			id: ['', Validators.required],
 			invoiceDate: [this.organizationSettingService.getDateFromOrganizationSettings(), Validators.required],
+			semanticId: [this.invoice?.semanticId, Validators.required],
 			invoiceNumber: ['', Validators.compose([Validators.required, Validators.min(1)])],
 			dueDate: ['', Validators.required],
 			discountValue: ['', Validators.compose([Validators.required, Validators.min(0)])],
@@ -217,6 +218,7 @@ export class InvoiceEditByOrganizationComponent extends PaginationFilterBaseComp
 	updateValueAndValidity(invoice: IInvoice) {
 		this.form.setValue({
 			id: invoice.id,
+			semanticId: invoice.semanticId || '',
 			invoiceNumber: invoice.invoiceNumber,
 			invoiceDate: new Date(invoice.invoiceDate),
 			dueDate: new Date(invoice.dueDate),
@@ -460,13 +462,10 @@ export class InvoiceEditByOrganizationComponent extends PaginationFilterBaseComp
 			}
 			const { tenantId } = this.store.user;
 			const { id: organizationId } = this.organization;
-			const invoice = await this.invoicesService.getAll({
-				invoiceNumber: invoiceData.invoiceNumber,
-				organizationId,
-				tenantId
-			});
 
-			if (invoice.items.length && +invoice.items[0].invoiceNumber !== +this.invoice.invoiceNumber) {
+			const invoiceNumber = await this.invoicesService.existsInvoiceNumber(invoiceData.invoiceNumber, [this.invoice.id]);
+
+			if (invoiceNumber.exists) {
 				this.toastrService.danger('INVOICES_PAGE.INVOICE_NUMBER_DUPLICATE');
 				return;
 			}

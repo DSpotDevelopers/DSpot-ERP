@@ -77,7 +77,23 @@
 								<nb-accordion-item-body>
 									<form [formGroup]="searchForm" (ngSubmit)="search()">
 										<div class="row w-100">
-											<div class="col-sm-4">
+											<!-- Semantic ID search (only for invoices, not estimates) -->
+											<div class="col-sm-3" *ngIf="!isEstimate">
+												<div class="form-group">
+													<label for="inputSemanticId" class="label">
+														<span>{{ 'INVOICES_PAGE.SEMANTIC_ID' | translate }}</span>
+													</label>
+													<input
+														type="text"
+														nbInput
+														[placeholder]="'INVOICES_PAGE.SEMANTIC_ID' | translate"
+														formControlName="semanticId"
+														id="inputSemanticId"
+														fullWidth
+													/>
+												</div>
+											</div>
+											<div class="col-sm-4" [class.col-sm-4]="isEstimate" [class.col-sm-3]="!isEstimate">
 												<div class="form-group">
 													<label for="inputInvoiceNumber" class="label">
 														<span>

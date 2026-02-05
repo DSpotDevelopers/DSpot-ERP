@@ -3054,6 +3054,7 @@
 		"COMMENT": "تعليق",
 		"COMMENTS": "التعليقات",
 		"HEADER": "الفواتير",
+		"SEMANTIC_ID": "معرف الفاتورة",
 		"INVOICE_NUMBER": "رقم الفاتورة",
 		"ESTIMATE_NUMBER": "رقم التقدير",
 		"INVOICE_DATE": "تاريخ الفاتورة",
@@ -3296,6 +3297,13 @@
 			"GENERATE": "توليد رابط إلى {{ text }} يمكن لأي شخص لديه الرابط عرضه.",
 			"ACCESS": "أي شخص لديه هذا الرابط يمكنه عرض {{ text }}.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "نسخ الرابط العام إلى الحافظة"
+		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "تم تعديل الفاتورة تلقائياً",
+			"ESTIMATE_UPDATED_TITLE": "تم تعديل التقدير تلقائياً",
+			"MESSAGE": "لضمان التفرد، تم تعديل بعض القيم تلقائياً. يرجى مراجعة التغييرات أدناه.",
+			"COPIED_TO_CLIPBOARD": "تم نسخ {{ field }} إلى الحافظة",
+			"COPY_FAILED": "فشل النسخ إلى الحافظة"
 		},
 		"ERRORS": {
 			"DELETE": "حدث خطأ أثناء حذف الفاتورة",

@@ -3067,6 +3067,7 @@
 		"COMMENT": "Comment",
 		"COMMENTS": "Comments",
 		"HEADER": "Invoices",
+		"SEMANTIC_ID": "Invoice ID",
 		"INVOICE_NUMBER": "Invoice Number",
 		"ESTIMATE_NUMBER": "Estimate Number",
 		"INVOICE_DATE": "Invoice Date",
@@ -3309,6 +3310,13 @@
 			"GENERATE": "Generate a link to the {{ text }} that anyone with the link can view.",
 			"ACCESS": "Anyone with access to this link can view the {{ text }}.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "Copy public link to clipboard"
+		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "Invoice Automatically Adjusted",
+			"ESTIMATE_UPDATED_TITLE": "Estimate Automatically Adjusted",
+			"MESSAGE": "To ensure uniqueness, some values were automatically adjusted. Please review the changes below.",
+			"COPIED_TO_CLIPBOARD": "{{ field }} copied to clipboard",
+			"COPY_FAILED": "Failed to copy to clipboard"
 		},
 		"ERRORS": {
 			"DELETE": "Error occurred while deleting the invoice",

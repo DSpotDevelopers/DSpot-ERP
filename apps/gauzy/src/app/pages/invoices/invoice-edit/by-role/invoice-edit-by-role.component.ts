@@ -196,6 +196,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 		this.form = this.fb.group({
 			id: ['', Validators.required],
 			invoiceDate: [this.organizationSettingService.getDateFromOrganizationSettings(), Validators.required],
+			semanticId: [this.invoice?.semanticId, Validators.required],
 			invoiceNumber: [this.invoice?.invoiceNumber, Validators.compose([Validators.required, Validators.min(1)])],
 			dueDate: ['', Validators.required],
 			discountValue: ['', Validators.compose([Validators.required, Validators.min(0)])],
@@ -213,6 +214,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 	updateValueAndValidity(invoice: IInvoice) {
 		this.form.setValue({
 			id: invoice.id,
+			semanticId: invoice.semanticId || '',
 			invoiceNumber: invoice.invoiceNumber,
 			invoiceDate: new Date(invoice.invoiceDate),
 			dueDate: new Date(invoice.dueDate),
@@ -464,13 +466,10 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			}
 			const { tenantId } = this.store.user;
 			const { id: organizationId } = this.organization;
-			const invoice = await this.invoicesService.getAll({
-				invoiceNumber: invoiceData.invoiceNumber,
-				organizationId,
-				tenantId
-			});
 
-			if (invoice.items.length && +invoice.items[0].invoiceNumber !== +this.invoice.invoiceNumber) {
+			const invoiceNumber = await this.invoicesService.existsInvoiceNumber(invoiceData.invoiceNumber, [this.invoice.id]);
+
+			if (invoiceNumber.exists) {
 				this.toastrService.danger('INVOICES_PAGE.INVOICE_NUMBER_DUPLICATE');
 				return;
 			}
@@ -641,6 +640,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			const invoice = {
 				id: invoiceData.id,
 				invoiceNumber: invoiceData.invoiceNumber,
+				semanticId: this.invoice.semanticId,
 				invoiceDate: invoiceData.invoiceDate,
 				currency: this.invoice?.currency,
 				dueDate: invoiceData.dueDate,
@@ -724,7 +724,8 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 					this.invoice.id,
 					this.isEstimate,
 					organizationId,
-					tenantId
+					tenantId,
+					this.invoice.semanticId
 				);
 
 				this.toastrService.success('INVOICES_PAGE.EMAIL.EMAIL_SENT');

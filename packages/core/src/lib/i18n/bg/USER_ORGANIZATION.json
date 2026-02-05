@@ -12,6 +12,7 @@
 		"ESTIMATE": "Estimate",
 		"FROM": "FROM",
 		"INVOICE": "Фактура",
+		"INVOICE_SEMANTIC_ID": "ID на фактура",
 		"INVOICES_SELECT_DISCOUNT_VALUE": "Discount Value",
 		"INVOICES_SELECT_NOTES": "Бележки",
 		"NO": "No",

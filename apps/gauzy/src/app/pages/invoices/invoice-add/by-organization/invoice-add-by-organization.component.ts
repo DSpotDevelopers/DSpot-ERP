@@ -41,6 +41,10 @@ import {
 	ExpensesService
 } from '@gauzy/ui-core/core';
 import { InvoiceEmailMutationComponent } from '../../invoice-email/invoice-email-mutation.component';
+import {
+	InvoiceChangesNotificationComponent,
+	IInvoiceFieldChange
+} from '../../invoice-changes-notification/invoice-changes-notification.component';
 import { InvoiceExpensesSelectorComponent } from '../../table-components/invoice-expense-selector.component';
 import {
 	InvoiceApplyTaxDiscountComponent,
@@ -65,6 +69,7 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 	invoice?: IInvoice;
 	createdInvoice: IInvoice;
 	formInvoiceNumber: number;
+	formSemanticId: string;
 	invoiceTypes = Object.values(InvoiceTypeEnum);
 	discountTaxTypes = Object.values(DiscountTaxTypeEnum);
 	taxCalculationTypes = Object.values(TaxCalculationTypeEnum);
@@ -180,6 +185,7 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 	initializeForm() {
 		this.form = this.fb.group({
 			invoiceDate: [this.organizationSettingService.getDateFromOrganizationSettings(), Validators.required],
+			semanticId: [this.formSemanticId, Validators.compose([Validators.required, Validators.pattern(/\S+/)]),], // Validators.pattern(/\S+/) is used to ensure the semantic ID is not empty
 			invoiceNumber: [this.formInvoiceNumber, Validators.compose([Validators.required, Validators.min(1)])],
 			dueDate: [this.getNextMonth(), Validators.required],
 			currency: ['', Validators.required],
@@ -407,6 +413,7 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 		const { tenantId } = this.store.user;
 		const { value: currency } = this.currency;
 		const {
+			semanticId,
 			invoiceNumber,
 			invoiceDate,
 			dueDate,
@@ -423,6 +430,7 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 
 		try {
 			const createdInvoice = await this.invoicesService.add({
+				semanticId,
 				invoiceNumber,
 				invoiceDate: moment(invoiceDate).startOf('day').toDate(),
 				dueDate: moment(dueDate).endOf('day').toDate(),
@@ -542,7 +550,13 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 			return;
 		}
 
-		const { invoiceNumber, invoiceDate, dueDate } = this.form.value;
+		const {
+			invoiceNumber: originalInvoiceNumber,
+			semanticId: originalSemanticId,
+			invoiceDate,
+			dueDate
+		 } = this.form.value;
+		 
 		if (!invoiceDate || !dueDate || compareDate(invoiceDate, dueDate)) {
 			this.toastrService.danger(
 				this.getTranslation('INVOICES_PAGE.INVALID_DATES'),
@@ -551,21 +565,40 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 			return;
 		}
 
-		const invoice = await this.invoicesService.getAll({
-			invoiceNumber
-		});
-
-		if (invoice.items.length) {
-			this.toastrService.danger(
-				this.getTranslation('INVOICES_PAGE.INVOICE_NUMBER_DUPLICATE'),
-				this.getTranslation('TOASTR.TITLE.WARNING')
-			);
-			return;
-		}
-
 		await this.createInvoiceEstimate(status, sendTo);
 		await this.createInvoiceEstimateItems();
 		await this.createInvoiceEstimateHistory();
+
+		// Check if invoice fields changed and show notification
+		const changes: IInvoiceFieldChange[] = [];
+
+		// Check semantic ID change first (only for invoices, not estimates)
+		if (!this.isEstimate && this.createdInvoice && originalSemanticId !== this.createdInvoice.semanticId) {
+			changes.push({
+				field: 'semanticId',
+				label: 'INVOICES_PAGE.SEMANTIC_ID',
+				oldValue: originalSemanticId,
+				newValue: this.createdInvoice.semanticId,
+				copyable: true
+			});
+		}
+
+		// Check invoice number change
+		if (this.createdInvoice && originalInvoiceNumber !== this.createdInvoice.invoiceNumber) {
+			changes.push({
+				field: 'invoiceNumber',
+				label: this.isEstimate
+					? 'INVOICES_PAGE.ESTIMATE_NUMBER'
+					: 'INVOICES_PAGE.INVOICE_NUMBER',
+				oldValue: originalInvoiceNumber,
+				newValue: this.createdInvoice.invoiceNumber,
+				copyable: true
+			});
+		}
+
+		if (changes.length > 0) {
+			await this.showChangesNotificationModal(changes, this.isEstimate);
+		}
 
 		if (this.isEstimate) {
 			this.toastrService.success(
@@ -588,6 +621,24 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 				}
 			});
 		}
+	}
+
+	/**
+	 * Show changes notification modal when invoice fields are auto-updated
+	 * @param changes - Array of field changes to display
+	 * @param isEstimate - Whether this is an estimate or invoice
+	 */
+	private async showChangesNotificationModal(changes: IInvoiceFieldChange[], isEstimate: boolean): Promise<void> {
+		if (changes.length === 0) return;
+
+		const dialogRef = this.dialogService.open(InvoiceChangesNotificationComponent, {
+			context: {
+				changes,
+				isEstimate
+			}
+		});
+
+		await firstValueFrom(dialogRef.onClose);
 	}
 
 	async sendToContact() {
@@ -638,7 +689,13 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 			return;
 		}
 
-		const { invoiceNumber, invoiceDate, dueDate } = this.form.value;
+		const {
+			invoiceNumber: originalInvoiceNumber,
+			semanticId: originalSemanticId,
+			invoiceDate,
+			dueDate
+		} = this.form.value;
+
 		if (!invoiceDate || !dueDate || compareDate(invoiceDate, dueDate)) {
 			this.toastrService.danger(
 				this.getTranslation('INVOICES_PAGE.INVALID_DATES'),
@@ -647,24 +704,44 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 			return;
 		}
 
-		const invoiceExists = await this.invoicesService.getAll({
-			invoiceNumber
-		});
-		if (invoiceExists.items.length) {
-			this.toastrService.danger(
-				this.getTranslation('INVOICES_PAGE.INVOICE_NUMBER_DUPLICATE'),
-				this.getTranslation('TOASTR.TITLE.WARNING')
-			);
-			return;
+		await this.createInvoiceEstimate(InvoiceStatusTypesEnum.SENT);
+		const invoiceItems = await this.createInvoiceEstimateItems();
+
+		// Check if invoice fields changed and show notification
+		const changes: IInvoiceFieldChange[] = [];
+
+		// Check semantic ID change first (only for invoices, not estimates)
+		if (!this.isEstimate && this.createdInvoice && originalSemanticId !== this.createdInvoice.semanticId) {
+			changes.push({
+				field: 'semanticId',
+				label: 'INVOICES_PAGE.SEMANTIC_ID',
+				oldValue: originalSemanticId,
+				newValue: this.createdInvoice.semanticId,
+				copyable: true
+			});
 		}
 
-		const invoice = await this.createInvoiceEstimate(InvoiceStatusTypesEnum.SENT);
-		const invoiceItems = await this.createInvoiceEstimateItems();
+		// Check invoice number change
+		if (this.createdInvoice && originalInvoiceNumber !== this.createdInvoice.invoiceNumber) {
+			changes.push({
+				field: 'invoiceNumber',
+				label: this.isEstimate
+					? 'INVOICES_PAGE.ESTIMATE_NUMBER'
+					: 'INVOICES_PAGE.INVOICE_NUMBER',
+				oldValue: originalInvoiceNumber,
+				newValue: this.createdInvoice.invoiceNumber,
+				copyable: true
+			});
+		}
+
+		if (changes.length > 0) {
+			await this.showChangesNotificationModal(changes, this.isEstimate);
+		}
 
 		await firstValueFrom(
 			this.dialogService.open(InvoiceEmailMutationComponent, {
 				context: {
-					invoice: invoice,
+					invoice: this.createdInvoice,
 					invoiceItems: invoiceItems,
 					isEstimate: this.isEstimate
 				}
@@ -695,13 +772,18 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 	}
 
 	private async _getInvoiceNumber() {
+		if (this.form.get('invoiceNumber')?.valid) {
+			return;
+		}
+
 		const { tenantId } = this.store.user;
 		const invoiceNumber = await this.invoicesService.getHighestInvoiceNumber(tenantId);
-		if (invoiceNumber['max']) {
-			this.formInvoiceNumber = +invoiceNumber['max'] + 1;
-		} else {
-			this.formInvoiceNumber = 1;
-		}
+
+		const nextInvoiceNumber = invoiceNumber['max'] ? +invoiceNumber['max'] + 1 : 1;
+
+		this.formInvoiceNumber = nextInvoiceNumber;
+
+		this.form.get('invoiceNumber')?.setValue(nextInvoiceNumber);
 	}
 
 	private getAllTasks() {
@@ -715,6 +797,27 @@ export class InvoiceAddByOrganizationComponent extends PaginationFilterBaseCompo
 		if (!organization) return;
 
 		this._getInvoiceNumber();
+		this._getSemanticId();
+	}
+
+	/**
+	 * Fetches the next available semantic ID for the invoice.
+	 * Only applies to invoices (not estimates)
+	 */
+	private async _getSemanticId() {
+		// Skip if this is an estimate or if the user is not set
+		if (this.isEstimate || !this.store.userId) {
+			return;
+		}
+
+		// Skip if the form already has a valid semantic ID
+		if (this.form.get('semanticId')?.valid) {
+			return;
+		}
+
+		const result = await this.invoicesService.getNextSemanticId(this.store.userId);
+		this.formSemanticId = result.semanticId;
+		this.form.get('semanticId')?.setValue(result.semanticId);
 	}
 
 	/**
