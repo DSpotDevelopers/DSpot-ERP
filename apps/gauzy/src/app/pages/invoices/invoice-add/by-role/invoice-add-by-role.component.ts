@@ -610,12 +610,11 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		}
 
 		const {
-			invoiceNumber: originalInvoiceNumber,
 			semanticId: originalSemanticId,
 			invoiceDate,
 			dueDate
 		} = this.form.value;
-		
+
 		if (!invoiceDate || !dueDate || compareDate(invoiceDate, dueDate)) {
 			this.toastrService.danger(
 				this.getTranslation('INVOICES_PAGE.INVALID_DATES'),
@@ -638,19 +637,6 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 				label: 'INVOICES_PAGE.SEMANTIC_ID',
 				oldValue: originalSemanticId,
 				newValue: this.createdInvoice.semanticId,
-				copyable: true
-			});
-		}
-
-		// Check invoice number change
-		if (this.createdInvoice && originalInvoiceNumber !== this.createdInvoice.invoiceNumber) {
-			changes.push({
-				field: 'invoiceNumber',
-				label: this.isEstimate
-					? 'INVOICES_PAGE.ESTIMATE_NUMBER'
-					: 'INVOICES_PAGE.INVOICE_NUMBER',
-				oldValue: originalInvoiceNumber,
-				newValue: this.createdInvoice.invoiceNumber,
 				copyable: true
 			});
 		}

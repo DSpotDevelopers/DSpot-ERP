@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { Angular2SmartTableComponent, Cell, Settings } from 'angular2-smart-table';
+import { Angular2SmartTableComponent, Cell, IColumns, Settings } from 'angular2-smart-table';
 import { TranslateService } from '@ngx-translate/core';
 import { NbDialogService, NbMenuItem, NbPopoverDirective, NbTabComponent } from '@nebular/theme';
 import {
@@ -560,6 +560,28 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 
 	private _loadSmartTableSettings() {
 		const pagination: IPaginationBase = this.getPagination();
+
+		const firstColumn: IColumns = this.isEstimate
+			? {
+				invoiceNumber: {
+					title: this.getTranslation('INVOICES_PAGE.ESTIMATES.ESTIMATE_NUMBER'),
+					type: 'custom',
+					width: '17%',
+					renderComponent: NotesWithTagsComponent,
+					componentInitFunction: (instance: NotesWithTagsComponent, cell: Cell) => {
+						instance.rowData = cell.getRow().getData();
+						instance.value = cell.getRawValue();
+					}
+				}
+			} : {
+				semanticId: {
+					title: this.getTranslation('INVOICES_PAGE.SEMANTIC_ID'),
+					type: 'text',
+					width: '17%',
+					isFilterable: false
+				}
+			};
+
 		this.settingsSmartTable = {
 			pager: {
 				display: false,
@@ -573,32 +595,9 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 				this.isEstimate ? 'SM_TABLE.NO_DATA.ESTIMATE' : 'SM_TABLE.NO_DATA.INVOICE'
 			),
 			columns: {
-				invoiceNumber: {
-					title: this.isEstimate
-						? this.getTranslation('INVOICES_PAGE.ESTIMATES.ESTIMATE_NUMBER')
-						: this.getTranslation('INVOICES_PAGE.INVOICE_NUMBER'),
-					type: 'custom',
-					width: '17%',
-					renderComponent: NotesWithTagsComponent,
-					componentInitFunction: (instance: NotesWithTagsComponent, cell: Cell) => {
-						instance.rowData = cell.getRow().getData();
-						instance.value = cell.getRawValue();
-					}
-				}
+				...firstColumn,
 			}
 		};
-		// Add semanticId column only for invoices (not estimates)
-		if (!this.isEstimate) {
-			this.settingsSmartTable['columns'] = {
-				semanticId: {
-					title: this.getTranslation('INVOICES_PAGE.SEMANTIC_ID'),
-					type: 'text',
-					width: '12%',
-					isFilterable: false
-				},
-				...this.settingsSmartTable['columns']
-			};
-		}
 		if (
 			this.columns.includes(InvoiceColumnsEnum.INVOICE_DATE) ||
 			this.columns.includes(EstimateColumnsEnum.ESTIMATE_DATE)

@@ -60,28 +60,11 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 		const { email } = this.form.value;
 
 		if (!this.invoice.id) {
-			// Store original invoice values to detect changes
-			const originalInvoiceNumber = this.invoice.invoiceNumber;
-			const originalSemanticId = this.invoice.semanticId;
-
 			const createdInvoice = await this.createInvoiceEstimate(InvoiceStatusTypesEnum.SENT);
 
 			if (createdInvoice) {
-				// Track changes if invoice number changed
-				if (originalInvoiceNumber !== createdInvoice.invoiceNumber) {
-					// Update invoice with created values
-					this.invoice.invoiceNumber = createdInvoice.invoiceNumber;
-
-					this.invoiceChanges.push({
-						field: 'invoiceNumber',
-						label: this.isEstimate
-							? 'INVOICES_PAGE.ESTIMATE_NUMBER'
-							: 'INVOICES_PAGE.INVOICE_NUMBER',
-						oldValue: originalInvoiceNumber,
-						newValue: createdInvoice.invoiceNumber,
-						copyable: true
-					});
-				}
+				// Store original semantic id values to detect changes
+				const originalSemanticId = this.invoice.semanticId;
 
 				// Track changes if semantic ID changed
 				if (originalSemanticId !== createdInvoice.semanticId) {
