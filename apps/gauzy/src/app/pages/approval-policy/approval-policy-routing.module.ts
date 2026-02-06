@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
 import { ApprovalPolicyComponent } from './approval-policy.component';
 
@@ -13,7 +13,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.APPROVAL_POLICY_VIEW],
 				redirectTo: '/pages/dashboard'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_EMPLOYEE_APPROVAL_POLICY
 		}
 	}
 ];

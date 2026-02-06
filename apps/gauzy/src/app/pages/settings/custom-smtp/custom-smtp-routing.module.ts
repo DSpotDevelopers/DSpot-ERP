@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
 import { SMTPComponent } from '@gauzy/ui-core/shared';
 import { CustomSmtpComponent } from './custom-smtp.component';
@@ -14,7 +14,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.CUSTOM_SMTP_VIEW],
 				redirectTo: '/pages/settings'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_SMTP
 		},
 		children: [
 			{

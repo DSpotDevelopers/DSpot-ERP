@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { PermissionsGuard } from '@gauzy/ui-core/core';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureGuard, PermissionsGuard } from '@gauzy/ui-core/core';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { DateRangePickerResolver } from '@gauzy/ui-core/shared';
 import { InvoiceAddByOrganizationComponent } from './invoice-add/by-organization/invoice-add-by-organization.component';
 import { InvoiceEditByOrganizationComponent } from './invoice-edit/by-organization/invoice-edit-by-organization.component';
@@ -26,12 +26,13 @@ const routes: Routes = [
 	{
 		path: '',
 		component: InvoicesByRoleComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			permissions: {
 				only: [PermissionsEnum.ALL_ORG_VIEW, PermissionsEnum.INVOICES_VIEW],
 				redirectTo
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_INVOICE
 		},
 		resolve: {
 			dates: DateRangePickerResolver
@@ -65,12 +66,13 @@ const routes: Routes = [
 	{
 		path: 'add-by-role',
 		component: InvoiceAddByRoleComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			permissions: {
 				only: [PermissionsEnum.ALL_ORG_VIEW, PermissionsEnum.INVOICES_EDIT],
 				redirectTo
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_INVOICE
 		}
 	},
 	{
@@ -98,12 +100,13 @@ const routes: Routes = [
 	{
 		path: 'received-invoices',
 		component: InvoicesReceivedComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			permissions: {
 				only: [PermissionsEnum.ALL_ORG_VIEW, PermissionsEnum.INVOICES_VIEW],
 				redirectTo
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_INVOICE_RECEIVED
 		},
 		resolve: {
 			dates: DateRangePickerResolver
@@ -129,7 +132,7 @@ const routes: Routes = [
 	},
 	{
 		path: 'estimates',
-		canActivateChild: [PermissionsGuard],
+		canActivateChild: [PermissionsGuard, FeatureGuard],
 		children: [
 			{
 				path: '',
@@ -138,7 +141,8 @@ const routes: Routes = [
 					permissions: {
 						only: [PermissionsEnum.ALL_ORG_VIEW, PermissionsEnum.ESTIMATES_VIEW],
 						redirectTo
-					}
+					},
+					featureKey: FeatureEnum.FEATURE_ESTIMATE
 				},
 				resolve: {
 					dates: DateRangePickerResolver
@@ -154,7 +158,8 @@ const routes: Routes = [
 					},
 					datePicker: {
 						unitOfTime: 'month'
-					}
+					},
+					featureKey: FeatureEnum.FEATURE_ESTIMATE
 				},
 				resolve: {
 					dates: DateRangePickerResolver
@@ -167,7 +172,8 @@ const routes: Routes = [
 					permissions: {
 						only: [PermissionsEnum.ALL_ORG_VIEW, PermissionsEnum.ESTIMATES_EDIT],
 						redirectTo
-					}
+					},
+					featureKey: FeatureEnum.FEATURE_ESTIMATE
 				}
 			},
 			{
@@ -184,7 +190,8 @@ const routes: Routes = [
 						employee: false,
 						project: false,
 						team: false
-					}
+					},
+					featureKey: FeatureEnum.FEATURE_ESTIMATE
 				}
 			}
 		]
@@ -192,12 +199,13 @@ const routes: Routes = [
 	{
 		path: 'received-estimates',
 		component: EstimatesReceivedComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			permissions: {
 				only: [PermissionsEnum.ALL_ORG_VIEW, PermissionsEnum.ESTIMATES_VIEW],
 				redirectTo
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_ESTIMATE_RECEIVED
 		},
 		resolve: {
 			dates: DateRangePickerResolver
@@ -217,7 +225,8 @@ const routes: Routes = [
 				employee: false,
 				project: false,
 				team: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_PAYMENT
 		}
 	},
 	{

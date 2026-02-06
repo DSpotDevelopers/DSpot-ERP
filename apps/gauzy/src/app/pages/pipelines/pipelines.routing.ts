@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
 import { PipelinesComponent } from './pipelines.component';
 import { PipelineDealsComponent } from './pipeline-deals/pipeline-deals.component';
@@ -17,7 +17,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.VIEW_SALES_PIPELINES],
 				redirectTo: '/pages/dashboard'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_PIPELINE
 		}
 	},
 	{
@@ -28,7 +29,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.VIEW_SALES_PIPELINES],
 				redirectTo: '/pages/dashboard'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_PIPELINE_DEAL
 		},
 		resolve: { pipeline: PipelineResolver }
 	},
@@ -40,7 +42,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.VIEW_SALES_PIPELINES],
 				redirectTo: '/pages/dashboard'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_PIPELINE_DEAL
 		},
 		resolve: { pipeline: PipelineResolver }
 	},
@@ -52,7 +55,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.VIEW_SALES_PIPELINES],
 				redirectTo: '/pages/dashboard'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_PIPELINE_DEAL
 		},
 		resolve: { pipeline: PipelineResolver, deal: DealResolver }
 	}

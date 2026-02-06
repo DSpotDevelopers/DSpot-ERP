@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { RolesPermissionsComponent } from './roles-permissions.component';
 
 const routes: Routes = [
@@ -19,7 +19,8 @@ const routes: Routes = [
 				employee: false,
 				date: false,
 				organization: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_ROLES_PERMISSION
 		}
 	}
 ];

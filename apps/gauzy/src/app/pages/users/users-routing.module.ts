@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { InviteGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { EditUserProfileComponent } from './edit-user-profile/edit-user-profile.component';
 import { UsersComponent } from './users.component';
@@ -21,7 +21,8 @@ const routes: Routes = [
 			permissions: {
 				only: [PermissionsEnum.ORG_USERS_VIEW],
 				redirectTo
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_USER
 		}
 	},
 	{
