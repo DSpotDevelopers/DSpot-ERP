@@ -129,7 +129,6 @@ export class InvoicesByOrganizationComponent extends PaginationFilterBaseCompone
 	public searchForm: UntypedFormGroup = InvoicesByOrganizationComponent.searchBuildForm(this.fb);
 	static searchBuildForm(fb: UntypedFormBuilder): UntypedFormGroup {
 		return fb.group({
-			semanticId: [],
 			invoiceNumber: [],
 			organizationContact: [],
 			invoiceDate: [],
@@ -925,18 +924,6 @@ export class InvoicesByOrganizationComponent extends PaginationFilterBaseCompone
 				}
 			}
 		};
-		// Add semanticId column only for invoices (not estimates)
-		if (!this.isEstimate) {
-			this.settingsSmartTable['columns'] = {
-				semanticId: {
-					title: this.getTranslation('INVOICES_PAGE.SEMANTIC_ID'),
-					type: 'text',
-					width: '12%',
-					isFilterable: false
-				},
-				...this.settingsSmartTable['columns']
-			};
-		}
 		if (
 			this.columns.includes(InvoiceColumnsEnum.INVOICE_DATE) ||
 			this.columns.includes(EstimateColumnsEnum.ESTIMATE_DATE)
@@ -1067,7 +1054,6 @@ export class InvoicesByOrganizationComponent extends PaginationFilterBaseCompone
 
 	search() {
 		const {
-			semanticId,
 			dueDate,
 			invoiceNumber,
 			invoiceDate,
@@ -1077,11 +1063,6 @@ export class InvoicesByOrganizationComponent extends PaginationFilterBaseCompone
 			organizationContact,
 			tags = []
 		} = this.searchForm.value;
-
-		// Filter by semantic ID
-		if (semanticId) {
-			this.setFilter({ field: 'semanticId', search: semanticId }, false);
-		}
 
 		// Filter by invoice number
 		this.setFilter({ field: 'invoiceNumber', search: invoiceNumber }, false);

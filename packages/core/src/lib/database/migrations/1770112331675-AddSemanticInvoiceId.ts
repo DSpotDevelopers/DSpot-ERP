@@ -54,6 +54,10 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 	/**
 	 * PostgresDB Up Migration
 	 *
+	 * Adds user columns (initials, userNumber, lastInvoiceNumber) and invoice.semanticId.
+	 * Existing users get userNumber/initials and lastInvoiceNumber from current invoice count.
+	 * Existing invoices keep semanticId null; only new invoices will receive a semanticId.
+	 *
 	 * @param queryRunner
 	 */
 	public async postgresUpQueryRunner(queryRunner: QueryRunner): Promise<any> {
@@ -63,16 +67,13 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 		await queryRunner.query(`ALTER TABLE "user" ADD "lastInvoiceNumber" integer DEFAULT 0`);
 		await queryRunner.query(`ALTER TABLE "user" ADD CONSTRAINT "UQ_user_userNumber" UNIQUE ("userNumber")`);
 
-		// Add semanticId column to invoice table
+		// Add semanticId column to invoice table (nullable; existing rows stay null)
 		await queryRunner.query(`ALTER TABLE "invoice" ADD "semanticId" character varying`);
 		await queryRunner.query(`ALTER TABLE "invoice" ADD CONSTRAINT "UQ_invoice_semanticId" UNIQUE ("semanticId")`);
 		await queryRunner.query(`CREATE INDEX "IDX_invoice_semanticId" ON "invoice" ("semanticId")`);
 
-		// Populate existing users with userNumber and initials
-		await this.populateExistingUsersPostgres(queryRunner);
-
-		// Populate existing invoices with semanticId
-		await this.populateExistingInvoicesPostgres(queryRunner);
+		// Populate existing users (userNumber, initials) and set lastInvoiceNumber from current invoice count
+		await this.populateExistingUsersAndLastInvoiceNumberPostgres(queryRunner);
 	}
 
 	/**
@@ -96,6 +97,9 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 	/**
 	 * SqliteDB and BetterSQlite3DB Up Migration
 	 *
+	 * Adds user columns and invoice.semanticId. Existing users get userNumber/initials and
+	 * lastInvoiceNumber from current invoice count. Existing invoices keep semanticId null.
+	 *
 	 * @param queryRunner
 	 */
 	public async sqliteUpQueryRunner(queryRunner: QueryRunner): Promise<any> {
@@ -104,14 +108,11 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 		await queryRunner.query(`ALTER TABLE "user" ADD "userNumber" integer`);
 		await queryRunner.query(`ALTER TABLE "user" ADD "lastInvoiceNumber" integer DEFAULT 0`);
 
-		// Add semanticId column to invoice table
+		// Add semanticId column to invoice table (nullable; existing rows stay null)
 		await queryRunner.query(`ALTER TABLE "invoice" ADD "semanticId" varchar`);
 
-		// Populate existing users with userNumber and initials
-		await this.populateExistingUsersSqlite(queryRunner);
-
-		// Populate existing invoices with semanticId
-		await this.populateExistingInvoicesSqlite(queryRunner);
+		// Populate existing users (userNumber, initials) and set lastInvoiceNumber from current invoice count
+		await this.populateExistingUsersAndLastInvoiceNumberSqlite(queryRunner);
 	}
 
 	/**
@@ -128,6 +129,9 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 	/**
 	 * MySQL Up Migration
 	 *
+	 * Adds user columns and invoice.semanticId. Existing users get userNumber/initials and
+	 * lastInvoiceNumber from current invoice count. Existing invoices keep semanticId null.
+	 *
 	 * @param queryRunner
 	 */
 	public async mysqlUpQueryRunner(queryRunner: QueryRunner): Promise<any> {
@@ -137,18 +141,15 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 		await queryRunner.query(`ALTER TABLE \`user\` ADD \`lastInvoiceNumber\` int DEFAULT 0`);
 		await queryRunner.query(`ALTER TABLE \`user\` ADD CONSTRAINT \`UQ_user_userNumber\` UNIQUE (\`userNumber\`)`);
 
-		// Add semanticId column to invoice table
+		// Add semanticId column to invoice table (nullable; existing rows stay null)
 		await queryRunner.query(`ALTER TABLE \`invoice\` ADD \`semanticId\` varchar(50) NULL`);
 		await queryRunner.query(
 			`ALTER TABLE \`invoice\` ADD CONSTRAINT \`UQ_invoice_semanticId\` UNIQUE (\`semanticId\`)`
 		);
 		await queryRunner.query(`CREATE INDEX \`IDX_invoice_semanticId\` ON \`invoice\` (\`semanticId\`)`);
 
-		// Populate existing users with userNumber and initials
-		await this.populateExistingUsersMysql(queryRunner);
-
-		// Populate existing invoices with semanticId
-		await this.populateExistingInvoicesMysql(queryRunner);
+		// Populate existing users (userNumber, initials) and set lastInvoiceNumber from current invoice count
+		await this.populateExistingUsersAndLastInvoiceNumberMysql(queryRunner);
 	}
 
 	/**
@@ -170,14 +171,16 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 	}
 
 	/**
-	 * Populate existing users with userNumber and initials for PostgreSQL
+	 * Populate existing users with userNumber and initials, and set lastInvoiceNumber
+	 * from current invoice count per user (PostgreSQL).
+	 * Existing invoices are not modified; semanticId remains null for them.
 	 */
-	private async populateExistingUsersPostgres(queryRunner: QueryRunner): Promise<void> {
-		// Assign sequential userNumber to existing users ordered by createdAt
+	private async populateExistingUsersAndLastInvoiceNumberPostgres(queryRunner: QueryRunner): Promise<void> {
+		// 1. Assign sequential userNumber and initials to existing users (ordered by createdAt)
 		await queryRunner.query(`
 			WITH numbered_users AS (
-				SELECT id, 
-					   UPPER(COALESCE(SUBSTRING("firstName" FROM 1 FOR 1), 'X')) || 
+				SELECT id,
+					   UPPER(COALESCE(SUBSTRING("firstName" FROM 1 FOR 1), 'X')) ||
 					   UPPER(COALESCE(SUBSTRING("lastName" FROM 1 FOR 1), 'X')) AS computed_initials,
 					   ROW_NUMBER() OVER (ORDER BY "createdAt" ASC) AS row_num
 				FROM "user"
@@ -189,16 +192,11 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 			FROM numbered_users nu
 			WHERE u.id = nu.id
 		`);
-	}
 
-	/**
-	 * Populate existing invoices with semanticId for PostgreSQL
-	 */
-	private async populateExistingInvoicesPostgres(queryRunner: QueryRunner): Promise<void> {
-		// First, count invoices per user and update lastInvoiceNumber
+		// 2. Set lastInvoiceNumber for each user to their current invoice count (so next invoice gets correct number)
 		await queryRunner.query(`
 			WITH invoice_counts AS (
-				SELECT "fromUserId", COUNT(*) as invoice_count
+				SELECT "fromUserId", COUNT(*) AS invoice_count
 				FROM "invoice"
 				WHERE "fromUserId" IS NOT NULL
 				GROUP BY "fromUserId"
@@ -208,30 +206,15 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 			FROM invoice_counts ic
 			WHERE u.id = ic."fromUserId"
 		`);
-
-		// Then, generate semanticId for existing invoices
-		await queryRunner.query(`
-			WITH numbered_invoices AS (
-				SELECT i.id,
-					   u."initials",
-					   u."userNumber",
-					   ROW_NUMBER() OVER (PARTITION BY i."fromUserId" ORDER BY i."createdAt" ASC) AS invoice_seq
-				FROM "invoice" i
-				JOIN "user" u ON i."fromUserId" = u.id
-				WHERE i."fromUserId" IS NOT NULL AND i."semanticId" IS NULL
-			)
-			UPDATE "invoice" inv
-			SET "semanticId" = ni."initials" || '-' || ni."userNumber" || '-' || ni.invoice_seq
-			FROM numbered_invoices ni
-			WHERE inv.id = ni.id
-		`);
 	}
 
 	/**
-	 * Populate existing users with userNumber and initials for SQLite
+	 * Populate existing users with userNumber and initials, and set lastInvoiceNumber
+	 * from current invoice count per user (SQLite / BetterSqlite3).
+	 * Existing invoices are not modified; semanticId remains null for them.
 	 */
-	private async populateExistingUsersSqlite(queryRunner: QueryRunner): Promise<void> {
-		// Get all users ordered by createdAt
+	private async populateExistingUsersAndLastInvoiceNumberSqlite(queryRunner: QueryRunner): Promise<void> {
+		// 1. Get all users ordered by createdAt and assign userNumber and initials
 		const users = await queryRunner.query(`
 			SELECT id, "firstName", "lastName"
 			FROM "user"
@@ -239,7 +222,6 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 			ORDER BY "createdAt" ASC
 		`);
 
-		// Update each user with sequential userNumber and computed initials
 		for (let i = 0; i < users.length; i++) {
 			const user = users[i];
 			const firstInitial = (user.firstName?.charAt(0) || 'X').toUpperCase();
@@ -253,56 +235,31 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 				user.id
 			]);
 		}
-	}
 
-	/**
-	 * Populate existing invoices with semanticId for SQLite
-	 */
-	private async populateExistingInvoicesSqlite(queryRunner: QueryRunner): Promise<void> {
-		// Get all users with invoices
-		const usersWithInvoices = await queryRunner.query(`
-			SELECT DISTINCT u.id, u."initials", u."userNumber"
-			FROM "user" u
-			JOIN "invoice" i ON i."fromUserId" = u.id
-			WHERE i."fromUserId" IS NOT NULL
+		// 2. Set lastInvoiceNumber for each user to their current invoice count
+		const invoiceCounts = await queryRunner.query(`
+			SELECT "fromUserId", COUNT(*) AS invoice_count
+			FROM "invoice"
+			WHERE "fromUserId" IS NOT NULL
+			GROUP BY "fromUserId"
 		`);
 
-		for (const user of usersWithInvoices) {
-			// Get invoices for this user ordered by createdAt
-			const invoices = await queryRunner.query(
-				`
-				SELECT id FROM "invoice"
-				WHERE "fromUserId" = ? AND "semanticId" IS NULL
-				ORDER BY "createdAt" ASC
-			`,
-				[user.id]
-			);
-
-			// Update each invoice with semanticId
-			for (let i = 0; i < invoices.length; i++) {
-				const invoice = invoices[i];
-				const invoiceSeq = i + 1;
-				const semanticId = `${user.initials}-${user.userNumber}-${invoiceSeq}`;
-
-				await queryRunner.query(`UPDATE "invoice" SET "semanticId" = ? WHERE id = ?`, [semanticId, invoice.id]);
-			}
-
-			// Update user's lastInvoiceNumber
+		for (const row of invoiceCounts) {
 			await queryRunner.query(`UPDATE "user" SET "lastInvoiceNumber" = ? WHERE id = ?`, [
-				invoices.length,
-				user.id
+				row.invoice_count,
+				row.fromUserId
 			]);
 		}
 	}
 
 	/**
-	 * Populate existing users with userNumber and initials for MySQL
+	 * Populate existing users with userNumber and initials, and set lastInvoiceNumber
+	 * from current invoice count per user (MySQL).
+	 * Existing invoices are not modified; semanticId remains null for them.
 	 */
-	private async populateExistingUsersMysql(queryRunner: QueryRunner): Promise<void> {
-		// Assign sequential userNumber to existing users ordered by createdAt
-		await queryRunner.query(`
-			SET @row_number = 0;
-		`);
+	private async populateExistingUsersAndLastInvoiceNumberMysql(queryRunner: QueryRunner): Promise<void> {
+		// 1. Assign sequential userNumber and initials to existing users (ordered by createdAt)
+		await queryRunner.query(`SET @row_number = 0`);
 
 		await queryRunner.query(`
 			UPDATE \`user\`
@@ -314,55 +271,17 @@ export class AddSemanticInvoiceId1770112331675 implements MigrationInterface {
 			WHERE \`userNumber\` IS NULL
 			ORDER BY \`createdAt\` ASC
 		`);
-	}
 
-	/**
-	 * Populate existing invoices with semanticId for MySQL
-	 */
-	private async populateExistingInvoicesMysql(queryRunner: QueryRunner): Promise<void> {
-		// Update lastInvoiceNumber for users with invoices
+		// 2. Set lastInvoiceNumber for each user to their current invoice count
 		await queryRunner.query(`
 			UPDATE \`user\` u
 			JOIN (
-				SELECT \`fromUserId\`, COUNT(*) as invoice_count
+				SELECT \`fromUserId\`, COUNT(*) AS invoice_count
 				FROM \`invoice\`
 				WHERE \`fromUserId\` IS NOT NULL
 				GROUP BY \`fromUserId\`
 			) ic ON u.id = ic.\`fromUserId\`
 			SET u.\`lastInvoiceNumber\` = ic.invoice_count
 		`);
-
-		// Generate semanticId for existing invoices using a temporary table approach
-		// First, get all invoices that need updating grouped by user
-		const usersWithInvoices = await queryRunner.query(`
-			SELECT DISTINCT u.id, u.\`initials\`, u.\`userNumber\`
-			FROM \`user\` u
-			JOIN \`invoice\` i ON i.\`fromUserId\` = u.id
-			WHERE i.\`fromUserId\` IS NOT NULL AND i.\`semanticId\` IS NULL
-		`);
-
-		for (const user of usersWithInvoices) {
-			// Get invoices for this user
-			const invoices = await queryRunner.query(
-				`
-				SELECT id FROM \`invoice\`
-				WHERE \`fromUserId\` = ? AND \`semanticId\` IS NULL
-				ORDER BY \`createdAt\` ASC
-			`,
-				[user.id]
-			);
-
-			// Update each invoice with semanticId
-			for (let i = 0; i < invoices.length; i++) {
-				const invoice = invoices[i];
-				const invoiceSeq = i + 1;
-				const semanticId = `${user.initials}-${user.userNumber}-${invoiceSeq}`;
-
-				await queryRunner.query(`UPDATE \`invoice\` SET \`semanticId\` = ? WHERE id = ?`, [
-					semanticId,
-					invoice.id
-				]);
-			}
-		}
 	}
 }

@@ -43,40 +43,26 @@
 				<div class="block mt-2">
 					<div class="row">
 						<div class="col-sm-6">
-							<!-- Estimate Number / Invoice Semantic ID -->
 							<div class="form-group">
-								<label for="inputInvoiceNumber" class="label required-asterisk">
+								<label for="inputInvoiceNumber" class="label">
 									<span>
-										{{
-											(isEstimate
-												? 'INVOICES_PAGE.ESTIMATE_NUMBER'
-												: 'INVOICES_PAGE.SEMANTIC_ID'
-											) | translate
-										}}
+										{{ (isEstimate ? 'INVOICES_PAGE.ESTIMATE_NUMBER' : 'INVOICES_PAGE.INVOICE_NUMBER' ) | translate }}
 									</span>
 								</label>
-								<ng-container *ngIf="isEstimate; else semanticIdInput">
-									<input
-										type="number"
-										[min]="0"
-										nbInput
-										[placeholder]="'INVOICES_PAGE.ESTIMATE_NUMBER' | translate"
-										formControlName="invoiceNumber"
-										id="inputInvoiceNumber"
-										fullWidth
-									/>
-								</ng-container>
-								<ng-template #semanticIdInput>
-									<input
-										type="text"
-										nbInput
-										[placeholder]="'INVOICES_PAGE.SEMANTIC_ID' | translate"
-										formControlName="semanticId"
-										id="inputSemanticId"
-										fullWidth
-										readonly
-									/>
-								</ng-template>
+								<input
+									type="number"
+									[min]="0"
+									nbInput
+									[placeholder]="
+										(isEstimate
+											? 'INVOICES_PAGE.ESTIMATE_NUMBER'
+											: 'INVOICES_PAGE.INVOICE_NUMBER'
+										) | translate
+									"
+									formControlName="invoiceNumber"
+									id="inputInvoiceNumber"
+									fullWidth
+								/>
 							</div>
 						</div>
 						<div class="col-sm-6">

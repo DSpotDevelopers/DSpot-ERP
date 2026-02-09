@@ -257,6 +257,13 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 	}
 
 	async create(input: IPartialEntity<Invoice>): Promise<Invoice> {
+
+		// If the invoice has an ID, then it is an update operation
+		// This is for support the existing invoice update behaviour
+		if(input.id) {
+			return await super.create(input);
+		}
+
 		return await retryQuery(async (): Promise<Invoice> => {
 			return await this.typeOrmRepository.manager.transaction(
 				'SERIALIZABLE',
