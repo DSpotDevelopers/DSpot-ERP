@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PageRouteRegistryService, PermissionsGuard } from '@gauzy/ui-core/core';
 import { ProposalTemplateComponent } from './components/proposal-template/proposal-template.component';
 
@@ -18,7 +18,8 @@ export const createJobProposalTemplateRoutes = (_pageRouteRegistryService: PageR
 			permissions: {
 				only: [PermissionsEnum.ORG_PROPOSAL_TEMPLATES_VIEW],
 				redirectTo: '/pages/jobs/search'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_PROPOSAL_TEMPLATE
 		}
 	}
 ];

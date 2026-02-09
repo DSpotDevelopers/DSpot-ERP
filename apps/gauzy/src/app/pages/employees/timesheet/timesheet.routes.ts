@@ -1,6 +1,7 @@
 import { Route } from '@angular/router';
 import { TimesheetLayoutComponent } from './layout/layout.component';
 import { PageRouteRegistryService } from '@gauzy/ui-core/core';
+import { FeatureEnum } from '@gauzy/contracts';
 
 /**
  * Create and configures routes for the timesheet module.
@@ -12,7 +13,7 @@ export const createTimesheetRoutes = (_pageRouteRegistryService: PageRouteRegist
 	{
 		path: '',
 		component: TimesheetLayoutComponent,
-		data: { tabsetId: 'timesheet' },
+		data: { tabsetId: 'timesheet', featureKey: FeatureEnum.FEATURE_EMPLOYEE_TIMESHEETS },
 		children: [
 			{
 				path: '',

@@ -14,6 +14,7 @@ import {
 	NavMenuBuilderService,
 	NavMenuSectionItem,
 	PermissionsService,
+	RouteFeatureService,
 	SocketConnectionService,
 	Store,
 	UsersService
@@ -53,12 +54,14 @@ export class PagesComponent extends TranslationBaseComponent implements AfterVie
 		private readonly _integrationEntitySettingServiceStoreService: IntegrationEntitySettingServiceStoreService,
 		private readonly _navMenuBuilderService: NavMenuBuilderService,
 		private readonly _permissionsService: PermissionsService,
-		private readonly _socketConnectionService: SocketConnectionService
+		private readonly _socketConnectionService: SocketConnectionService,
+		private readonly _routeFeatureService: RouteFeatureService
 	) {
 		super(translate);
 	}
 
 	async ngOnInit() {
+		const featureKey = this._routeFeatureService.currentFeatureKey;
 		this.route.data
 			.pipe(
 				filter(({ user }: Data) => !!user),
@@ -129,6 +132,17 @@ export class PagesComponent extends TranslationBaseComponent implements AfterVie
 			// Add the report menu items to the navigation menu
 			this.addOrRemoveOrganizationReportsMenuItems();
 		});
+
+		this.store.featureToggles$
+			.pipe(
+				tap(() => {
+					if (featureKey && !this.store.hasFeatureEnabled(featureKey)) {
+						this.router.navigate(['/pages/help']);
+					}
+				}),
+				untilDestroyed(this)
+			)
+			.subscribe();
 
 		if (this.store.token) this._socketConnectionService.connect();
 	}
