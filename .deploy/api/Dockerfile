@@ -117,6 +117,7 @@ WORKDIR /srv/gauzy
 
 # Copy related project files and configuration files
 COPY --chown=node:node . .
+COPY --chown=node:node LICENSE /srv/gauzy/LICENSE
 
 # Set the environment variables
 ENV CI=true \
@@ -133,6 +134,8 @@ FROM ${DEPENDENCIES_IMAGE:-"no-image"}:latest-api-prod AS production
 
 ARG GIT_HASH
 WORKDIR /srv/gauzy
+
+COPY --chown=node:node --from=builder /srv/gauzy/LICENSE /srv/gauzy/LICENSE
 
 # Copy the built API items and prepare dependencies
 COPY --chown=node:node --from=builder /srv/gauzy/dist/apps/api/assets /srv/gauzy/dist/apps/api/public /srv/gauzy/dist/apps/api/main.* ./

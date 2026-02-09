@@ -71,6 +71,7 @@ USER node
 
 # Copy related project files and configuration files
 COPY --chown=node:node . .
+COPY --chown=node:node LICENSE /srv/gauzy/LICENSE
 
 # Set the environment variables
 ENV CI=true \
@@ -86,6 +87,8 @@ RUN yarn build:gauzy:prod:docker
 FROM nginx:alpine AS production
 
 WORKDIR /srv/gauzy
+
+COPY --chown=nginx:nginx --from=builder /srv/gauzy/LICENSE /srv/gauzy/LICENSE
 
 # Copy the built API items and prepare dependencies
 COPY --chown=nginx:nginx .deploy/webapp/nginx.compose.conf /etc/nginx/conf.d/compose.conf.template
