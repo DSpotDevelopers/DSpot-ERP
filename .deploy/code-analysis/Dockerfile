@@ -1,4 +1,4 @@
-# DSpot ERP image to run code analysis
+# Gauzy image to run code analysis
 
 ARG DEPENDENCIES_IMAGE
 
