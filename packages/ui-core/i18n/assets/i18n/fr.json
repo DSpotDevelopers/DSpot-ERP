@@ -3261,7 +3261,12 @@
 			"END_DATE": "Date de fin",
 			"SELECT_END_DATE": "Sélectionner la date de fin",
 			"DESCRIPTION": "Description",
-			"IS_FAVORITE": "Favori"
+			"IS_FAVORITE": "Favori",
+			"VALIDATION": {
+				"NAME_REQUIRED": "Le nom du module est obligatoire et ne peut pas être vide",
+				"START_DATE_REQUIRED": "La date de début est obligatoire",
+				"END_DATE_REQUIRED": "La date de fin est obligatoire"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {

@@ -3404,7 +3404,12 @@
 			"SELECT_MANAGER": "اختر مديرًا",
 			"ORGANIZATION_SPRINTS": "سبرينتات المؤسسة",
 			"SELECT_SPRINTS": "اختر السبرينتات",
-			"IS_FAVORITE": "مفضل"
+			"IS_FAVORITE": "مفضل",
+			"VALIDATION": {
+				"NAME_REQUIRED": "اسم الوحدة مطلوب ولا يمكن أن يكون فارغًا",
+				"START_DATE_REQUIRED": "تاريخ البدء مطلوب",
+				"END_DATE_REQUIRED": "تاريخ الانتهاء مطلوب"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {

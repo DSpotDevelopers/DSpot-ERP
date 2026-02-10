@@ -3415,7 +3415,12 @@
 			"SELECT_MANAGER": "Manager auswählen",
 			"ORGANIZATION_SPRINTS": "Organisation Sprints",
 			"SELECT_SPRINTS": "Sprints auswählen",
-			"IS_FAVORITE": "Favorit"
+			"IS_FAVORITE": "Favorit",
+			"VALIDATION": {
+				"NAME_REQUIRED": "Der Modulname ist erforderlich und darf nicht leer sein",
+				"START_DATE_REQUIRED": "Das Startdatum ist erforderlich",
+				"END_DATE_REQUIRED": "Das Enddatum ist erforderlich"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {

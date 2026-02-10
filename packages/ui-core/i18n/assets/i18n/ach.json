@@ -3032,7 +3032,12 @@
 			"END_DATE": "Dwe kede mogo",
 			"SELECT_END_DATE": "Yera dwe kede mogo",
 			"DESCRIPTION": "Kweyo",
-			"IS_FAVORITE": "Fɛrɛbɔ"
+			"IS_FAVORITE": "Fɛrɛbɔ",
+			"VALIDATION": {
+				"NAME_REQUIRED": "Nying me module mito, pe romo bedo peke",
+				"START_DATE_REQUIRED": "Dwe kede ka mito",
+				"END_DATE_REQUIRED": "Dwe kede mogo mito"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {

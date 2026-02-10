@@ -76,7 +76,7 @@
 
 						<div *ngIf="form.get('name')?.errors?.required && form.get('name')?.touched"
 							class="invalid-feedback d-block">
-							{{ 'Module name is required and cannot be empty' | translate }}
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.NAME_REQUIRED' | translate }}
 						</div>
 					</div>
 				</div>
@@ -147,9 +147,8 @@
 
 						<div *ngIf="form.get('startDate')?.errors?.required && form.get('startDate')?.touched"
 							class="invalid-feedback d-block">
-							{{ 'Start date is required' | translate }}
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.START_DATE_REQUIRED' | translate }}
 						</div>
-
 						<nb-datepicker #startDatePicker></nb-datepicker>
 					</div>
 				</div>
@@ -164,7 +163,7 @@
 
 						<div *ngIf="form.get('endDate')?.errors?.required && form.get('endDate')?.touched"
 							class="invalid-feedback d-block">
-							{{ 'End date is required' | translate }}
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.END_DATE_REQUIRED' | translate }}
 						</div>
 						<nb-datepicker #endDatePicker></nb-datepicker>
 					</div>

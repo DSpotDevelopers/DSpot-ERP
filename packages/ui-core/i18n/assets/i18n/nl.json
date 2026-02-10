@@ -3415,7 +3415,12 @@
 			"SELECT_MANAGER": "Selecteer een manager",
 			"ORGANIZATION_SPRINTS": "Organisatiesprints",
 			"SELECT_SPRINTS": "Selecteer sprints",
-			"IS_FAVORITE": "Favoriet"
+			"IS_FAVORITE": "Favoriet",
+			"VALIDATION": {
+				"NAME_REQUIRED": "Modulenaam is verplicht en mag niet leeg zijn",
+				"START_DATE_REQUIRED": "Startdatum is verplicht",
+				"END_DATE_REQUIRED": "Einddatum is verplicht"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {

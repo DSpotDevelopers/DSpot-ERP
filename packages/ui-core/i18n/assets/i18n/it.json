@@ -3415,7 +3415,12 @@
 			"SELECT_MANAGER": "Seleziona un manager",
 			"ORGANIZATION_SPRINTS": "Sprint organizzazione",
 			"SELECT_SPRINTS": "Seleziona sprint",
-			"IS_FAVORITE": "Preferito"
+			"IS_FAVORITE": "Preferito",
+			"VALIDATION": {
+				"NAME_REQUIRED": "Il nome del modulo è obbligatorio e non può essere vuoto",
+				"START_DATE_REQUIRED": "La data di inizio è obbligatoria",
+				"END_DATE_REQUIRED": "La data di fine è obbligatoria"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {

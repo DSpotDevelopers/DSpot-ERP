@@ -3415,7 +3415,12 @@
 			"SELECT_MANAGER": "选择经理",
 			"ORGANIZATION_SPRINTS": "组织冲刺",
 			"SELECT_SPRINTS": "选择冲刺",
-			"IS_FAVORITE": "收藏"
+			"IS_FAVORITE": "收藏",
+			"VALIDATION": {
+				"NAME_REQUIRED": "模块名称为必填项，不能为空",
+				"START_DATE_REQUIRED": "开始日期为必填项",
+				"END_DATE_REQUIRED": "结束日期为必填项"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {
