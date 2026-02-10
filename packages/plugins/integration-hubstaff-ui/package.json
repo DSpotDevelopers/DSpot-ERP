@@ -9,11 +9,11 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/DSpotDevelopers/gauzy",
+		"url": "https://repo.ciberos.com/dspot/erp/dspot-erp",
 		"directory": "packages/plugins/integration-hubstaff-ui"
 	},
 	"bugs": {
-		"url": "https://github.com/DSpotDevelopers/gauzy/issues"
+		"url": "https://repo.ciberos.com/dspot/erp/dspot-erp/issues"
 	},
 	"contributors": [
 		{
