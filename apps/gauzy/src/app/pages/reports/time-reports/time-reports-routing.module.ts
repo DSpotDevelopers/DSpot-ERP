@@ -13,6 +13,9 @@ const routes: Routes = [
 			datePicker: {
 				unitOfTime: 'week'
 			},
+			selectors: {
+				team: false
+			},
 			featureKey: FeatureEnum.FEATURE_REPORT
 		},
 		resolve: {
