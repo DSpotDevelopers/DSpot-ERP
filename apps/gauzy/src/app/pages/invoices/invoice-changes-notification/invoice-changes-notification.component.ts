@@ -41,7 +41,9 @@ export class InvoiceChangesNotificationComponent extends TranslationBaseComponen
 		try {
 			await navigator.clipboard.writeText(String(value));
 			this.toastrService.success(
-				this.getTranslation('INVOICES_PAGE.CHANGES_NOTIFICATION.COPIED_TO_CLIPBOARD', { field: fieldLabel }),
+				this.getTranslation('INVOICES_PAGE.CHANGES_NOTIFICATION.COPIED_TO_CLIPBOARD', {
+					field: this.getTranslation(fieldLabel)
+				 }),
 				this.getTranslation('TOASTR.TITLE.SUCCESS')
 			);
 		} catch (error) {

@@ -408,7 +408,6 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 
 			invoice: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE', { lang: language }),
 			estimate: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ESTIMATE', { lang: language }),
-			semanticId: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE_SEMANTIC_ID', { lang: language }),
 			number: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.NUMBER', { lang: language }),
 			from: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.FROM', { lang: language }),
 			to: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.TO', { lang: language }),
@@ -478,7 +477,6 @@ export class InvoiceService extends TenantAwareCrudService<Invoice> {
 
 			invoice: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE', { lang: language }),
 			estimate: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.ESTIMATE', { lang: language }),
-			semanticId: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.INVOICE_SEMANTIC_ID', { lang: language }),
 			number: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.NUMBER', { lang: language }),
 			from: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.FROM', { lang: language }),
 			to: this.i18n.translate('USER_ORGANIZATION.INVOICES_PAGE.TO', { lang: language }),

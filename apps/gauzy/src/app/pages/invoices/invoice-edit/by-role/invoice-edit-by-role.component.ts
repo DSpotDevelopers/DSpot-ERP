@@ -74,6 +74,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 		data: any,
 		isSelected: false
 	};
+	isLegacyInvoice: boolean = false;
 
 	private _isEstimate = false;
 	@Input() set isEstimate(val: boolean) {
@@ -175,9 +176,19 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				{ tenantId, organizationId }
 			)
 			.then(async (invoice: IInvoice) => {
+				this.isLegacyInvoice = !invoice.semanticId;
 				this.invoice = invoice;
 				this.invoiceItems = invoice?.invoiceItems;
 				this.discountAfterTax = invoice?.toOrganization?.discountAfterTax;
+
+				if(!this.isLegacyInvoice) {
+					const semanticIdControl = this.form.get('semanticId');
+
+					if(semanticIdControl) {
+						semanticIdControl.setValidators([Validators.required]);
+						semanticIdControl.updateValueAndValidity();
+					}
+				}
 
 				await this._loadOrganizationData().finally(() => this.updateValueAndValidity(invoice));
 			})
@@ -196,8 +207,8 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 		this.form = this.fb.group({
 			id: ['', Validators.required],
 			invoiceDate: [this.organizationSettingService.getDateFromOrganizationSettings(), Validators.required],
-			semanticId: [this.invoice?.semanticId, Validators.required],
-			invoiceNumber: [this.invoice?.invoiceNumber, Validators.compose([Validators.required, Validators.min(1)])],
+			semanticId: [{ value: this.invoice?.semanticId, disabled: true }],
+			invoiceNumber: [{ value: this.invoice?.invoiceNumber, disabled: !this.isEstimate }, Validators.compose([Validators.required, Validators.min(1)])],
 			dueDate: ['', Validators.required],
 			discountValue: ['', Validators.compose([Validators.required, Validators.min(0)])],
 			tax: ['', Validators.compose([Validators.required, Validators.min(0)])],
@@ -455,6 +466,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 	private async updateInvoice(status: string, sendTo?: string) {
 		const tableData = await this.smartTableSource.getAll();
 		if (tableData.length) {
+			const { invoiceNumber } = this.form.getRawValue();
 			const invoiceData = this.form.value;
 			if (
 				!invoiceData.invoiceDate ||
@@ -467,16 +479,16 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			const { tenantId } = this.store.user;
 			const { id: organizationId } = this.organization;
 
-			const invoiceNumber = await this.invoicesService.existsInvoiceNumber(invoiceData.invoiceNumber, [this.invoice.id]);
+			const invoiceNumberExists = await this.invoicesService.existsInvoiceNumber(invoiceData.invoiceNumber, [this.invoice.id]);
 
-			if (invoiceNumber.exists) {
+			if (invoiceNumberExists.exists) {
 				this.toastrService.danger('INVOICES_PAGE.INVOICE_NUMBER_DUPLICATE');
 				return;
 			}
 
 			const { invoiceDate } = this.form.getRawValue();
 			await this.invoicesService.update(this.invoice.id, {
-				invoiceNumber: invoiceData.invoiceNumber,
+				invoiceNumber,
 				invoiceDate: moment(invoiceData.invoiceDate).startOf('day').toDate(),
 				dueDate: moment(invoiceData.dueDate).endOf('day').toDate(),
 				discountValue: invoiceData.discountValue,
@@ -615,6 +627,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 	async sendViaEmail() {
 		const tableData = await this.smartTableSource.getAll();
 		if (tableData.length) {
+			const { invoiceNumber } = this.form.getRawValue();
 			const invoiceData = this.form.value;
 			if (
 				!invoiceData.invoiceDate ||
@@ -627,7 +640,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			const { tenantId } = this.store.user;
 			const { id: organizationId } = this.organization;
 			const invoiceExists = await this.invoicesService.getAll({
-				invoiceNumber: invoiceData.invoiceNumber,
+				invoiceNumber,
 				organizationId,
 				tenantId
 			});
@@ -639,7 +652,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 
 			const invoice = {
 				id: invoiceData.id,
-				invoiceNumber: invoiceData.invoiceNumber,
+				invoiceNumber,
 				semanticId: this.invoice.semanticId,
 				invoiceDate: invoiceData.invoiceDate,
 				currency: this.invoice?.currency,

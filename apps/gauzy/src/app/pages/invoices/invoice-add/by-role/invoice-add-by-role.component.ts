@@ -221,8 +221,8 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 	initializeForm() {
 		this.form = this.fb.group({
 			invoiceDate: [this.organizationSettingService.getDateFromOrganizationSettings(), Validators.required],
-			semanticId: [this.formSemanticId, Validators.compose([Validators.required, Validators.pattern(/\S+/)]),], // Validators.pattern(/\S+/) is used to ensure the semantic ID is not empty
-			invoiceNumber: [this.formInvoiceNumber, Validators.compose([Validators.required, Validators.min(1)])],
+			semanticId: [{ value: this.formSemanticId, disabled: true },Validators.compose([Validators.required, Validators.pattern(/\S+/)]),], // Validators.pattern(/\S+/) is used to ensure the semantic ID is not empty
+			invoiceNumber: [{ value: this.formInvoiceNumber, disabled: !this.isEstimate }, Validators.compose([Validators.required, Validators.min(1)])],
 			dueDate: [this.getNextMonth(), Validators.required],
 			discountValue: [0, Validators.compose([Validators.required, Validators.min(0)])],
 			tax: [0, Validators.compose([Validators.required, Validators.min(0)])],
@@ -474,9 +474,8 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		}
 		const { id: organizationId } = this.organization;
 		const { tenantId } = this.store.user;
+		const { semanticId, invoiceNumber } = this.form.getRawValue();
 		const {
-			semanticId,
-			invoiceNumber,
 			invoiceDate,
 			dueDate,
 			discountValue,
@@ -491,8 +490,8 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 
 		try {
 			const createdInvoice = await this.invoicesService.addOwn({
-				semanticId,
-				invoiceNumber,
+				semanticId: semanticId,
+				invoiceNumber: invoiceNumber,
 				invoiceDate: moment(invoiceDate).startOf('day').toDate(),
 				dueDate: moment(dueDate).endOf('day').toDate(),
 				currency: this.currency,
@@ -609,8 +608,9 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 			return;
 		}
 
+		const { semanticId: originalSemanticId } = this.form.getRawValue();
+
 		const {
-			semanticId: originalSemanticId,
 			invoiceDate,
 			dueDate
 		} = this.form.value;
@@ -630,11 +630,12 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		// Check if invoice fields changed and show notification
 		const changes: IInvoiceFieldChange[] = [];
 
-		// Check semantic ID change first (only for invoices, not estimates)
-		if (!this.isEstimate && this.createdInvoice && originalSemanticId !== this.createdInvoice.semanticId) {
+		const isSemanticIdChanged = originalSemanticId && originalSemanticId !== this.createdInvoice.semanticId;
+
+		if (!this.isEstimate && this.createdInvoice && isSemanticIdChanged) {
 			changes.push({
 				field: 'semanticId',
-				label: 'INVOICES_PAGE.SEMANTIC_ID',
+				label: 'INVOICES_PAGE.INVOICE_NUMBER',
 				oldValue: originalSemanticId,
 				newValue: this.createdInvoice.semanticId,
 				copyable: true
@@ -716,9 +717,8 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 		}
 		const { id: organizationId } = this.organization;
 		const { tenantId } = this.store.user;
+		const { semanticId, invoiceNumber } = this.form.getRawValue();
 		const {
-			semanticId,
-			invoiceNumber,
 			invoiceDate,
 			dueDate,
 			discountValue,

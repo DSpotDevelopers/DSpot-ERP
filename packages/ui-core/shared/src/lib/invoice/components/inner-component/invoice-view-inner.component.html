@@ -22,12 +22,12 @@
 							<div class="font-weight-bold mb-4">
 								<h4 class="d-inline mr-2">
 									{{
-										(!isEstimate ? 'INVOICES_PAGE.SEMANTIC_ID' : 'INVOICES_PAGE.ESTIMATE_NUMBER')
+										(isEstimate ? 'INVOICES_PAGE.ESTIMATE_NUMBER' : 'INVOICES_PAGE.INVOICE_NUMBER')
 											| translate
 											| titlecase
 									}}:
 								</h4>
-								<h4 class="d-inline">{{ isEstimate ? invoice?.invoiceNumber : invoice?.semanticId }}</h4>
+								<h4 class="d-inline">{{ invoice?.semanticId ?? invoice?.invoiceNumber }}</h4>
 							</div>
 							<div class="d-flex">
 								<div class="font-weight-bold mr-2">

@@ -402,6 +402,14 @@ export class UserService extends TenantAwareCrudService<User> {
 				entity['hash'] = await this.getPasswordHash(entity['hash']);
 			}
 
+			const shouldUpdateInitials = !user
+				|| user.firstName !== entity.firstName
+				|| user.lastName !== entity.lastName;
+
+			if (shouldUpdateInitials) {
+				entity.initials = this.generateInitials(entity.firstName, entity.lastName);
+			}
+
 			// Save the updated user entity
 			await this.save(entity);
 

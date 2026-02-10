@@ -127,7 +127,6 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 	public searchForm: UntypedFormGroup = InvoicesByRoleComponent.searchBuildForm(this.fb);
 	static searchBuildForm(fb: UntypedFormBuilder): UntypedFormGroup {
 		return fb.group({
-			semanticId: [''],
 			invoiceNumber: [''],
 			invoiceDate: [''],
 			dueDate: [''],
@@ -560,28 +559,6 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 
 	private _loadSmartTableSettings() {
 		const pagination: IPaginationBase = this.getPagination();
-
-		const firstColumn: IColumns = this.isEstimate
-			? {
-				invoiceNumber: {
-					title: this.getTranslation('INVOICES_PAGE.ESTIMATES.ESTIMATE_NUMBER'),
-					type: 'custom',
-					width: '17%',
-					renderComponent: NotesWithTagsComponent,
-					componentInitFunction: (instance: NotesWithTagsComponent, cell: Cell) => {
-						instance.rowData = cell.getRow().getData();
-						instance.value = cell.getRawValue();
-					}
-				}
-			} : {
-				semanticId: {
-					title: this.getTranslation('INVOICES_PAGE.SEMANTIC_ID'),
-					type: 'text',
-					width: '17%',
-					isFilterable: false
-				}
-			};
-
 		this.settingsSmartTable = {
 			pager: {
 				display: false,
@@ -595,7 +572,22 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 				this.isEstimate ? 'SM_TABLE.NO_DATA.ESTIMATE' : 'SM_TABLE.NO_DATA.INVOICE'
 			),
 			columns: {
-				...firstColumn,
+				invoiceNumber: {
+					title: this.isEstimate
+						? this.getTranslation('INVOICES_PAGE.ESTIMATES.ESTIMATE_NUMBER')
+						: this.getTranslation('INVOICES_PAGE.INVOICE_NUMBER'),
+					type: 'custom',
+					width: '17%',
+					renderComponent: NotesWithTagsComponent,
+					componentInitFunction: (instance: NotesWithTagsComponent, cell: Cell) => {
+						const row = cell.getRow().getData();
+						instance.rowData = {
+							...row,
+							invoiceNumber: row.semanticId ?? row.invoiceNumber,
+						};
+						instance.value = row.semanticId ?? row.invoiceNumber;
+					}
+				}
 			}
 		};
 		if (
@@ -754,18 +746,16 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 	}
 
 	search() {
-		const { semanticId, dueDate, invoiceNumber, invoiceDate, totalValue, currency, status, tags = [] } = this.searchForm.value;
-
-		// Filter by semantic ID
-		if (semanticId) {
-			this.setFilter({ field: 'semanticId', search: semanticId }, false);
-		}
+		const { dueDate, invoiceNumber, invoiceDate, totalValue, currency, status, tags = [] } = this.searchForm.value;
 
 		if (invoiceNumber) {
 			const invoiceNumberAsNumber = Number(invoiceNumber);
-			if (!isNaN(invoiceNumberAsNumber)) {
-				this.setFilter({ field: 'invoiceNumber', search: invoiceNumberAsNumber }, false);
-			}
+
+			const filter = !isNaN(invoiceNumberAsNumber)
+			? { field: 'invoiceNumber', search: invoiceNumberAsNumber }
+			: { field: 'semanticId', search: invoiceNumber };
+
+			this.setFilter(filter, false);
 		}
 
 		// Filter by invoice date

@@ -160,13 +160,12 @@ export async function generateInvoicePdfDefinition(
 					width: '50%',
 					alignment: 'right',
 					stack: [
-						// Show Estimate Number or Invoice Semantic ID
 						{
 							fontSize: 16,
 							bold: true,
-							text: invoice.isEstimate
-							? `${translatedText.estimate} ${translatedText.number}: ${invoice.invoiceNumber}`
-							: `${translatedText.semanticId}: ${invoice.semanticId}`
+							text: `${invoice.isEstimate ? translatedText.estimate : translatedText.invoice} ${
+								translatedText.number
+							}: ${invoice.semanticId ?? invoice.invoiceNumber}`
 						}
 					]
 				}

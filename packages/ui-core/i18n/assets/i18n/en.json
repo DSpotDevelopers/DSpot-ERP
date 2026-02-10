@@ -3067,7 +3067,6 @@
 		"COMMENT": "Comment",
 		"COMMENTS": "Comments",
 		"HEADER": "Invoices",
-		"SEMANTIC_ID": "Invoice ID",
 		"INVOICE_NUMBER": "Invoice Number",
 		"ESTIMATE_NUMBER": "Estimate Number",
 		"INVOICE_DATE": "Invoice Date",

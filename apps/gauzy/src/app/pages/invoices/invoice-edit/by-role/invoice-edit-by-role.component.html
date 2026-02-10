@@ -31,12 +31,12 @@
 										{{
 											(isEstimate
 												? 'INVOICES_PAGE.ESTIMATE_NUMBER'
-												: 'INVOICES_PAGE.SEMANTIC_ID'
+												: 'INVOICES_PAGE.INVOICE_NUMBER'
 											) | translate
 										}}
 									</span>
 								</label>
-								<ng-container *ngIf="isEstimate; else semanticIdInput">
+								<ng-container *ngIf="isEstimate; else invoiceNumberInput">
 									<input
 										type="number"
 										[min]="0"
@@ -47,11 +47,22 @@
 										fullWidth
 									/>
 								</ng-container>
-								<ng-template #semanticIdInput>
+								<ng-template #invoiceNumberInput>
 									<input
+										*ngIf="isLegacyInvoice"
 										type="text"
 										nbInput
-										[placeholder]="'INVOICES_PAGE.SEMANTIC_ID' | translate"
+										[placeholder]="'INVOICES_PAGE.INVOICE_NUMBER' | translate"
+										formControlName="invoiceNumber"
+										id="inputInvoiceNumber"
+										fullWidth
+										readonly
+									/>
+									<input
+										*ngIf="!isLegacyInvoice"
+										type="text"
+										nbInput
+										[placeholder]="'INVOICES_PAGE.INVOICE_NUMBER' | translate"
 										formControlName="semanticId"
 										id="inputSemanticId"
 										fullWidth

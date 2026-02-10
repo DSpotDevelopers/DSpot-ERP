@@ -145,7 +145,7 @@ export class EmailService {
 				to: `${email}`,
 				attachments: [
 					{
-						filename: `${isEstimate ? 'Estimate' : 'Invoice'}-${isEstimate ? invoiceNumber : semanticId}.pdf`,
+						filename: `${isEstimate ? 'Estimate' : 'Invoice'}-${semanticId ?? invoiceNumber}.pdf`,
 						content: base64,
 						encoding: 'base64'
 					}

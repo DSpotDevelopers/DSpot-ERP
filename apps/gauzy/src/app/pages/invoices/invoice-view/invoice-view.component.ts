@@ -130,7 +130,7 @@ export class InvoiceViewComponent extends TranslationBaseComponent implements On
 			: this.getTranslation('INVOICES_PAGE.INVOICE');
 
 		// Construct the filename based on the file type and invoice number
-		const pdfTitle = this.isEstimate ? this.invoice.invoiceNumber : this.invoice.semanticId;
+		const pdfTitle = this.invoice.semanticId ?? this.invoice.invoiceNumber;
 		const filename = `${fileType}-${pdfTitle}.pdf`;
 
 		// Download the file using the FileSaver library

@@ -73,7 +73,7 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 
 					this.invoiceChanges.push({
 						field: 'semanticId',
-						label: 'INVOICES_PAGE.SEMANTIC_ID',
+						label: 'INVOICES_PAGE.INVOICE_NUMBER',
 						oldValue: originalSemanticId,
 						newValue: createdInvoice.semanticId,
 						copyable: true

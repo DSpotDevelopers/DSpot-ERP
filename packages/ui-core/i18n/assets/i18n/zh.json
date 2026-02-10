@@ -3065,7 +3065,6 @@
 		"COMMENT": "评论",
 		"COMMENTS": "评论",
 		"HEADER": "发票",
-		"SEMANTIC_ID": "发票ID",
 		"INVOICE_NUMBER": "发票编号",
 		"ESTIMATE_NUMBER": "估算编号",
 		"INVOICE_DATE": "发票日期",
