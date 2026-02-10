@@ -1,4 +1,4 @@
-# DSpot ERP Platform UI
+# Ever Gauzy Platform UI
 
 ARG DEPENDENCIES_IMAGE
 

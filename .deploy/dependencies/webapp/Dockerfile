@@ -1,4 +1,4 @@
-# DSpot ERP dependencies image
+# Gauzy dependencies image
 
 FROM node:20.11.1-alpine3.19 AS gauzy-webapp-deps
 
