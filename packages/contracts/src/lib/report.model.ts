@@ -1,4 +1,8 @@
-import { IBaseEntityModel, IBasePerTenantAndOrganizationEntityModel, IBaseRelationsEntityModel } from './base-entity.model';
+import {
+	IBaseEntityModel,
+	IBasePerTenantAndOrganizationEntityModel,
+	IBaseRelationsEntityModel
+} from './base-entity.model';
 import { IEmployee } from './employee.model';
 
 export interface IReport extends IBaseEntityModel {
@@ -30,14 +34,14 @@ export interface IGetReportCategory extends IBasePerTenantAndOrganizationEntityM
 	where?: IReport;
 }
 
-export interface IGetReport extends IGetReportCategory { }
+export type IGetReport = IGetReportCategory;
 
 export interface UpdateReportMenuInput extends IBasePerTenantAndOrganizationEntityModel {
 	reportId?: string;
 	isEnabled?: boolean;
 }
 
-export interface GetReportMenuItemsInput extends IBasePerTenantAndOrganizationEntityModel { }
+export type GetReportMenuItemsInput = IBasePerTenantAndOrganizationEntityModel;
 
 export interface ReportDayData {
 	employee?: IEmployee;
@@ -50,7 +54,8 @@ export enum ReportGroupFilterEnum {
 	date = 'date',
 	employee = 'employee',
 	project = 'project',
-	client = 'client'
+	client = 'client',
+	task = 'task'
 }
 
 export type ReportGroupByFilter = keyof typeof ReportGroupFilterEnum;

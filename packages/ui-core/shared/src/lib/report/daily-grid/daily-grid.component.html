@@ -15,6 +15,9 @@
 				<nb-option [value]="ReportGroupFilterEnum.client">
 					{{ 'REPORT_PAGE.CLIENT' | translate }}
 				</nb-option>
+				<nb-option [value]="ReportGroupFilterEnum.task">
+					{{ 'REPORT_PAGE.TO_DO' | translate }}
+				</nb-option>
 			</nb-select>
 		</div>
 		<div class="label">
@@ -26,7 +29,9 @@
 				class="action info-text-1"
 				(click)="exportToCsv()"
 				[disabled]="
-					dailyLogs && dailyLogs.length && groupBy === ReportGroupFilterEnum.date
+					dailyLogs &&
+					dailyLogs.length &&
+					(groupBy === ReportGroupFilterEnum.date || groupBy === ReportGroupFilterEnum.task)
 						? dailyLogs.length <= 0
 						: true
 				"
@@ -103,6 +108,25 @@
 								></nb-badge>
 							</div>
 						</ng-container>
+						<ng-container *ngSwitchCase="ReportGroupFilterEnum.task">
+							<div class="responsive-table-row employee-column">
+								<ng-container
+									*ngTemplateOutlet="taskEl; context: { $implicit: day?.task }"
+								></ng-container>
+							</div>
+							<div class="responsive-table-row project-column"></div>
+							<div class="responsive-table-row project-column"></div>
+							<div class="responsive-table-row todo-column header"></div>
+							<div class="responsive-table-row time-column">
+								<span>{{ day?.sum | durationFormat }}</span>
+							</div>
+							<div class="responsive-table-row activity-column">
+								<nb-badge
+									[status]="getStatus(day?.activity || 0)"
+									[text]="(day?.activity || 0) + '%'"
+								></nb-badge>
+							</div>
+						</ng-container>
 						<ng-container *ngSwitchDefault>
 							<div class="responsive-table-row employee-column">
 								<ng-container
@@ -143,6 +167,11 @@
 						<ng-container *ngSwitchCase="ReportGroupFilterEnum.client">
 							<ng-container
 								*ngTemplateOutlet="groupByClientCardEl; context: { $implicit: day }"
+							></ng-container>
+						</ng-container>
+						<ng-container *ngSwitchCase="ReportGroupFilterEnum.task">
+							<ng-container
+								*ngTemplateOutlet="groupByTaskCardEl; context: { $implicit: day }"
 							></ng-container>
 						</ng-container>
 						<ng-container *ngSwitchDefault>
@@ -494,6 +523,93 @@
 		</div>
 	</ng-template>
 
+	<ng-template class="table-template" let-taskGroup #groupByTaskCardEl>
+		<ng-container *ngFor="let day of taskGroup.logs">
+			<ng-container *ngFor="let projectLog of day.projectLogs">
+				<div class="cart-body project-row" *ngFor="let employeeLog of projectLog.employeeLogs">
+					<div class="table-row" *ngFor="let task of employeeLog.tasks">
+						<ng-container
+							*ngIf="
+								(!taskGroup.task && !task.task) ||
+								(taskGroup.task && task.task && task.task.id === taskGroup.task.id)
+							"
+						>
+							<div class="table-inner-wrapper">
+								<div class="responsive-table-row employee-column">
+									<div class="responsive-table-header">
+										{{ 'REPORT_PAGE.DATE' | translate }}
+									</div>
+									<div class="responsive-table-content">
+										<ng-container
+											*ngTemplateOutlet="dateEl; context: { $implicit: day.date }"
+										></ng-container>
+									</div>
+								</div>
+								<div class="responsive-table-row employee-column">
+									<div class="responsive-table-header">
+										{{ 'REPORT_PAGE.EMPLOYEE' | translate }}
+									</div>
+									<div class="responsive-table-content">
+										<ng-container
+											*ngTemplateOutlet="employeeEl; context: { $implicit: employeeLog.employee }"
+										></ng-container>
+									</div>
+								</div>
+								<div class="responsive-table-row project-column">
+									<div class="responsive-table-header">
+										{{ 'REPORT_PAGE.CLIENT' | translate }}
+									</div>
+									<div class="responsive-table-content project-name">
+										<ng-container *ngTemplateOutlet="clientEl; context: { $implicit: task.client }">
+										</ng-container>
+									</div>
+								</div>
+								<div class="responsive-table-row project-column">
+									<div class="responsive-table-header">
+										{{ 'REPORT_PAGE.PROJECT' | translate }}
+									</div>
+									<div class="responsive-table-content">
+										<ng-container
+											*ngTemplateOutlet="projectEl; context: { $implicit: projectLog.project }"
+										>
+										</ng-container>
+									</div>
+								</div>
+								<div class="responsive-table-row todo-column">
+									<div class="responsive-table-header">
+										{{ 'REPORT_PAGE.NOTES' | translate }}
+									</div>
+									<div class="responsive-table-content day-col" [nbTooltip]="task.description">
+										{{ task.description | truncate : 40 }}
+									</div>
+								</div>
+								<div class="responsive-table-row time-column">
+									<div class="responsive-table-header">
+										{{ 'REPORT_PAGE.TIME' | translate }}
+									</div>
+									<div class="responsive-table-content day-col">
+										{{ task.duration | durationFormat }}
+									</div>
+								</div>
+								<div class="responsive-table-row activity-column">
+									<div class="responsive-table-header">
+										{{ 'REPORT_PAGE.ACTIVITY' | translate }}
+									</div>
+									<div class="responsive-table-content day-col">
+										<nb-badge
+											[status]="getStatus(employeeLog.activity || 0)"
+											[text]="(employeeLog.activity || 0) + '%'"
+										></nb-badge>
+									</div>
+								</div>
+							</div>
+						</ng-container>
+					</div>
+				</div>
+			</ng-container>
+		</ng-container>
+	</ng-template>
+
 	<ng-template let-project #projectEl>
 		<ga-project-column-view [project]="project"></ga-project-column-view>
 	</ng-template>
@@ -560,7 +676,7 @@
 				<div *ngIf="groupBy != ReportGroupFilterEnum.project" class="responsive-table-row project-column">
 					{{ 'REPORT_PAGE.PROJECT' | translate }}
 				</div>
-				<div class="responsive-table-row todo-column day-col">
+				<div *ngIf="groupBy != ReportGroupFilterEnum.task" class="responsive-table-row todo-column day-col">
 					{{ 'REPORT_PAGE.TO_DO' | translate }}
 				</div>
 				<div class="responsive-table-row todo-column day-col">
