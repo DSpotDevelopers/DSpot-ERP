@@ -1,4 +1,4 @@
-# Gauzy dependencies image
+# DSpot ERP dependencies image
 
 FROM node:20.11.1-alpine3.19 AS gauzy-webapp-deps
 
@@ -32,4 +32,5 @@ RUN NODE_ENV=development yarn install \
     && rm -rf node_modules/passport* \
     && rm -rf node_modules/apollo-server* \
     && rm -rf .angular \
-    && yarn cache clean
+    && yarn cache clean \
+    && rm -rf apps/ packages/ dist/ .scripts/ tools/

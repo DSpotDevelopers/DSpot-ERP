@@ -1,4 +1,4 @@
-# Gauzy API dependencies image
+# DSpot ERP API dependencies image
 
 ARG ENVIRONMENT=development
 
@@ -43,4 +43,5 @@ RUN if [ "$ENVIRONMENT" = "production" ]; then \
     && rm -rf node_modules/@angular* \
     && rm -rf node_modules/angular* \
     && rm -rf .angular \
-    && yarn cache clean
+    && yarn cache clean \
+    && rm -rf apps/ packages/ dist/ .scripts/ tools/

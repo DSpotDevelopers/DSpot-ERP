@@ -28,6 +28,12 @@ docker-compose*.yml
 .travis.yml
 greenkeeper.json
 **/*.md
+# AGPL-3.0 compliance: preserve license and attribution files in Docker images
+!LICENSE*
+!LICENSES.md
+!CREDITS.md
+!CHANGELOG.md
+!README.md
 **/*.cmd
 **/*.log
 Jenkinsfile
