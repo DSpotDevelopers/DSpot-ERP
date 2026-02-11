@@ -1,29 +1,32 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { EMPTY, Subscription, finalize, firstValueFrom, interval } from 'rxjs';
-import { catchError, filter, tap } from 'rxjs/operators';
+import { EMPTY, Observable, Subscription, finalize, firstValueFrom, interval } from 'rxjs';
+import { catchError, filter, map, tap } from 'rxjs/operators';
 import { NbAuthService, NbLoginComponent, NB_AUTH_OPTIONS } from '@nebular/auth';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { environment } from '@gauzy/ui-config';
-import { AuthService, ErrorHandlingService } from '@gauzy/ui-core/core';
+import { AppService, AuthService, ErrorHandlingService } from '@gauzy/ui-core/core';
 import { patterns } from '@gauzy/ui-core/shared';
+import { IAppConfig } from '@gauzy/contracts';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-login-magic',
-    templateUrl: './login-magic.component.html',
-    styleUrls: ['./login-magic.component.scss'],
-    standalone: false
+	selector: 'ngx-login-magic',
+	templateUrl: './login-magic.component.html',
+	styleUrls: ['./login-magic.component.scss'],
+	standalone: false
 })
 export class NgxLoginMagicComponent extends NbLoginComponent implements OnInit {
 	public countdown: number;
 	private timer: Subscription;
 
-	public isLoading: boolean = false;
-	public isCodeSent: boolean = false;
-	public isCodeResent: boolean = false;
+	public isLoading = false;
+	public isCodeSent = false;
+	public isCodeResent = false;
 	public isDemo: boolean = environment.DEMO;
+
+	public allowRegisterLogin$: Observable<boolean>;
 
 	/**
 	 * FormGroup instance representing the magic login form.
@@ -68,6 +71,7 @@ export class NgxLoginMagicComponent extends NbLoginComponent implements OnInit {
 		public readonly router: Router,
 		private readonly _authService: AuthService,
 		private readonly _errorHandlingService: ErrorHandlingService,
+		private readonly appService: AppService,
 		@Inject(NB_AUTH_OPTIONS) options
 	) {
 		super(nbAuthService, options, cdr, router);
@@ -94,6 +98,11 @@ export class NgxLoginMagicComponent extends NbLoginComponent implements OnInit {
 				untilDestroyed(this)
 			)
 			.subscribe();
+
+		this.allowRegisterLogin$ = this.appService.getAppConfigs().pipe(
+			map((configs: IAppConfig) => configs.register_login),
+			untilDestroyed(this)
+		);
 	}
 
 	/**

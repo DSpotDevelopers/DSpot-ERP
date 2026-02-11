@@ -6,6 +6,9 @@ import { AuthGuard } from './auth.guard';
 import { NoAuthGuard } from './no-auth.guard';
 import { NoEmailPasswordGuard } from './no-email-password.guard';
 import { AuthService, AuthStrategy, ElectronService, Store } from '../services';
+import { NoMagicLoginGuard } from './no-magic-login.guard';
+import { NoRegisterLoginGuard } from './no-register-login.guard';
+import { NoWorkspaceLoginGuard } from './no-workspace-login.guard';
 
 /**
  * Social links for auth
@@ -54,6 +57,9 @@ const socialLinks = [
 		AuthGuard,
 		NoAuthGuard,
 		NoEmailPasswordGuard,
+		NoMagicLoginGuard,
+		NoRegisterLoginGuard,
+		NoWorkspaceLoginGuard,
 		AuthStrategy,
 		AuthService,
 		Store,

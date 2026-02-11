@@ -149,6 +149,8 @@ export enum FeatureEnum {
 	/** Defines feature flags and settings related to user authentication methods. */
 	FEATURE_EMAIL_PASSWORD_LOGIN = 'FEATURE_EMAIL_PASSWORD_LOGIN',
 	FEATURE_MAGIC_LOGIN = 'FEATURE_MAGIC_LOGIN',
+	FEATURE_REGISTER_LOGIN = 'FEATURE_REGISTER_LOGIN',
+	FEATURE_WORKSPACE_LOGIN = 'FEATURE_WORKSPACE_LOGIN',
 	FEATURE_GITHUB_LOGIN = 'FEATURE_GITHUB_LOGIN',
 	FEATURE_FACEBOOK_LOGIN = 'FEATURE_FACEBOOK_LOGIN',
 	FEATURE_GOOGLE_LOGIN = 'FEATURE_GOOGLE_LOGIN',
@@ -166,6 +168,12 @@ export interface IAuthenticationFlagFeatures {
 
 	/** Flag indicating whether magic login is enabled. */
 	FEATURE_MAGIC_LOGIN: boolean;
+
+	/** Flag indicating whether user registration is enabled. */
+	FEATURE_REGISTER_LOGIN: boolean;
+
+	/** Flag indicating whether workspace login/sign-in is enabled. */
+	FEATURE_WORKSPACE_LOGIN: boolean;
 
 	/** Flag indicating whether GitHub login is enabled. */
 	FEATURE_GITHUB_LOGIN: boolean;
