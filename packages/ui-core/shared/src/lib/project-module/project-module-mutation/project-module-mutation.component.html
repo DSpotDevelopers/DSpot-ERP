@@ -13,7 +13,8 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<div class="form-group">
-						<label class="label">{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.PROJECT' | translate }}</label>
+						<label class="label" class="label required-asterisk">{{
+							'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.PROJECT' | translate }}</label>
 						<ga-project-selector formControlName="projectId"
 							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.SELECT_PROJECT' | translate"
 							[skipGlobalChange]="true" [defaultSelected]="false"
@@ -21,7 +22,7 @@
 
 						<div *ngIf="form.get('projectId')?.errors?.required && form.get('projectId')?.touched"
 							class="invalid-feedback d-block">
-							{{ 'FORM.VALIDATION.REQUIRED' | translate }}
+							{{ 'FORM.ERROR.PROJECT_NAME' | translate }}
 						</div>
 
 					</div>
