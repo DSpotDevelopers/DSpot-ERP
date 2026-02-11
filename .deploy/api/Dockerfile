@@ -1,4 +1,4 @@
-# DSpot ERP Platform API (Core)
+# Ever Gauzy Platform API (Core)
 
 ARG DEPENDENCIES_IMAGE
 ARG GIT_HASH
