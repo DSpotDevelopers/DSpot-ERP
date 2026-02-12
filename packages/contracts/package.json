@@ -9,11 +9,11 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://repo.ciberos.com/dspot/erp/dspot-erp",
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP",
 		"directory": "packages/contracts"
 	},
 	"bugs": {
-		"url": "https://repo.ciberos.com/dspot/erp/dspot-erp/issues"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP/issues"
 	},
 	"contributors": [
 		{

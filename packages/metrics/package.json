@@ -12,7 +12,7 @@
 	"main": "./src/index.js",
 	"typings": "./src/index.d.ts",
 	"bugs": {
-		"url": "https://repo.ciberos.com/dspot/erp/dspot-erp/issues"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP/issues"
 	},
 	"homepage": "https://www.dspot.com.pl",
 	"keywords": [
@@ -27,7 +27,7 @@
 	"private": true,
 	"repository": {
 		"type": "git",
-		"url": "https://repo.ciberos.com/dspot/erp/dspot-erp"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP"
 	},
 	"sideEffects": false,
 	"scripts": {

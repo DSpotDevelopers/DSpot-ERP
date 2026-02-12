@@ -1,7 +1,7 @@
 {
 	"name": "gauzy",
 	"version": "0.1.0",
-	"repository": "https://repo.ciberos.com/dspot/erp/dspot-erp",
+	"repository": "https://github.com/DSpotDevelopers/DSpot-ERP",
 	"private": true,
 	"resolutions": {},
 	"workspaces": [
