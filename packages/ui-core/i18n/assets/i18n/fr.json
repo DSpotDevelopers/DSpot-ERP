@@ -3265,7 +3265,8 @@
 			"VALIDATION": {
 				"NAME_REQUIRED": "Le nom du module est obligatoire et ne peut pas être vide",
 				"START_DATE_REQUIRED": "La date de début est obligatoire",
-				"END_DATE_REQUIRED": "La date de fin est obligatoire"
+				"END_DATE_REQUIRED": "La date de fin est obligatoire",
+				"INVALID_DATE_FORMAT": "Format de date invalide"
 			}
 		}
 	},

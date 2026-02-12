@@ -3419,7 +3419,8 @@
 			"VALIDATION": {
 				"NAME_REQUIRED": "Modulenaam is verplicht en mag niet leeg zijn",
 				"START_DATE_REQUIRED": "Startdatum is verplicht",
-				"END_DATE_REQUIRED": "Einddatum is verplicht"
+				"END_DATE_REQUIRED": "Einddatum is verplicht",
+				"INVALID_DATE_FORMAT": "Ongeldig datumformaat"
 			}
 		}
 	},

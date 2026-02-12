@@ -3421,7 +3421,8 @@
 			"VALIDATION": {
 				"NAME_REQUIRED": "Module name is required and cannot be empty",
 				"START_DATE_REQUIRED": "Start date is required",
-				"END_DATE_REQUIRED": "End date is required"
+				"END_DATE_REQUIRED": "End date is required",
+				"INVALID_DATE_FORMAT": "Invalid date format"
 			}
 		}
 	},

@@ -3416,9 +3416,10 @@
 			"SELECT_SPRINTS": "Wybierz sprinty",
 			"IS_FAVORITE": "Ulubione",
 			"VALIDATION": {
-				"NAME_REQUIRED": "Nazwa modułu jest wymagana i nie może być pusta.",
-				"START_DATE_REQUIRED": "Data rozpoczęcia jest wymagana.",
-				"END_DATE_REQUIRED": "Data zakończenia jest wymagana."
+				"NAME_REQUIRED": "Nazwa modułu jest wymagana i nie może być pusta",
+				"START_DATE_REQUIRED": "Data rozpoczęcia jest wymagana",
+				"END_DATE_REQUIRED": "Data zakończenia jest wymagana",
+				"INVALID_DATE_FORMAT": "Nieprawidłowy format daty"
 			}
 		}
 	},

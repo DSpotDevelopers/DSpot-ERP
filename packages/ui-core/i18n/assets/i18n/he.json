@@ -3413,7 +3413,8 @@
 			"VALIDATION": {
 				"NAME_REQUIRED": "שם המודול הוא שדה חובה ואינו יכול להיות ריק",
 				"START_DATE_REQUIRED": "תאריך ההתחלה הוא שדה חובה",
-				"END_DATE_REQUIRED": "תאריך הסיום הוא שדה חובה"
+				"END_DATE_REQUIRED": "תאריך הסיום הוא שדה חובה",
+				"INVALID_DATE_FORMAT": "פורמט תאריך לא חוקי"
 			}
 		}
 	},

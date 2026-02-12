@@ -3408,7 +3408,8 @@
 			"VALIDATION": {
 				"NAME_REQUIRED": "اسم الوحدة مطلوب ولا يمكن أن يكون فارغًا",
 				"START_DATE_REQUIRED": "تاريخ البدء مطلوب",
-				"END_DATE_REQUIRED": "تاريخ الانتهاء مطلوب"
+				"END_DATE_REQUIRED": "تاريخ الانتهاء مطلوب",
+				"INVALID_DATE_FORMAT": "تنسيق التاريخ غير صالح"
 			}
 		}
 	},

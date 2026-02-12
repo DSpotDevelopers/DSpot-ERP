@@ -1,10 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { NbDialogRef } from '@nebular/theme';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import * as moment from 'moment';
 import {
 	IEmployee,
 	IOrganization,
@@ -29,7 +30,7 @@ import {
 	ToastrService
 } from '@gauzy/ui-core/core';
 import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
-
+type DateControlName = 'startDate' | 'endDate';
 @UntilDestroy({ checkProperties: true })
 @Component({
 	selector: 'ngx-project-module-mutation',
@@ -56,8 +57,8 @@ export class ProjectModuleMutationComponent extends TranslationBaseComponent imp
 		name: ['', Validators.required],
 		description: [''],
 		status: [ProjectModuleStatusEnum.BACKLOG],
-		startDate: ['', Validators.required],
-		endDate: ['', Validators.required],
+		startDate: [null, Validators.required],
+		endDate: [null, Validators.required],
 		isFavorite: [false],
 		parentId: [],
 		projectId: [null, Validators.required],
@@ -111,6 +112,74 @@ export class ProjectModuleMutationComponent extends TranslationBaseComponent imp
 		this.loadAvailableParentModules();
 		this.loadTasks();
 		this.findOrganizationSprints();
+	}
+	private readonly ALLOWED_DATE_FORMATS = ['MMM D, YYYY', 'MMMM D, YYYY'] as const;
+
+	onDateInput(controlName: DateControlName, rawValue: string): void {
+		this.validateDateInput(controlName, rawValue, false);
+	}
+
+	onDateBlur(controlName: DateControlName, rawValue: string): void {
+		this.validateDateInput(controlName, rawValue, true);
+	}
+
+	private validateDateInput(
+		controlName: DateControlName,
+		rawValue: string,
+		markTouched: boolean
+	): void {
+		const ctrl = this.form.get(controlName);
+		if (!ctrl) return;
+
+		if (markTouched) {
+			ctrl.markAsTouched();
+		}
+
+		const text = (rawValue ?? '').trim();
+
+		//пусто/пробелы -> required
+		if (!text) {
+			this.clearControlError(ctrl, 'invalidDate');
+			return;
+		}
+
+		if (/^\d+$/.test(text)) {
+			this.setControlError(ctrl, 'invalidDate', true);
+			return;
+		}
+
+		const v = ctrl.value;
+		if (v instanceof Date && !isNaN(v.getTime())) {
+			const formatted1 = moment(v).format(this.ALLOWED_DATE_FORMATS[0]);
+			const formatted2 = moment(v).format(this.ALLOWED_DATE_FORMATS[1]);
+			if (text === formatted1 || text === formatted2) {
+				this.clearControlError(ctrl, 'invalidDate');
+				return;
+			}
+		}
+
+		//ручной ввод
+		const m = moment(text, [...this.ALLOWED_DATE_FORMATS], true);
+		if (m.isValid()) {
+			//нормализуем: храним в форме Date
+			ctrl.setValue(m.toDate(), { emitEvent: false });
+			this.clearControlError(ctrl, 'invalidDate');
+			return;
+		}
+
+		this.setControlError(ctrl, 'invalidDate', true);
+	}
+
+	private setControlError(ctrl: any, key: string, value: any): void {
+		const errors = { ...(ctrl.errors ?? {}), [key]: value };
+		ctrl.setErrors(errors);
+	}
+
+	private clearControlError(ctrl: any, key: string): void {
+		const errors = ctrl.errors;
+		if (!errors || !errors[key]) return;
+		const { [key]: _removed, ...rest } = errors;
+		ctrl.setErrors(Object.keys(rest).length ? rest : null);
 	}
 
 	/**

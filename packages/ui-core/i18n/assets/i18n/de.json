@@ -3419,7 +3419,8 @@
 			"VALIDATION": {
 				"NAME_REQUIRED": "Der Modulname ist erforderlich und darf nicht leer sein",
 				"START_DATE_REQUIRED": "Das Startdatum ist erforderlich",
-				"END_DATE_REQUIRED": "Das Enddatum ist erforderlich"
+				"END_DATE_REQUIRED": "Das Enddatum ist erforderlich",
+				"INVALID_DATE_FORMAT": "Ungültiges Datumsformat"
 			}
 		}
 	},

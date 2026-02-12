@@ -142,13 +142,22 @@
 						<label for="startDate" class="label required-asterisk">{{
 							'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.START_DATE' | translate
 							}}</label>
-						<input formControlName="startDate" type="text" nbInput
+						<input #startDateInput formControlName="startDate" type="text" nbInput
 							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.SELECT_START_DATE' | translate"
-							[nbDatepicker]="startDatePicker" id="startDate" fullWidth />
+							[nbDatepicker]="startDatePicker" id="startDate" fullWidth
+							(input)="onDateInput('startDate', startDateInput.value)"
+							(blur)="onDateBlur('startDate', startDateInput.value)" />
 
-						<div *ngIf="form.get('startDate')?.errors?.required && form.get('startDate')?.touched"
-							class="invalid-feedback d-block">
+						<div *ngIf="form.get('startDate')?.errors?.required &&
+						 form.get('startDate')?.touched &&
+						 !startDateInput.value?.trim()" class="invalid-feedback d-block">
 							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.START_DATE_REQUIRED' | translate }}
+						</div>
+
+						<div *ngIf="form.get('startDate')?.errors?.invalidDate &&
+						form.get('startDate')?.touched &&
+						!!startDateInput.value?.trim()" class="invalid-feedback d-block">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.INVALID_DATE_FORMAT' | translate }}
 						</div>
 						<nb-datepicker #startDatePicker></nb-datepicker>
 					</div>
@@ -158,13 +167,22 @@
 						<label for="endDate" class="label required-asterisk">{{
 							'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.END_DATE' | translate
 							}}</label>
-						<input formControlName="endDate" type="text" nbInput
+						<input #endDateInput formControlName="endDate" type="text" nbInput
 							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.SELECT_END_DATE' | translate"
-							[nbDatepicker]="endDatePicker" id="endDate" [min]="form.get('startDate').value" fullWidth />
+							[nbDatepicker]="endDatePicker" id="endDate" [min]="form.get('startDate').value" fullWidth
+							(input)="onDateInput('endDate', endDateInput.value)"
+							(blur)="onDateBlur('endDate', endDateInput.value)" />
 
-						<div *ngIf="form.get('endDate')?.errors?.required && form.get('endDate')?.touched"
-							class="invalid-feedback d-block">
+						<div *ngIf="form.get('endDate')?.errors?.required &&
+						form.get('endDate')?.touched &&
+          				!endDateInput.value?.trim()" class="invalid-feedback d-block">
 							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.END_DATE_REQUIRED' | translate }}
+						</div>
+
+						<div *ngIf="form.get('endDate')?.errors?.invalidDate &&
+						form.get('endDate')?.touched &&
+						!!endDateInput.value?.trim()" class="invalid-feedback d-block">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.INVALID_DATE_FORMAT' | translate }}
 						</div>
 						<nb-datepicker #endDatePicker></nb-datepicker>
 					</div>
