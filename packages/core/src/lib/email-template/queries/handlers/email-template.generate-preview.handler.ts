@@ -73,7 +73,7 @@ export class EmailTemplateGeneratePreviewHandler implements IQueryHandler<EmailT
 			task_status: 'In Progress',
 			task_update_project: 'DSpot ERP Project',
 			task_update_assign_by: 'Ruslan Konviser',
-			task_update_url: 'https://github.com/DSpotDevelopers/gauzy/issues/1688',
+			task_update_url: 'https://github.com/DSpotDevelopers/DSpot-ERP/issues/1688',
 			inviteCode: generateAlphaNumericCode(ALPHA_NUMERIC_CODE_LENGTH),
 			teams: 'DSpot ERP Team',
 			verificationCode: generateAlphaNumericCode(ALPHA_NUMERIC_CODE_LENGTH),
@@ -85,7 +85,7 @@ export class EmailTemplateGeneratePreviewHandler implements IQueryHandler<EmailT
 				{
 					tenantName: 'Default',
 					userName: 'Default',
-					resetLink: 'https://github.com/DSpotDevelopers/gauzy'
+					resetLink: 'https://github.com/DSpotDevelopers/DSpot-ERP'
 				}
 			],
 			companyLink,
