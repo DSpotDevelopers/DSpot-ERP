@@ -16,6 +16,12 @@ export default registerAs('setting', () => ({
 	/** Flag indicating whether magic login is enabled. */
 	magic_login: flagFeatures.FEATURE_MAGIC_LOGIN,
 
+	/** Flag indicating whether registration is enabled. */
+	register_login: flagFeatures.FEATURE_REGISTER_LOGIN,
+
+	/** Flag indicating whether workspace login is enabled. */
+	workspace_login: flagFeatures.FEATURE_WORKSPACE_LOGIN,
+
 	/** Flag indicating whether GitHub login is enabled. */
 	github_login: flagFeatures.FEATURE_GITHUB_LOGIN,
 

@@ -1,24 +1,28 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { filter, tap } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/internal/Observable';
 import { NB_AUTH_OPTIONS, NbAuthOptions, NbAuthService, NbRegisterComponent } from '@nebular/auth';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { TranslateService } from '@ngx-translate/core';
 import { patterns } from '@gauzy/ui-core/shared';
+import { AppService } from '@gauzy/ui-core/core';
+import { IAppConfig } from '@gauzy/contracts';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-register',
-    templateUrl: './register.component.html',
-    styleUrls: ['./register.component.scss'],
-    standalone: false
+	selector: 'ngx-register',
+	templateUrl: './register.component.html',
+	styleUrls: ['./register.component.scss'],
+	standalone: false
 })
 export class NgxRegisterComponent extends NbRegisterComponent implements OnInit {
 	public showPassword = false;
 	public showConfirmPassword = false;
 	public passwordNoSpaceEdges = patterns.passwordNoSpaceEdges;
+
 	public queryParams$: Observable<Params>; // Observable for the query params
+	public allowWorkspaceLogin$: Observable<boolean>;
 
 	constructor(
 		public readonly translate: TranslateService,
@@ -26,6 +30,7 @@ export class NgxRegisterComponent extends NbRegisterComponent implements OnInit 
 		protected readonly cdr: ChangeDetectorRef,
 		protected readonly router: Router,
 		protected readonly activatedRoute: ActivatedRoute,
+		private readonly appService: AppService,
 		@Inject(NB_AUTH_OPTIONS) options: NbAuthOptions
 	) {
 		super(nbAuthService, options, cdr, router);
@@ -48,6 +53,11 @@ export class NgxRegisterComponent extends NbRegisterComponent implements OnInit 
 			tap(({ email }: Params) => (this.user.email = email)),
 
 			// Use 'untilDestroyed' to handle component lifecycle and avoid memory leaks.
+			untilDestroyed(this)
+		);
+
+		this.allowWorkspaceLogin$ = this.appService.getAppConfigs().pipe(
+			map((configs: IAppConfig) => configs.workspace_login),
 			untilDestroyed(this)
 		);
 	}

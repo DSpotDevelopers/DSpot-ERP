@@ -1,6 +1,13 @@
 import { Route } from '@angular/router';
 import { NbLogoutComponent } from '@nebular/auth';
-import { NoAuthGuard, PageRouteRegistryService, NoEmailPasswordGuard } from '@gauzy/ui-core/core';
+import {
+	NoAuthGuard,
+	PageRouteRegistryService,
+	NoEmailPasswordGuard,
+	NoMagicLoginGuard,
+	NoWorkspaceLoginGuard,
+	NoRegisterLoginGuard
+} from '@gauzy/ui-core/core';
 import { NgxAuthComponent } from './components/auth/auth.component';
 import { NgxLoginComponent } from './components/login/login.component';
 import { NgxForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
@@ -12,6 +19,8 @@ import { AcceptInviteComponent } from './components/accept-invite/accept-invite.
 import { EstimateEmailComponent } from './components/estimate-email/estimate-email.component';
 import { EstimateEmailResolver } from './components/estimate-email/estimate-email.resolver';
 import { AcceptClientInviteComponent } from './components/accept-client-invite/accept-client-invite.component';
+import { NgxLoginMagicComponent } from './components/login-magic/login-magic.component';
+import { NgxLoginWorkspaceComponent } from './components/login-workspace/login-workspace.component';
 
 /**
  * Creates routes for the auth module.
@@ -35,9 +44,19 @@ export const createAuthRoutes = (_pageRouteRegistryService: PageRouteRegistrySer
 				canActivate: [NoAuthGuard]
 			},
 			{
+				path: 'login-magic',
+				component: NgxLoginMagicComponent,
+				canActivate: [NoAuthGuard, NoEmailPasswordGuard, NoMagicLoginGuard]
+			},
+			{
+				path: 'login-workspace',
+				component: NgxLoginWorkspaceComponent,
+				canActivate: [NoAuthGuard, NoEmailPasswordGuard, NoWorkspaceLoginGuard]
+			},
+			{
 				path: 'register',
 				component: NgxRegisterComponent,
-				canActivate: [NoAuthGuard, NoEmailPasswordGuard]
+				canActivate: [NoAuthGuard, NoEmailPasswordGuard, NoRegisterLoginGuard]
 			},
 			{
 				path: 'request-password',

@@ -23,6 +23,12 @@ export const flagFeatures: IAuthenticationFlagFeatures = {
 	/** Flag indicating whether magic login is enabled. */
 	FEATURE_MAGIC_LOGIN: featureEnabled(FeatureEnum.FEATURE_MAGIC_LOGIN),
 
+	/** Flag indicating whether user registration is enabled. */
+	FEATURE_REGISTER_LOGIN: featureEnabled(FeatureEnum.FEATURE_REGISTER_LOGIN),
+
+	/** Flag indicating whether workspace login/sign-in is enabled. */
+	FEATURE_WORKSPACE_LOGIN: featureEnabled(FeatureEnum.FEATURE_WORKSPACE_LOGIN),
+
 	/** Flag indicating whether GitHub login is enabled. */
 	FEATURE_GITHUB_LOGIN: featureEnabled(FeatureEnum.FEATURE_GITHUB_LOGIN),
 
@@ -64,7 +70,7 @@ export class FeatureFlagEnabledGuard implements CanActivate {
 			context.getHandler(), // Returns a reference to the handler (method) that will be invoked next in the request pipeline.
 			context.getClass() // Returns the *type* of the controller class which the current handler belongs to.
 		]);
-		if (!!flagFeatures[flag]) {
+		if (flagFeatures[flag]) {
 			return true;
 		}
 

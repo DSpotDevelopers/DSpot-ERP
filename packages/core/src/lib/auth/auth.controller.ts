@@ -14,13 +14,14 @@ import { ApiTags, ApiOperation, ApiResponse, ApiOkResponse, ApiBadRequestRespons
 import { CommandBus } from '@nestjs/cqrs';
 import { I18nLang } from 'nestjs-i18n';
 import {
+	FeatureEnum,
 	IAuthResponse,
 	ISocialAccount,
 	ISocialAccountExistUser,
 	IUserSigninWorkspaceResponse,
 	LanguagesEnum
 } from '@gauzy/contracts';
-import { Public } from '@gauzy/common';
+import { FeatureFlag, FeatureFlagEnabledGuard, Public } from '@gauzy/common';
 import { AuthService } from './auth.service';
 import { User as IUser } from '../user/user.entity';
 import {
@@ -31,7 +32,7 @@ import {
 } from './commands';
 import { RequestContext } from '../core/context';
 import { convertNativeParameters } from '../core/crud/pagination.helper';
-import { AuthRefreshGuard } from './../shared/guards';
+import { AuthRefreshGuard, FeatureFlagGuard } from './../shared/guards';
 import { UseValidationPipe } from '../shared/pipes';
 import { ChangePasswordRequestDTO, ResetPasswordRequestDTO } from './../password-reset/dto';
 import { RegisterUserDTO, UserEmailDTO, UserLoginDTO, UserSigninWorkspaceDTO } from './../user/dto';
@@ -120,6 +121,8 @@ export class AuthController {
 		status: HttpStatus.NOT_ACCEPTABLE,
 		description: "User can't be registered. The email domain is not registered in any organization"
 	})
+	@UseGuards(FeatureFlagEnabledGuard)
+	@FeatureFlag(FeatureEnum.FEATURE_REGISTER_LOGIN)
 	@Post('/register')
 	@Public()
 	@UseValidationPipe({ transform: true })
@@ -159,6 +162,8 @@ export class AuthController {
 	 * @returns
 	 */
 	@HttpCode(HttpStatus.OK)
+	@UseGuards(FeatureFlagEnabledGuard)
+	@FeatureFlag(FeatureEnum.FEATURE_WORKSPACE_LOGIN)
 	@Post('/signin.email.password')
 	@Public()
 	@UseValidationPipe()
@@ -216,6 +221,8 @@ export class AuthController {
 	 * @returns
 	 */
 	@HttpCode(HttpStatus.OK)
+	@UseGuards(FeatureFlagEnabledGuard)
+	@FeatureFlag(FeatureEnum.FEATURE_MAGIC_LOGIN)
 	@Post('/signin.email')
 	@Public()
 	@UseValidationPipe({ transform: true })
@@ -229,6 +236,8 @@ export class AuthController {
 	 * @param input - Workspace sign-in email verification data.
 	 * @returns
 	 */
+	@UseGuards(FeatureFlagEnabledGuard)
+	@FeatureFlag(FeatureEnum.FEATURE_MAGIC_LOGIN)
 	@Post('/signin.email/confirm')
 	@Public()
 	@UseValidationPipe({ whitelist: true })
@@ -244,6 +253,8 @@ export class AuthController {
 	 * @param input - Workspace sign-in data.
 	 * @returns
 	 */
+	@UseGuards(FeatureFlagEnabledGuard)
+	@FeatureFlag(FeatureEnum.FEATURE_WORKSPACE_LOGIN)
 	@Post('/signin.workspace')
 	@Public()
 	@UseValidationPipe({ whitelist: true })

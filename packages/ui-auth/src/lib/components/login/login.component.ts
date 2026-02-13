@@ -14,10 +14,10 @@ import { TranslateService } from '@ngx-translate/core';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    standalone: false
+	selector: 'ngx-login',
+	templateUrl: './login.component.html',
+	styleUrls: ['./login.component.scss'],
+	standalone: false
 })
 export class NgxLoginComponent extends NbLoginComponent implements OnInit {
 	@ViewChild('form') private readonly form: FormGroupDirective;
@@ -27,9 +27,13 @@ export class NgxLoginComponent extends NbLoginComponent implements OnInit {
 	isDemo: boolean = environment.DEMO;
 	showPassword = false;
 	passwordNoSpaceEdges = patterns.passwordNoSpaceEdges;
+	allowEmailPasswordLogin: boolean;
+
 	public queryParams$: Observable<Params>; // Observable for the query params
 	public allowEmailPasswordLogin$: Observable<boolean>;
-	public allowEmailPasswordLogin: boolean;
+	public allowMagicLogin$: Observable<boolean>;
+	public allowRegisterLogin$: Observable<boolean>;
+	public allowWorkspaceLogin$: Observable<boolean>;
 
 	constructor(
 		private readonly cookieService: CookieService,
@@ -60,6 +64,23 @@ export class NgxLoginComponent extends NbLoginComponent implements OnInit {
 			untilDestroyed(this)
 		);
 		this.handleEmailPasswordLogin();
+
+		this.allowMagicLogin$ = this.appService.getAppConfigs().pipe(
+			map((configs: IAppConfig) => configs.magic_login),
+			untilDestroyed(this)
+		);
+
+		this.allowRegisterLogin$ = this.appService.getAppConfigs().pipe(
+			map((configs: IAppConfig) => configs.register_login),
+			untilDestroyed(this)
+		);
+
+		this.allowWorkspaceLogin$ = this.appService.getAppConfigs().pipe(
+			map((configs: IAppConfig) => configs.workspace_login),
+			untilDestroyed(this)
+		);
+
+		this.appService.getAppConfigs().subscribe((pp) => console.log(pp));
 
 		// Create an observable to listen to query parameter changes in the current route.
 		this.queryParams$ = this.activatedRoute.queryParams.pipe(
@@ -94,18 +115,18 @@ export class NgxLoginComponent extends NbLoginComponent implements OnInit {
 					await firstValueFrom(this.translate.get('BANNERS.ERROR_TITLE')),
 					{
 						duration: 8000,
-						destroyByClick: true,
+						destroyByClick: true
 					}
 				);
 
 				// Remove the error query parameter from the URL without reloading the page
 				this.router.navigate([], {
 					queryParams: {
-						'error': null,
+						error: null
 					},
 					queryParamsHandling: 'merge',
 					replaceUrl: true
-				})
+				});
 			}
 		});
 	}
