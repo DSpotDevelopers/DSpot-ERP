@@ -9,11 +9,11 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/DSpotDevelopers/gauzy",
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP",
 		"directory": "packages/config"
 	},
 	"bugs": {
-		"url": "https://github.com/DSpotDevelopers/gauzy/issues"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP/issues"
 	},
 	"contributors": [
 		{

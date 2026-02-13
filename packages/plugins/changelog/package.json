@@ -10,11 +10,11 @@
 	"homepage": "https://www.dspot.com.pl",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/DSpotDevelopers/gauzy",
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP",
 		"directory": "packages/plugins/changelog"
 	},
 	"bugs": {
-		"url": "https://github.com/DSpotDevelopers/gauzy/issues"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP/issues"
 	},
 	"contributors": [
 		{

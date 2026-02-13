@@ -4,10 +4,10 @@
 	"description": "Authentication module for the DSpot ERP Platform, providing various authentication strategies and integrations.",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/DSpotDevelopers/gauzy"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP"
 	},
 	"bugs": {
-		"url": "https://github.com/DSpotDevelopers/gauzy/issues"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP/issues"
 	},
 	"contributors": [
 		{

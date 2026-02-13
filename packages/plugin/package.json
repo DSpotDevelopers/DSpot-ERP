@@ -4,10 +4,10 @@
 	"description": "DSpot ERP Platform Plugin module",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/DSpotDevelopers/gauzy"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP"
 	},
 	"bugs": {
-		"url": "https://github.com/DSpotDevelopers/gauzy/issues"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP/issues"
 	},
 	"contributors": [
 		{

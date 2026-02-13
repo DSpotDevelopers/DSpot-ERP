@@ -12,7 +12,7 @@
 	"main": "./src/index.js",
 	"typings": "./src/index.d.ts",
 	"bugs": {
-		"url": "https://github.com/DSpotDevelopers/gauzy/issues"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP/issues"
 	},
 	"homepage": "https://www.dspot.com.pl",
 	"keywords": [
@@ -27,7 +27,7 @@
 	"private": true,
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/DSpotDevelopers/gauzy"
+		"url": "https://github.com/DSpotDevelopers/DSpot-ERP"
 	},
 	"sideEffects": false,
 	"scripts": {

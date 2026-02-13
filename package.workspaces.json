@@ -1,7 +1,7 @@
 {
 	"name": "gauzy",
 	"version": "0.1.0",
-	"repository": "https://github.com/DSpotDevelopers/gauzy",
+	"repository": "https://github.com/DSpotDevelopers/DSpot-ERP",
 	"private": true,
 	"resolutions": {},
 	"workspaces": [
