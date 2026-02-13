@@ -3420,7 +3420,8 @@
 				"NAME_REQUIRED": "Il nome del modulo è obbligatorio e non può essere vuoto",
 				"START_DATE_REQUIRED": "La data di inizio è obbligatoria",
 				"END_DATE_REQUIRED": "La data di fine è obbligatoria",
-				"INVALID_DATE_FORMAT": "Formato data non valido"
+				"INVALID_DATE_FORMAT": "Formato data non valido",
+				"INCORRECT_DATE_LOCATION": "La data di fine deve essere successiva alla data di inizio"
 			}
 		}
 	},

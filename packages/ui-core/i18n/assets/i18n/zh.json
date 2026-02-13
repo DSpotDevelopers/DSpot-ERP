@@ -3420,7 +3420,8 @@
 				"NAME_REQUIRED": "模块名称为必填项，不能为空",
 				"START_DATE_REQUIRED": "开始日期为必填项",
 				"END_DATE_REQUIRED": "结束日期为必填项",
-				"INVALID_DATE_FORMAT": "无效的日期格式"
+				"INVALID_DATE_FORMAT": "无效的日期格式",
+				"INCORRECT_DATE_LOCATION": "结束日期必须晚于开始日期"
 			}
 		}
 	},

@@ -3414,7 +3414,8 @@
 				"NAME_REQUIRED": "שם המודול הוא שדה חובה ואינו יכול להיות ריק",
 				"START_DATE_REQUIRED": "תאריך ההתחלה הוא שדה חובה",
 				"END_DATE_REQUIRED": "תאריך הסיום הוא שדה חובה",
-				"INVALID_DATE_FORMAT": "פורמט תאריך לא חוקי"
+				"INVALID_DATE_FORMAT": "פורמט תאריך לא חוקי",
+				"INCORRECT_DATE_LOCATION": "תאריך הסיום חייב להיות אחרי תאריך ההתחלה"
 			}
 		}
 	},

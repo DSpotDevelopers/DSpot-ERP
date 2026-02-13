@@ -3409,7 +3409,8 @@
 				"NAME_REQUIRED": "اسم الوحدة مطلوب ولا يمكن أن يكون فارغًا",
 				"START_DATE_REQUIRED": "تاريخ البدء مطلوب",
 				"END_DATE_REQUIRED": "تاريخ الانتهاء مطلوب",
-				"INVALID_DATE_FORMAT": "تنسيق التاريخ غير صالح"
+				"INVALID_DATE_FORMAT": "تنسيق التاريخ غير صالح",
+				"INCORRECT_DATE_LOCATION": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء"
 			}
 		}
 	},

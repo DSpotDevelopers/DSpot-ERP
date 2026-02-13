@@ -3420,7 +3420,8 @@
 				"NAME_REQUIRED": "Modulenaam is verplicht en mag niet leeg zijn",
 				"START_DATE_REQUIRED": "Startdatum is verplicht",
 				"END_DATE_REQUIRED": "Einddatum is verplicht",
-				"INVALID_DATE_FORMAT": "Ongeldig datumformaat"
+				"INVALID_DATE_FORMAT": "Ongeldig datumformaat",
+				"INCORRECT_DATE_LOCATION": "De einddatum moet na de begindatum liggen"
 			}
 		}
 	},

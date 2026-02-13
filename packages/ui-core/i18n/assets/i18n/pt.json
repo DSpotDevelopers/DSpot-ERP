@@ -3420,7 +3420,8 @@
 				"NAME_REQUIRED": "O nome do módulo é obrigatório e não pode ficar em branco",
 				"START_DATE_REQUIRED": "A data de início é obrigatória",
 				"END_DATE_REQUIRED": "A data de término é obrigatória",
-				"INVALID_DATE_FORMAT": "Formato de data inválido"
+				"INVALID_DATE_FORMAT": "Formato de data inválido",
+				"INCORRECT_DATE_LOCATION": "A data de término deve ser posterior à data de início"
 			}
 		}
 	},

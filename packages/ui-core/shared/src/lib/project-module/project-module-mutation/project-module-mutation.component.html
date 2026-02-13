@@ -184,6 +184,10 @@
 						!!endDateInput.value?.trim()" class="invalid-feedback d-block">
 							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.INVALID_DATE_FORMAT' | translate }}
 						</div>
+
+						<div *ngIf="form.hasError('dateOrder') && form.get('endDate')?.touched" class="text-danger">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.INCORRECT_DATE_LOCATION' | translate}}
+						</div>
 						<nb-datepicker #endDatePicker></nb-datepicker>
 					</div>
 				</div>

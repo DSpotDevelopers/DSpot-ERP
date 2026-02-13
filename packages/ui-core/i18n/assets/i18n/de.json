@@ -3420,7 +3420,8 @@
 				"NAME_REQUIRED": "Der Modulname ist erforderlich und darf nicht leer sein",
 				"START_DATE_REQUIRED": "Das Startdatum ist erforderlich",
 				"END_DATE_REQUIRED": "Das Enddatum ist erforderlich",
-				"INVALID_DATE_FORMAT": "Ungültiges Datumsformat"
+				"INVALID_DATE_FORMAT": "Ungültiges Datumsformat",
+				"INCORRECT_DATE_LOCATION": "Das Enddatum muss nach dem Startdatum liegen"
 			}
 		}
 	},

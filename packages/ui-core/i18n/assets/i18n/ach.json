@@ -3037,7 +3037,8 @@
 				"NAME_REQUIRED": "Nying me module mito, pe romo bedo peke",
 				"START_DATE_REQUIRED": "Dwe kede ka mito",
 				"END_DATE_REQUIRED": "Dwe kede mogo mito",
-				"INVALID_DATE_FORMAT": "Kit ma nino pe tye maber"
+				"INVALID_DATE_FORMAT": "Kit ma nino pe tye maber",
+				"INCORRECT_DATE_LOCATION": "Ngec me agiki myero obed inge anyim pa ngec me acaki"
 			}
 		}
 	},
