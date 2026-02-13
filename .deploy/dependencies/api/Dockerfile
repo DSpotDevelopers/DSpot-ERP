@@ -43,5 +43,4 @@ RUN if [ "$ENVIRONMENT" = "production" ]; then \
     && rm -rf node_modules/@angular* \
     && rm -rf node_modules/angular* \
     && rm -rf .angular \
-    && yarn cache clean \
-    && rm -rf apps/ packages/ dist/ .scripts/ tools/
+    && yarn cache clean

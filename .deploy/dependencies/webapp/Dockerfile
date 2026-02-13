@@ -32,5 +32,4 @@ RUN NODE_ENV=development yarn install \
     && rm -rf node_modules/passport* \
     && rm -rf node_modules/apollo-server* \
     && rm -rf .angular \
-    && yarn cache clean \
-    && rm -rf apps/ packages/ dist/ .scripts/ tools/
+    && yarn cache clean
