@@ -925,6 +925,15 @@ export class BaseNavMenuComponent extends TranslationBaseComponent implements On
 						}
 					}
 				]
+			},
+			{
+				id: 'about',
+				title: 'About',
+				icon: 'fas fa-info-circle',
+				link: '/pages/about',
+				data: {
+					translationKey: 'MENU.ABOUT'
+				}
 			}
 		];
 	}

@@ -3279,7 +3279,23 @@
 		}
 	},
 	"ABOUT_PAGE": {
-		"ABOUT": "crwdns2257:0crwdne2257:0"
+		"ABOUT": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"FORK_PART_1": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"FORK_PART_2": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"FORK_PART_3": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"FORK_PART_4": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"FORK_PART_5": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"SOURCE_CODE_TEXT": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"SOURCE_CODE_LINK": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"NOTABLE_CHANGES": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"CHANGE_1": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"CHANGE_2": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"CHANGE_3": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"CHANGE_4": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"CHANGE_5": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"CHANGELOG_TEXT": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"CHANGELOG_LINK": "crwdnsXXXXX:0crwdneXXXXX:0",
+		"CHANGELOG_SUFFIX": "crwdnsXXXXX:0crwdneXXXXX:0"
 	},
 	"FOOTER": {
 		"BY": "crwdns292:0crwdne292:0",

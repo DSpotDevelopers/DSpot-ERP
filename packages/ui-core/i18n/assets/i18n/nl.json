@@ -3602,7 +3602,23 @@
 		}
 	},
 	"ABOUT_PAGE": {
-		"ABOUT": "Over"
+		"ABOUT": "Over",
+		"FORK_PART_1": "Deze applicatie is een fork van ",
+		"FORK_PART_2": " door ",
+		"FORK_PART_3": ". De oorspronkelijke repository was gelicentieerd onder ",
+		"FORK_PART_4": ". Wijzigingen zijn aangebracht door ",
+		"FORK_PART_5": " en worden uitgebracht onder dezelfde AGPL v3.0-licentie.",
+		"SOURCE_CODE_TEXT": "De volledige bijbehorende broncode voor deze versie is beschikbaar op: ",
+		"SOURCE_CODE_LINK": "Broncode repository",
+		"NOTABLE_CHANGES": "Opmerkelijke wijzigingen:",
+		"CHANGE_1": "Verschillende kerncomponenten geherstructureerd voor betere herbruikbaarheid",
+		"CHANGE_2": "Aanvullende UI/UX-verbeteringen",
+		"CHANGE_3": "Diverse bugs opgelost en algehele stabiliteit verbeterd",
+		"CHANGE_4": "Uitgebreide facturatiefunctie — facturen kunnen nu per gebruiker aan het bedrijf worden uitgegeven",
+		"CHANGE_5": "Nieuwe statistieken geïntroduceerd voor betere tracking en prestatieanalyse",
+		"CHANGELOG_TEXT": "Voor een volledige lijst met wijzigingen, zie onze ",
+		"CHANGELOG_LINK": "Wijzigingslog",
+		"CHANGELOG_SUFFIX": " of vergelijk met upstream."
 	},
 	"FOOTER": {
 		"BY": "door",
