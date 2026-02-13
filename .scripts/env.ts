@@ -247,7 +247,7 @@ export const env: Env = cleanEnv(
 			default: 'https://www.linkedin.com/company/dspotteam'
 		}),
 		PROJECT_REPO: str({
-			default: 'https://github.com/DSpotDevelopers/gauzy'
+			default: 'https://github.com/DSpotDevelopers/DSpot-ERP'
 		}),
 
 		DESKTOP_TIMER_APP_NAME: str({

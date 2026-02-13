@@ -3609,7 +3609,23 @@
 		}
 	},
 	"ABOUT_PAGE": {
-		"ABOUT": "Informazioni"
+		"ABOUT": "Informazioni",
+		"FORK_PART_1": "Questa applicazione è un fork di ",
+		"FORK_PART_2": " da ",
+		"FORK_PART_3": ". Il repository originale era concesso in licenza sotto ",
+		"FORK_PART_4": ". Le modifiche sono state apportate da ",
+		"FORK_PART_5": " e sono rilasciate sotto la stessa licenza AGPL v3.0.",
+		"SOURCE_CODE_TEXT": "Il codice sorgente completo corrispondente a questa versione è disponibile su: ",
+		"SOURCE_CODE_LINK": "Repository del codice sorgente",
+		"NOTABLE_CHANGES": "Modifiche rilevanti:",
+		"CHANGE_1": "Refactoring di diversi componenti chiave per migliorarne la riusabilità",
+		"CHANGE_2": "Ulteriori miglioramenti UI/UX",
+		"CHANGE_3": "Correzione di vari bug e miglioramento della stabilità complessiva",
+		"CHANGE_4": "Funzionalità di fatturazione estesa — ora le fatture possono essere emesse per utente verso l’azienda",
+		"CHANGE_5": "Introduzione di nuove metriche per un migliore monitoraggio e analisi delle prestazioni",
+		"CHANGELOG_TEXT": "Per l’elenco completo delle modifiche, consulta il nostro ",
+		"CHANGELOG_LINK": "Registro delle modifiche",
+		"CHANGELOG_SUFFIX": " o confronta con l’upstream."
 	},
 	"FOOTER": {
 		"BY": "da",

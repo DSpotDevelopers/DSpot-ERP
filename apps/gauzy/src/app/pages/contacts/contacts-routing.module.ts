@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ContactType, PermissionsEnum } from '@gauzy/contracts';
-import { PermissionsGuard } from '@gauzy/ui-core/core';
+import { ContactType, FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
+import { FeatureGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { ContactsComponent } from './contacts.component';
 
 const CONTACT_VIEW_PERMISSION = {
@@ -26,46 +26,50 @@ const routes: Routes = [
 				employee: false,
 				date: false,
 				organization: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_CONTACT
 		}
 	},
 	{
 		path: 'clients',
 		component: ContactsComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			...CONTACT_VIEW_PERMISSION,
 			selectors: {
 				project: false,
 				date: true
 			},
-			contactType: ContactType.CLIENT
+			contactType: ContactType.CLIENT,
+			featureKey: FeatureEnum.FEATURE_CONTACT
 		}
 	},
 	{
 		path: 'customers',
 		component: ContactsComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			...CONTACT_VIEW_PERMISSION,
 			selectors: {
 				project: false,
 				date: true
 			},
-			contactType: ContactType.CUSTOMER
+			contactType: ContactType.CUSTOMER,
+			featureKey: FeatureEnum.FEATURE_CONTACT
 		}
 	},
 	{
 		path: 'leads',
 		component: ContactsComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			...CONTACT_VIEW_PERMISSION,
 			selectors: {
 				project: false,
 				date: true
 			},
-			contactType: ContactType.LEAD
+			contactType: ContactType.LEAD,
+			featureKey: FeatureEnum.FEATURE_CONTACT
 		}
 	},
 	{

@@ -17,8 +17,8 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NgChartsModule } from 'ng2-charts';
 import { NgxPermissionsModule } from 'ngx-permissions';
 import { CKEditorModule } from 'ckeditor4-angular';
-import { PermissionsEnum } from '@gauzy/contracts';
-import { PageRouteRegistryService, PermissionsGuard } from '@gauzy/ui-core/core';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
+import { FeatureGuard, PageRouteRegistryService, PermissionsGuard } from '@gauzy/ui-core/core';
 import { HttpLoaderFactory } from '@gauzy/ui-core/i18n';
 import {
 	SmartDataViewLayoutModule,
@@ -139,14 +139,15 @@ export class JobProposalModule {
 			// Register the component
 			component: ProposalComponent,
 			// Register the canActivate guard
-			canActivate: [PermissionsGuard],
+			canActivate: [PermissionsGuard, FeatureGuard],
 			// Register the data object
 			data: {
 				selectors: {
 					project: false,
 					team: false
 				},
-				datePicker: { unitOfTime: 'month' }
+				datePicker: { unitOfTime: 'month' },
+				featureKey: FeatureEnum.FEATURE_PROPOSAL
 			},
 			resolve: { dates: DateRangePickerResolver }
 		});

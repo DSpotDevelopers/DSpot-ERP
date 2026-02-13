@@ -1,6 +1,6 @@
-# Ever Gauzy Desktop Application
+# Gauzy Desktop Application
 
-Ever Gauzy Desktop is a cross-platform application built with [nstudio/electron](https://github.com/nstudio/xplat) for seamless integration with Gauzy.
+Gauzy Desktop is a cross-platform application built with [nstudio/electron](https://github.com/nstudio/xplat) for seamless integration with Gauzy. This README provides setup, build, and uninstall instructions for macOS and Windows.
 
 ---
 

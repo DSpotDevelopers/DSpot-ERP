@@ -1,4 +1,4 @@
-# DSpot ERP Platform UI
+# Ever Gauzy Platform UI
 
 ARG DEPENDENCIES_IMAGE
 
@@ -59,7 +59,7 @@ ARG EXTENSION_DOWNLOAD_LINK
 FROM ${DEPENDENCIES_IMAGE:-"no-image"} AS builder
 
 LABEL maintainer="info@dspot.com.pl"
-LABEL org.opencontainers.image.source="https://github.com/DSpotDevelopers/gauzy"
+LABEL org.opencontainers.image.source="https://github.com/DSpotDevelopers/DSpot-ERP"
 
 # We make NODE_ENV and other env vars passed as build argument to be available in this stage
 ARG NODE_ENV
@@ -87,10 +87,13 @@ FROM nginx:alpine AS production
 
 WORKDIR /srv/gauzy
 
-# Copy the built API items and prepare dependencies
+# Copy the built webapp and prepare dependencies
 COPY --chown=nginx:nginx .deploy/webapp/nginx.compose.conf /etc/nginx/conf.d/compose.conf.template
 COPY --chown=nginx:nginx .deploy/webapp/nginx.prod.conf /etc/nginx/conf.d/prod.conf.template
 COPY --chown=nginx:nginx --from=builder /srv/gauzy/dist/apps/gauzy .
+
+# AGPL-3.0 compliance: include license, attribution, and modification notice files
+COPY --chown=nginx:nginx LICENSE LICENSES.md CREDITS.md CHANGELOG.md README.md ./
 
 # Copy the entrypoint scripts
 COPY  --chown=nginx:nginx --chmod=755 wait .deploy/webapp/entrypoint.compose.sh .deploy/webapp/entrypoint.prod.sh .deploy/webapp/replacements.sed ./
@@ -133,7 +136,7 @@ ENV CI=true \
 	FILE_PROVIDER=${FILE_PROVIDER:-"LOCAL"} \
 	PLATFORM_PRIVACY_URL=${PLATFORM_PRIVACY_URL:-"https://gauzy.co/privacy"} \
 	PLATFORM_TOS_URL=${PLATFORM_TOS_URL:-"https://gauzy.co/tos"} \
-	PROJECT_REPO=${PROJECT_REPO:-"https://github.com/DSpotDevelopers/gauzy"} \
+	PROJECT_REPO=${PROJECT_REPO:-"https://github.com/DSpotDevelopers/DSpot-ERP"} \
 	I18N_FILES_URL=${I18N_FILES_URL} \
 	COMPANY_NAME=${COMPANY_NAME:-"DSpot sp. z o.o."} \
 	COMPANY_LINK=${COMPANY_LINK:-"https://www.dspot.com.pl"} \

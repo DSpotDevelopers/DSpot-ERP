@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
 import { DateRangePickerResolver } from '@gauzy/ui-core/shared';
 import { TimeOffComponent } from './time-off.component';
@@ -23,7 +23,8 @@ export const routes: Routes = [
 			},
 			datePicker: {
 				unitOfTime: 'month'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_EMPLOYEE_TIMEOFF
 		},
 		resolve: { dates: DateRangePickerResolver }
 	},

@@ -1,0 +1,42 @@
+@use 'themes' as *;
+
+.about-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: calc(100vh - 19.5rem);
+
+  .about-page-content {
+    padding: 0.5rem 0;
+
+    .large-text {
+      text-transform: uppercase;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    ul {
+      padding-left: 1.2rem;
+      margin-bottom: 1rem;
+
+      li {
+        margin-bottom: 0.3rem;
+      }
+    }
+
+    .changes-link {
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+nb-card {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+
+  nb-card-body {
+    padding: 1.5rem;
+  }
+}

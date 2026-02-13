@@ -2,5 +2,48 @@
 	<nb-card-header>
 		<h4>{{ 'ABOUT_PAGE.ABOUT' | translate }}</h4>
 	</nb-card-header>
-	<nb-card-body></nb-card-body>
+	<nb-card-body>
+		<div class="about-page-wrapper">
+			<div class="about-page-content">
+				<span>{{ 'ABOUT_PAGE.FORK_PART_1' | translate }}</span>
+				<a href="https://github.com/ever-co/ever-gauzy" target="_blank" rel="noopener"> Ever Gauzy </a>
+				<span>{{ 'ABOUT_PAGE.FORK_PART_2' | translate }}</span>
+				<a href="https://ever.co/" target="_blank" rel="noopener"> Ever Co. Ltd </a>
+				<span>{{ 'ABOUT_PAGE.FORK_PART_3' | translate }}</span>
+				<a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener"> GNU AGPL v3 </a>
+				<span>{{ 'ABOUT_PAGE.FORK_PART_4' | translate }}</span>
+				<a href="https://www.dspot.com.pl" target="_blank" rel="noopener"> DSpot sp. z o.o. </a>
+				<span>{{ 'ABOUT_PAGE.FORK_PART_5' | translate }}</span>
+			</div>
+
+			<div class="about-page-content">
+				<span>{{ 'ABOUT_PAGE.SOURCE_CODE_TEXT' | translate }}</span>
+				<a href="https://github.com/DSpotDevelopers/DSpot-ERP" target="_blank" rel="noopener">
+					{{ 'ABOUT_PAGE.SOURCE_CODE_LINK' | translate }} </a
+				>.
+			</div>
+
+			<div class="about-page-content">
+				<h6>{{ 'ABOUT_PAGE.NOTABLE_CHANGES' | translate }}</h6>
+				<ul>
+					<li>{{ 'ABOUT_PAGE.CHANGE_1' | translate }}</li>
+					<li>{{ 'ABOUT_PAGE.CHANGE_2' | translate }}</li>
+					<li>{{ 'ABOUT_PAGE.CHANGE_3' | translate }}</li>
+					<li>{{ 'ABOUT_PAGE.CHANGE_4' | translate }}</li>
+					<li>{{ 'ABOUT_PAGE.CHANGE_5' | translate }}</li>
+				</ul>
+				<div class="changes-link">
+					<span>{{ 'ABOUT_PAGE.CHANGELOG_TEXT' | translate }}</span>
+					<a
+						href="https://github.com/DSpotDevelopers/DSpot-ERP/blob/dev-dspot/CHANGELOG.md"
+						target="_blank"
+						rel="noopener"
+					>
+						<span class="large-text">{{ 'ABOUT_PAGE.CHANGELOG_LINK' | translate }}</span>
+					</a>
+					<span>{{ 'ABOUT_PAGE.CHANGELOG_SUFFIX' | translate }}</span>
+				</div>
+			</div>
+		</div>
+	</nb-card-body>
 </nb-card>

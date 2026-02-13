@@ -6,7 +6,13 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { FeatureEnum, IOrganization, PermissionsEnum } from '@gauzy/contracts';
 import { distinctUntilChange } from '@gauzy/ui-core/common';
 import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
-import { NavMenuBuilderService, NavMenuSectionItem, SidebarMenuService, Store } from '../../services';
+import {
+	FeatureSocketService,
+	NavMenuBuilderService,
+	NavMenuSectionItem,
+	SidebarMenuService,
+	Store
+} from '../../services';
 
 @UntilDestroy()
 @Directive({
@@ -18,13 +24,23 @@ export class BaseNavMenuComponent extends TranslationBaseComponent implements On
 		protected readonly _navMenuBuilderService: NavMenuBuilderService,
 		protected readonly _store: Store,
 		protected readonly _sidebarMenuService: SidebarMenuService,
-		protected readonly _translateService: TranslateService
+		protected readonly _translateService: TranslateService,
+		private readonly _featureSocketService: FeatureSocketService
 	) {
 		super(_translateService);
 	}
 
 	ngOnInit(): void {
 		this.defineBaseNavMenus();
+		this._featureSocketService.featureChanged$
+			.pipe(
+				filter(Boolean),
+				tap(() => {
+					window.location.reload();
+				}),
+				untilDestroyed(this)
+			)
+			.subscribe();
 	}
 
 	ngAfterViewInit() {
@@ -443,6 +459,7 @@ export class BaseNavMenuComponent extends TranslationBaseComponent implements On
 						link: '/pages/jobs/proposal-template',
 						data: {
 							translationKey: 'MENU.PROPOSAL_TEMPLATE',
+							featureKey: FeatureEnum.FEATURE_PROPOSAL_TEMPLATE,
 							permissionKeys: [PermissionsEnum.ORG_PROPOSAL_TEMPLATES_VIEW],
 							...(this._store.hasAnyPermission(
 								PermissionsEnum.ALL_ORG_EDIT,
@@ -908,6 +925,15 @@ export class BaseNavMenuComponent extends TranslationBaseComponent implements On
 						}
 					}
 				]
+			},
+			{
+				id: 'about',
+				title: 'About',
+				icon: 'fas fa-info-circle',
+				link: '/pages/about',
+				data: {
+					translationKey: 'MENU.ABOUT'
+				}
 			}
 		];
 	}

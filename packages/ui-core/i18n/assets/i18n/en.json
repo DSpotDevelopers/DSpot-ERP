@@ -3611,7 +3611,23 @@
 		}
 	},
 	"ABOUT_PAGE": {
-		"ABOUT": "About"
+		"ABOUT": "About",
+		"FORK_PART_1": "This application is a fork of ",
+		"FORK_PART_2": " by ",
+		"FORK_PART_3": ". The original repository was licensed under ",
+		"FORK_PART_4": ". Modifications have been made by ",
+		"FORK_PART_5": " and are released under the same AGPL v3.0 license.",
+		"SOURCE_CODE_TEXT": "The complete corresponding source code for this version is available at: ",
+		"SOURCE_CODE_LINK": "Source code repository",
+		"NOTABLE_CHANGES": "Notable changes:",
+		"CHANGE_1": "Refactored several key components for improved reusability",
+		"CHANGE_2": "Additional UI/UX enhancements",
+		"CHANGE_3": "Fixed various bugs and improved overall application stability",
+		"CHANGE_4": "Extended invoicing functionality — invoices can now be issued per user to the company",
+		"CHANGE_5": "Introduced new metrics for better tracking and performance analysis",
+		"CHANGELOG_TEXT": "For a full list of changes, see our ",
+		"CHANGELOG_LINK": "Changelog",
+		"CHANGELOG_SUFFIX": " or compare with upstream."
 	},
 	"FOOTER": {
 		"BY": "by",

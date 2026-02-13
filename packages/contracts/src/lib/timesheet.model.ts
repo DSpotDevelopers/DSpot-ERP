@@ -450,6 +450,13 @@ export interface IReportProjectLogs {
 	activity: number;
 }
 
+export interface IReportTaskProjectLogs {
+	project: IOrganizationProject | null;
+	employeeLogs: IReportEmployeeLogs[];
+	sum: number;
+	activity: number;
+}
+
 export interface IReportDayGroupByDate {
 	date: string;
 	logs: {
@@ -475,6 +482,16 @@ export interface IReportDayGroupByProject {
 	logs: {
 		date: string;
 		employeeLogs: IReportEmployeeLogs[];
+	}[];
+	sum: number;
+	activity: number;
+}
+
+export interface IReportDayGroupByTask {
+	task: ITask;
+	logs: {
+		date: string;
+		projectLogs: IReportTaskProjectLogs[];
 	}[];
 	sum: number;
 	activity: number;

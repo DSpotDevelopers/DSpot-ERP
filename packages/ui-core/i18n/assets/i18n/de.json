@@ -3609,7 +3609,23 @@
 		}
 	},
 	"ABOUT_PAGE": {
-		"ABOUT": "Über"
+		"ABOUT": "Über",
+		"FORK_PART_1": "Diese Anwendung ist ein Fork von ",
+		"FORK_PART_2": " von ",
+		"FORK_PART_3": ". Das ursprüngliche Repository wurde unter ",
+		"FORK_PART_4": " lizenziert. Änderungen wurden vorgenommen von ",
+		"FORK_PART_5": " und unter derselben AGPL v3.0-Lizenz veröffentlicht.",
+		"SOURCE_CODE_TEXT": "Der vollständige entsprechende Quellcode für diese Version ist verfügbar unter: ",
+		"SOURCE_CODE_LINK": "Quellcode-Repository",
+		"NOTABLE_CHANGES": "Wesentliche Änderungen:",
+		"CHANGE_1": "Mehrere Kernkomponenten für bessere Wiederverwendbarkeit refaktoriert",
+		"CHANGE_2": "Zusätzliche UI/UX-Verbesserungen",
+		"CHANGE_3": "Verschiedene Fehler behoben und Gesamtstabilität verbessert",
+		"CHANGE_4": "Erweiterte Rechnungsfunktion — Rechnungen können nun pro Benutzer an das Unternehmen gestellt werden",
+		"CHANGE_5": "Neue Metriken zur besseren Nachverfolgung und Leistungsanalyse eingeführt",
+		"CHANGELOG_TEXT": "Eine vollständige Liste der Änderungen finden Sie in unserem ",
+		"CHANGELOG_LINK": "Changelog",
+		"CHANGELOG_SUFFIX": " oder vergleichen Sie mit dem Upstream."
 	},
 	"FOOTER": {
 		"BY": "von",

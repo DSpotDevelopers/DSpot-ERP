@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
 import { PermissionsGuard } from '@gauzy/ui-core/core';
 import { OrganizationsComponent } from './organizations.component';
 
@@ -24,7 +24,8 @@ const routes: Routes = [
 				employee: false,
 				organization: false,
 				date: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_ORGANIZATIONS
 		}
 	},
 	{

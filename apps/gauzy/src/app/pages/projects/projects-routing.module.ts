@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { IntegrationEnum, PermissionsEnum } from '@gauzy/contracts';
-import { IntegrationResolver, PermissionsGuard } from '@gauzy/ui-core/core';
+import { FeatureEnum, IntegrationEnum, PermissionsEnum } from '@gauzy/contracts';
+import { FeatureGuard, IntegrationResolver, PermissionsGuard } from '@gauzy/ui-core/core';
 import { ProjectLayoutComponent } from './layout/layout.component';
 import { ProjectResolver } from './project.resolver';
 import { ProjectCreateMutationComponent } from './components/project-create/create.component';
@@ -23,13 +23,14 @@ const routes: Routes = [
 					permissions: {
 						only: [PermissionsEnum.ALL_ORG_VIEW, PermissionsEnum.ORG_PROJECT_VIEW],
 						redirectTo: '/pages/dashboard'
-					}
+					},
+					featureKey: FeatureEnum.FEATURE_ORGANIZATION_PROJECT
 				}
 			},
 			{
 				path: 'create',
 				component: ProjectCreateMutationComponent,
-				canActivate: [PermissionsGuard],
+				canActivate: [PermissionsGuard, FeatureGuard],
 				data: {
 					permissions: {
 						only: [PermissionsEnum.ALL_ORG_EDIT, PermissionsEnum.ORG_PROJECT_ADD],

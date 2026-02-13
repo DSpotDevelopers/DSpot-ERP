@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { PermissionsEnum } from '@gauzy/contracts';
-import { InviteGuard, PermissionsGuard } from '@gauzy/ui-core/core';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
+import { FeatureGuard, InviteGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { EmployeesComponent } from './employees.component';
 import { ManageEmployeeInviteComponent } from './manage-employee-invite/manage-employee-invite.component';
 import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
@@ -30,7 +30,7 @@ const routes: Routes = [
 	{
 		path: '',
 		component: EmployeesComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			// The data table identifier for the route
 			dataTableId: 'employee-manage',
@@ -45,7 +45,8 @@ const routes: Routes = [
 				project: false,
 				employee: false,
 				date: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_EMPLOYEES
 		}
 	},
 	{
@@ -136,15 +137,18 @@ const routes: Routes = [
 				project: false,
 				employee: false,
 				date: false
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_MANAGE_INVITE
 		}
 	},
 	{
 		path: 'timesheets',
+		canActivate: [FeatureGuard],
 		loadChildren: () => import('./timesheet/timesheet.module').then((m) => m.TimesheetModule)
 	},
 	{
 		path: 'activity',
+		canActivate: [FeatureGuard],
 		loadChildren: () => import('./activity/activity.module').then((m) => m.ActivityModule)
 	}
 ];

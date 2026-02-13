@@ -1,6 +1,7 @@
 import { Route } from '@angular/router';
 import { PageRouteRegistryService } from '@gauzy/ui-core/core';
 import { JobLayoutComponent } from './job-layout/job-layout.component';
+import { FeatureEnum } from '@gauzy/contracts';
 
 /**
  * Creates jobs routes for the application
@@ -16,7 +17,8 @@ export const createJobsRoutes = (_pageRouteRegistryService: PageRouteRegistrySer
 			{
 				path: '',
 				redirectTo: 'employee',
-				pathMatch: 'full'
+				pathMatch: 'full',
+				data: { featureKey: FeatureEnum.FEATURE_JOB }
 			},
 			..._pageRouteRegistryService.getPageLocationRoutes('jobs')
 		]

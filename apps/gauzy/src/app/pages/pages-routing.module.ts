@@ -1,6 +1,6 @@
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { PermissionsGuard, UserResolver } from '@gauzy/ui-core/core';
+import { FeatureGuard, PermissionsGuard, UserResolver } from '@gauzy/ui-core/core';
 import { PermissionsEnum } from '@gauzy/contracts';
 import { DateRangePickerResolver, NotFoundComponent } from '@gauzy/ui-core/shared';
 import { PagesComponent } from './pages.component';
@@ -109,6 +109,7 @@ const routes: Routes = [
 				children: [
 					{
 						path: 'proposals',
+						canActivate: [FeatureGuard],
 						loadChildren: () => import('@gauzy/plugin-job-proposal-ui').then((m) => m.JobProposalModule)
 					},
 					{

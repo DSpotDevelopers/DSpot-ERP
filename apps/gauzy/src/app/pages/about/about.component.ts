@@ -1,14 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
-    selector: 'ngx-about',
-    templateUrl: './about.component.html',
-    standalone: false
+	selector: 'ngx-about',
+	templateUrl: './about.component.html',
+	styleUrl: './about.component.scss',
+	standalone: false
 })
-export class AboutComponent implements OnInit, OnDestroy {
-	constructor() {}
-
-	ngOnInit() {}
-
-	ngOnDestroy() {}
-}
+export class AboutComponent {}

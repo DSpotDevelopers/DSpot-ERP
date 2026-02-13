@@ -3,6 +3,7 @@ import { PageRouteRegistryService } from '@gauzy/ui-core/core';
 import { IntegrationLayoutComponent } from './layout/layout.component';
 import { IntegrationsComponent } from './integrations.component';
 import { IntegrationListComponent } from './components/integration-list/list.component';
+import { FeatureEnum } from '@gauzy/contracts';
 
 /**
  * Create and configures routes for the integrations module.
@@ -25,7 +26,8 @@ export const createIntegrationsRoutes = (_pageRouteRegistryService: PageRouteReg
 						employee: false,
 						date: false,
 						organization: true
-					}
+					},
+					featureKey: FeatureEnum.FEATURE_APP_INTEGRATION
 				}
 			},
 			{

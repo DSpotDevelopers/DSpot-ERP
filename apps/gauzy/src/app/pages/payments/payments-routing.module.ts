@@ -1,7 +1,7 @@
 import { Routes, RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { PermissionsEnum } from '@gauzy/contracts';
-import { PermissionsGuard } from '@gauzy/ui-core/core';
+import { FeatureEnum, PermissionsEnum } from '@gauzy/contracts';
+import { FeatureGuard, PermissionsGuard } from '@gauzy/ui-core/core';
 import { DateRangePickerResolver } from '@gauzy/ui-core/shared';
 import { PaymentsComponent } from './payments.component';
 
@@ -9,7 +9,7 @@ const routes: Routes = [
 	{
 		path: '',
 		component: PaymentsComponent,
-		canActivate: [PermissionsGuard],
+		canActivate: [PermissionsGuard, FeatureGuard],
 		data: {
 			permissions: {
 				only: [PermissionsEnum.ORG_PAYMENT_VIEW],
@@ -20,7 +20,8 @@ const routes: Routes = [
 			},
 			datePicker: {
 				unitOfTime: 'month'
-			}
+			},
+			featureKey: FeatureEnum.FEATURE_PAYMENT
 		},
 		resolve: { dates: DateRangePickerResolver }
 	}

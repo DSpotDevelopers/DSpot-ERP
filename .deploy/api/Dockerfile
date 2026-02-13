@@ -1,4 +1,4 @@
-# DSpot ERP Platform API (Core)
+# Ever Gauzy Platform API (Core)
 
 ARG DEPENDENCIES_IMAGE
 ARG GIT_HASH
@@ -107,7 +107,7 @@ ARG MIKRO_ORM_ALLOW_GLOBAL_CONTEXT
 FROM ${DEPENDENCIES_IMAGE:-"no-image"}:latest-api-dev AS builder
 
 LABEL maintainer="info@dspot.com.pl"
-LABEL org.opencontainers.image.source="https://github.com/DSpotDevelopers/gauzy"
+LABEL org.opencontainers.image.source="https://github.com/DSpotDevelopers/DSpot-ERP"
 
 ARG NODE_ENV
 ARG DEMO
@@ -158,6 +158,9 @@ RUN rm -rf ./node_modules/@gauzy \
 	done \
 	&& mv "./node_modules/@gauzy/plugin-sentry-tracing" "./node_modules/@gauzy/plugin-sentry" \
 	&& cp -r ./seed/* ./apps/api/public
+
+# AGPL-3.0 compliance: explicitly include license, attribution, and modification notice files
+COPY --chown=node:node LICENSE LICENSES.md CREDITS.md CHANGELOG.md README.md ./
 
 # Copy the entrypoint scripts
 COPY --chmod=755 wait .deploy/api/entrypoint.prod.sh .deploy/api/entrypoint.compose.sh ./
