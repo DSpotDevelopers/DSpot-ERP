@@ -3602,7 +3602,23 @@
 		}
 	},
 	"ABOUT_PAGE": {
-		"ABOUT": "关于"
+		"ABOUT": "关于",
+		"FORK_PART_1": "此应用程序是 ",
+		"FORK_PART_2": " 的一个分支，由 ",
+		"FORK_PART_3": " 授权发布。原始仓库采用 ",
+		"FORK_PART_4": " 许可证。修改由 ",
+		"FORK_PART_5": " 进行，并在相同的 AGPL v3.0 许可证下发布。",
+		"SOURCE_CODE_TEXT": "此版本对应的完整源代码可在以下地址获取：",
+		"SOURCE_CODE_LINK": "源代码仓库",
+		"NOTABLE_CHANGES": "主要变更：",
+		"CHANGE_1": "重构多个关键组件以提高可复用性",
+		"CHANGE_2": "额外的 UI/UX 优化",
+		"CHANGE_3": "修复多个错误并提升整体稳定性",
+		"CHANGE_4": "扩展发票功能——现在可以按用户向公司开具发票",
+		"CHANGE_5": "引入新的指标以 улучш tracking 和性能分析",
+		"CHANGELOG_TEXT": "完整变更列表请参见我们的 ",
+		"CHANGELOG_LINK": "更新日志",
+		"CHANGELOG_SUFFIX": " 或与上游版本进行比较。"
 	},
 	"FOOTER": {
 		"BY": "由",
