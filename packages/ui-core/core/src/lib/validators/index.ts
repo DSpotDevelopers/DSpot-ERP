@@ -5,4 +5,4 @@ export * from './match.validator';
 export * from './url-pattern.validator';
 export * from './empty-string.validator';
 export * from './no-negative-zero.validator';
-export * from './date-validator';
+export * from './date-range.validator';
