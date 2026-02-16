@@ -13,14 +13,18 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<div class="form-group">
-						<label class="label">{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.PROJECT' | translate }}</label>
-						<ga-project-selector
-							formControlName="projectId"
+						<label class="label required-asterisk">{{
+							'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.PROJECT' | translate }}</label>
+						<ga-project-selector formControlName="projectId"
 							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.SELECT_PROJECT' | translate"
-							[skipGlobalChange]="true"
-							[defaultSelected]="false"
-							[showAllOption]="false"
-						></ga-project-selector>
+							[skipGlobalChange]="true" [defaultSelected]="false"
+							[showAllOption]="false"></ga-project-selector>
+
+						<div *ngIf="form.get('projectId')?.errors?.required && form.get('projectId')?.touched"
+							class="invalid-feedback d-block">
+							{{ 'FORM.ERROR.PROJECT_NAME' | translate }}
+						</div>
+
 					</div>
 				</div>
 				<div class="col-sm-6">
@@ -40,11 +44,8 @@
 				<!-- Employee Multi-Select -->
 				<div class="col-sm-12">
 					<div class="form-group">
-						<ga-employee-multi-select
-							[selectedEmployeeIds]="selectedEmployeeIds"
-							[allEmployees]="employees"
-							(selectedChange)="onMembersSelected($event)"
-						></ga-employee-multi-select>
+						<ga-employee-multi-select [selectedEmployeeIds]="selectedEmployeeIds" [allEmployees]="employees"
+							(selectedChange)="onMembersSelected($event)"></ga-employee-multi-select>
 					</div>
 				</div>
 
@@ -53,15 +54,10 @@
 					<div class="form-group">
 						<label class="label">{{
 							'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.SELECT_TEAMS' | translate
-						}}</label>
-						<nb-select
-							formControlName="teams"
-							multiple
-							[selected]="selectedTeams"
-							(selectedChange)="onTeamsSelected($event)"
-							fullWidth
-							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.CHOOSE_TEAMS' | translate"
-						>
+							}}</label>
+						<nb-select formControlName="teams" multiple [selected]="selectedTeams"
+							(selectedChange)="onTeamsSelected($event)" fullWidth
+							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.CHOOSE_TEAMS' | translate">
 							<nb-option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</nb-option>
 						</nb-select>
 					</div>
@@ -72,26 +68,27 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<div class="form-group">
-						<label class="label">{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.NAME' | translate }}</label>
-						<input
-							class="name-input"
-							formControlName="name"
-							type="text"
-							nbInput
-							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.ENTER_NAME' | translate"
-						/>
+						<label class="label required-asterisk">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.NAME' | translate }}
+						</label>
+
+						<input class="name-input" formControlName="name" type="text" nbInput
+							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.ENTER_NAME' | translate" />
+
+						<div *ngIf="form.get('name')?.errors?.required && form.get('name')?.touched"
+							class="invalid-feedback d-block">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.NAME_REQUIRED' | translate }}
+						</div>
 					</div>
 				</div>
 				<div class="col-sm-6">
 					<div class="form-group">
 						<label class="label">{{
 							'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.PARENT_MODULE' | translate
-						}}</label>
-						<nb-select
-							formControlName="parentId"
+							}}</label>
+						<nb-select formControlName="parentId"
 							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.SELECT_PARENT' | translate"
-							fullWidth
-						>
+							fullWidth>
 							<nb-option *ngFor="let module of availableParentModules" [value]="module.id">
 								{{ module.name }}
 							</nb-option>
@@ -106,12 +103,8 @@
 					<div class="form-group">
 						<label class="label">{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.MANAGER' | translate }}</label>
 
-						<ga-employee-multi-select
-							[selectedEmployeeIds]="selectedManagerIds"
-							[allEmployees]="employees"
-							class="employees"
-							(selectedChange)="onManagersSelected($event)"
-						></ga-employee-multi-select>
+						<ga-employee-multi-select [selectedEmployeeIds]="selectedManagerIds" [allEmployees]="employees"
+							class="employees" (selectedChange)="onManagersSelected($event)"></ga-employee-multi-select>
 					</div>
 				</div>
 
@@ -120,13 +113,10 @@
 					<div class="form-group">
 						<label class="label">{{
 							'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.ORGANIZATION_SPRINTS' | translate
-						}}</label>
-						<nb-select
-							formControlName="organizationSprints"
-							multiple
+							}}</label>
+						<nb-select formControlName="organizationSprints" multiple
 							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.SELECT_SPRINTS' | translate"
-							fullWidth
-						>
+							fullWidth>
 							<nb-option *ngFor="let sprint of organizationSprints" [value]="sprint.id">
 								{{ sprint.name }}
 							</nb-option>
@@ -139,13 +129,9 @@
 				<div class="col-sm-12">
 					<div class="form-group">
 						<label>{{ 'TIMER_TRACKER.SELECT_TASK' | translate }}</label>
-						<ga-task-selector
-							name="taskId"
-							[projectId]="form.get('projectId').value"
-							formControlName="tasks"
-							[multiple]="true"
-							[required]="organization?.requireTask"
-						></ga-task-selector>
+						<ga-task-selector name="taskId" [projectId]="form.get('projectId').value"
+							formControlName="tasks" [multiple]="true"
+							[required]="organization?.requireTask"></ga-task-selector>
 					</div>
 				</div>
 			</div>
@@ -153,36 +139,51 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<div class="form-group">
-						<label for="startDate" class="label">{{
+						<label for="startDate" class="label required-asterisk">{{
 							'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.START_DATE' | translate
-						}}</label>
-						<input
-							formControlName="startDate"
-							type="text"
-							nbInput
+							}}</label>
+						<input formControlName="startDate" type="text" nbInput
 							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.SELECT_START_DATE' | translate"
-							[nbDatepicker]="startDatePicker"
-							id="startDate"
-							fullWidth
-						/>
+							[nbDatepicker]="startDatePicker" id="startDate" fullWidth
+							(input)="validateDateInput('startDate', $event.target.value)" />
+						<!-- required -->
+						<div *ngIf="form.get('startDate')?.errors?.required && form.get('startDate')?.touched"
+							class="invalid-feedback d-block">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.START_DATE_REQUIRED' | translate }}
+						</div>
+						<!-- invalid format -->
+						<div *ngIf="form.get('startDate')?.errors?.invalidDateFormat && form.get('startDate')?.dirty"
+							class="invalid-feedback d-block">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.INVALID_DATE_FORMAT' | translate }}
+						</div>
 						<nb-datepicker #startDatePicker></nb-datepicker>
 					</div>
 				</div>
+
 				<div class="col-sm-6">
 					<div class="form-group">
-						<label for="endDate" class="label">{{
+						<label for="endDate" class="label required-asterisk">{{
 							'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.END_DATE' | translate
-						}}</label>
-						<input
-							formControlName="endDate"
-							type="text"
-							nbInput
+							}}</label>
+						<input formControlName="endDate" type="text" nbInput
 							[placeholder]="'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.SELECT_END_DATE' | translate"
-							[nbDatepicker]="endDatePicker"
-							id="endDate"
-							[min]="form.get('startDate').value"
-							fullWidth
-						/>
+							[nbDatepicker]="endDatePicker" id="endDate" [min]="form.get('startDate').value" fullWidth
+							(input)="validateDateInput('endDate', $event.target.value)" />
+						<!-- required -->
+						<div *ngIf="form.get('endDate')?.errors?.required && form.get('endDate')?.touched"
+							class="invalid-feedback d-block">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.END_DATE_REQUIRED' | translate }}
+						</div>
+						<!-- invalid format -->
+						<div *ngIf="form.get('endDate')?.errors?.invalidDateFormat && form.get('endDate')?.dirty"
+							class="invalid-feedback d-block">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.INVALID_DATE_FORMAT' | translate }}
+						</div>
+						<!-- start > end -->
+						<div *ngIf="form.errors?.dateRangeInvalid && form.get('endDate')?.dirty"
+							class="invalid-feedback d-block">
+							{{ 'PROJECT_MANAGEMENT_PAGE.PROJECT_MODULE.VALIDATION.INCORRECT_DATE_LOCATION' | translate}}
+						</div>
 						<nb-datepicker #endDatePicker></nb-datepicker>
 					</div>
 				</div>

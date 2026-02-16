@@ -3411,7 +3411,14 @@
 			"SELECT_MANAGER": "Выберите менеджера",
 			"ORGANIZATION_SPRINTS": "Спринты организации",
 			"SELECT_SPRINTS": "Выберите спринты",
-			"IS_FAVORITE": "Избранное"
+			"IS_FAVORITE": "Избранное",
+			"VALIDATION": {
+				"NAME_REQUIRED": "Название модуля обязательно и не может быть пустым",
+				"START_DATE_REQUIRED": "Дата начала обязательна",
+				"END_DATE_REQUIRED": "Дата окончания обязательна",
+				"INVALID_DATE_FORMAT": "Неверный формат даты",
+				"INCORRECT_DATE_LOCATION": "Дата окончания должна быть позже даты начала"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {

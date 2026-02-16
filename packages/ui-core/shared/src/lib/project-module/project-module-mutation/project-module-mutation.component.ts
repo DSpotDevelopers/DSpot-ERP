@@ -5,6 +5,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import * as moment from 'moment';
+import { dateRangeValidator } from '@gauzy/ui-core/core';
 import {
 	IEmployee,
 	IOrganization,
@@ -29,7 +31,6 @@ import {
 	ToastrService
 } from '@gauzy/ui-core/core';
 import { TranslationBaseComponent } from '@gauzy/ui-core/i18n';
-
 @UntilDestroy({ checkProperties: true })
 @Component({
 	selector: 'ngx-project-module-mutation',
@@ -52,21 +53,24 @@ export class ProjectModuleMutationComponent extends TranslationBaseComponent imp
 	taskParticipantEnum = TaskParticipantEnum;
 	participants = TaskParticipantEnum.EMPLOYEES;
 	projectModuleStatuses = Object.values(ProjectModuleStatusEnum);
-	form: UntypedFormGroup = this.fb.group({
-		name: ['', Validators.required],
-		description: [''],
-		status: [ProjectModuleStatusEnum.BACKLOG],
-		startDate: ['', Validators.required],
-		endDate: ['', Validators.required],
-		isFavorite: [false],
-		parentId: [],
-		projectId: [null, Validators.required],
-		managerIds: [],
-		memberIds: [],
-		organizationSprints: [],
-		teams: [],
-		tasks: []
-	});
+	form: UntypedFormGroup = this.fb.group(
+		{
+			name: ['', Validators.required],
+			description: [''],
+			status: [ProjectModuleStatusEnum.BACKLOG],
+			startDate: ['', Validators.required],
+			endDate: ['', Validators.required],
+			isFavorite: [false],
+			parentId: [],
+			projectId: [null, Validators.required],
+			managerIds: [],
+			memberIds: [],
+			organizationSprints: [],
+			teams: [],
+			tasks: []
+		},
+		{ validators: dateRangeValidator('startDate', 'endDate') }
+	);
 
 	@Input() createModule = false;
 
@@ -111,6 +115,23 @@ export class ProjectModuleMutationComponent extends TranslationBaseComponent imp
 		this.loadAvailableParentModules();
 		this.loadTasks();
 		this.findOrganizationSprints();
+	}
+
+
+	validateDateInput(controlName: 'startDate' | 'endDate', value: string) {
+		const control = this.form.get(controlName);
+		if (!value) {
+			control?.setErrors({ required: true });
+			return;
+		}
+		const parsedValue = moment(value, ['MMM D, YYYY', 'MMMM D, YYYY', 'YYYY-MM-DD', 'DD-MM-YYYY', 'DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY/MM/DD'], true);
+		if (!parsedValue.isValid()) {
+			control?.setErrors({ invalidDateFormat: true });
+		} else {
+			control?.setErrors(null);
+			control?.setValue(parsedValue.toDate(), { emitEvent: false });
+			this.form.updateValueAndValidity();
+		}
 	}
 
 	/**

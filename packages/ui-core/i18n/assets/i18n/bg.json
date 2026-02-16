@@ -3415,7 +3415,14 @@
 			"SELECT_MANAGER": "Избери мениджър",
 			"ORGANIZATION_SPRINTS": "Спринтове на организацията",
 			"SELECT_SPRINTS": "Избери спринтове",
-			"IS_FAVORITE": "Любими"
+			"IS_FAVORITE": "Любими",
+			"VALIDATION": {
+				"NAME_REQUIRED": "Името на модула е задължително и не може да бъде празно",
+				"START_DATE_REQUIRED": "Началната дата е задължителна",
+				"END_DATE_REQUIRED": "Крайната дата е задължителна",
+				"INVALID_DATE_FORMAT": "Невалиден формат на датата",
+				"INCORRECT_DATE_LOCATION": "Крайната дата трябва да е след началната дата"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {

@@ -3414,7 +3414,14 @@
 			"SELECT_MANAGER": "Wybierz menedżera",
 			"ORGANIZATION_SPRINTS": "Sprinty organizacji",
 			"SELECT_SPRINTS": "Wybierz sprinty",
-			"IS_FAVORITE": "Ulubione"
+			"IS_FAVORITE": "Ulubione",
+			"VALIDATION": {
+				"NAME_REQUIRED": "Nazwa modułu jest wymagana i nie może być pusta",
+				"START_DATE_REQUIRED": "Data rozpoczęcia jest wymagana",
+				"END_DATE_REQUIRED": "Data zakończenia jest wymagana",
+				"INVALID_DATE_FORMAT": "Nieprawidłowy format daty",
+				"INCORRECT_DATE_LOCATION": "Data zakończenia musi być późniejsza niż data rozpoczęcia"
+			}
 		}
 	},
 	"SETTINGS_FEATURES": {
