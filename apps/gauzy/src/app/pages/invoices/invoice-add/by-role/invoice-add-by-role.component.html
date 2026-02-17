@@ -22,28 +22,15 @@
 										}}
 									</span>
 								</label>
-								<ng-container *ngIf="isEstimate; else invoiceNumberInput">
-									<input
-										type="number"
-										[min]="0"
-										nbInput
-										[placeholder]="'INVOICES_PAGE.ESTIMATE_NUMBER' | translate"
-										formControlName="invoiceNumber"
-										id="inputInvoiceNumber"
-										fullWidth
-									/>
-								</ng-container>
-								<ng-template #invoiceNumberInput>
-									<input
-										type="text"
-										nbInput
-										[placeholder]="'INVOICES_PAGE.INVOICE_NUMBER' | translate"
-										formControlName="semanticId"
-										id="inputSemanticId"
-										fullWidth
-										readonly
-									/>
-								</ng-template>
+								<input
+									[type]="isEstimate ? 'number' : 'text'"
+									[min]="0"
+									nbInput
+									[placeholder]="(isEstimate ? 'INVOICES_PAGE.ESTIMATE_NUMBER' : 'INVOICES_PAGE.INVOICE_NUMBER') | translate"
+									[formControlName]="isEstimate ? 'invoiceNumber' : 'semanticId'"
+									id="inputInvoiceNumber"
+									fullWidth
+								/>
 							</div>
 						</div>
 						<div class="col-sm-6">

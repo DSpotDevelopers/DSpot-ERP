@@ -577,6 +577,7 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 						? this.getTranslation('INVOICES_PAGE.ESTIMATES.ESTIMATE_NUMBER')
 						: this.getTranslation('INVOICES_PAGE.INVOICE_NUMBER'),
 					type: 'custom',
+					sortDirection: 'asc',
 					width: '17%',
 					renderComponent: NotesWithTagsComponent,
 					componentInitFunction: (instance: NotesWithTagsComponent, cell: Cell) => {

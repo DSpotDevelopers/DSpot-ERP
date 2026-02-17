@@ -181,15 +181,6 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				this.invoiceItems = invoice?.invoiceItems;
 				this.discountAfterTax = invoice?.toOrganization?.discountAfterTax;
 
-				if(!this.isLegacyInvoice) {
-					const semanticIdControl = this.form.get('semanticId');
-
-					if(semanticIdControl) {
-						semanticIdControl.setValidators([Validators.required]);
-						semanticIdControl.updateValueAndValidity();
-					}
-				}
-
 				await this._loadOrganizationData().finally(() => this.updateValueAndValidity(invoice));
 			})
 			.catch((error) => {
@@ -240,6 +231,27 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			tags: invoice.tags
 		});
 		this.form.updateValueAndValidity();
+	}
+
+	get invoiceNumberConfig() {
+		const placeholder = this.isEstimate
+			? 'INVOICES_PAGE.ESTIMATE_NUMBER'
+			: 'INVOICES_PAGE.INVOICE_NUMBER';
+
+		const control = (this.isEstimate || this.isLegacyInvoice)
+			? this.form.get('invoiceNumber')
+			: this.form.get('semanticId');
+
+		const id = this.isEstimate || this.isLegacyInvoice
+			? 'inputInvoiceNumber'
+			: 'inputSemanticId';
+
+		return {
+			type: this.isEstimate ? 'number' : 'text',
+			placeholder: this.getTranslation(placeholder),
+			control,
+			id
+		}
 	}
 
 	async loadSmartTable() {

@@ -221,7 +221,7 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 	initializeForm() {
 		this.form = this.fb.group({
 			invoiceDate: [this.organizationSettingService.getDateFromOrganizationSettings(), Validators.required],
-			semanticId: [{ value: this.formSemanticId, disabled: true },Validators.compose([Validators.required, Validators.pattern(/\S+/)]),], // Validators.pattern(/\S+/) is used to ensure the semantic ID is not empty
+			semanticId: [{ value: this.formSemanticId, disabled: true }],
 			invoiceNumber: [{ value: this.formInvoiceNumber, disabled: !this.isEstimate }, Validators.compose([Validators.required, Validators.min(1)])],
 			dueDate: [this.getNextMonth(), Validators.required],
 			discountValue: [0, Validators.compose([Validators.required, Validators.min(0)])],
@@ -490,8 +490,8 @@ export class InvoiceAddByRoleComponent extends PaginationFilterBaseComponent imp
 
 		try {
 			const createdInvoice = await this.invoicesService.addOwn({
-				semanticId: semanticId,
-				invoiceNumber: invoiceNumber,
+				semanticId,
+				invoiceNumber,
 				invoiceDate: moment(invoiceDate).startOf('day').toDate(),
 				dueDate: moment(dueDate).endOf('day').toDate(),
 				currency: this.currency,
