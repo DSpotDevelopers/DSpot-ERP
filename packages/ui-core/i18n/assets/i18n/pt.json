@@ -4091,8 +4091,8 @@
 			"USER": "Usuário",
 			"PASSWORD": "Senha",
 			"UI_HOSTNAME": "Nome do Host da Interface do Usuário / Endereço IP",
-			"TITLE_SERVER_API": "Ever Gauzy API Server Instalation Wizard",
-			"LABEL_SERVER_API": "A aplicação Gauzy API Server Desktop fornece a funcionalidade completa da plataforma Gauzy disponível diretamente no seu computador de secretária ou portátil. Além disso, permite o tempo de trabalho de rastreio, o registo de atividades e a capacidade de receber lembretes/notificações de rastreio.",
+			"TITLE_SERVER_API": "DSpot ERP API Server Instalation Wizard",
+			"LABEL_SERVER_API": "A aplicação DSpot ERP API Server Desktop fornece a funcionalidade completa da plataforma Gauzy disponível diretamente no seu computador de secretária ou portátil. Além disso, permite o tempo de trabalho de rastreio, o registo de atividades e a capacidade de receber lembretes/notificações de rastreio.",
 			"UNABLE_TO_CONNECT": "Não foi possível conectar ao servidor. Por favor, verifique seu host da API ou conexão com a internet."
 		},
 		"SETTINGS": {
