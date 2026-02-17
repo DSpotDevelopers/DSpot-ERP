@@ -128,13 +128,14 @@
 			<div class="row">
 				<div class="col-sm-12">
 					<div class="form-group">
-						<label class="label" [ngClass]="organization?.requireTask ? 'required-asterisk' : null">
+						<label class="label"
+							[ngClass]="form.get('tasks')?.errors?.required ? 'required-asterisk' : null">
 							{{ 'TIMER_TRACKER.SELECT_TASK' | translate }}
 						</label>
 						<ga-task-selector name="taskId" [projectId]="form.get('projectId').value"
 							formControlName="tasks" [multiple]="true"
 							[required]="organization?.requireTask"></ga-task-selector>
-						<div *ngIf="organization?.requireTask && form.get('tasks')?.errors?.required &&
+						<div *ngIf="form.get('tasks')?.errors?.required &&
 						 form.get('tasks')?.touched" class="invalid-feedback d-block">
 							{{ 'TIMER_TRACKER.VALIDATION.TASK_REQUIRED' | translate }}
 						</div>
