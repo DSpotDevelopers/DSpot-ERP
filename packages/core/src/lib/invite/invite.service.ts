@@ -1016,19 +1016,16 @@ export class InviteService extends TenantAwareCrudService<Invite> {
 		/**
 		 * Register new user
 		 */
-		const create = this.typeOrmUserRepository.create({
+		const userEntity = await this.userService.create({
 			...input.user,
 			tenant,
-			initials: this.userService.generateInitials(input.user.firstName, input.user.lastName),
-			userNumber: await this.userService.getNextUserNumber(),
 			...(input.password ? { hash: await this.authService.getPasswordHash(input.password) } : {})
 		});
-		const entity = await this.typeOrmUserRepository.save(create);
 
 		/**
 		 * Email automatically verified after accept invitation
 		 */
-		await this.typeOrmUserRepository.update(entity.id, {
+		await this.typeOrmUserRepository.update(userEntity.id, {
 			...(input.inviteId ? { emailVerifiedAt: freshTimestamp() } : {})
 		});
 
@@ -1036,7 +1033,7 @@ export class InviteService extends TenantAwareCrudService<Invite> {
 		 * Find latest register user with role
 		 */
 		const user = await this.typeOrmUserRepository.findOne({
-			where: { id: entity.id },
+			where: { id: userEntity.id },
 			relations: { role: true }
 		});
 

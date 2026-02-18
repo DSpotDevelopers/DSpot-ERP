@@ -651,19 +651,11 @@ export class AuthService extends SocialAuthService {
 		}
 
 		// 3. Register new user
-		// Generate initials and get next user number for semantic document IDs
-		const initials = this.userService.generateInitials(input.user.firstName, input.user.lastName);
-		const userNumber = await this.userService.getNextUserNumber();
-
-		const entity = this.typeOrmUserRepository.create({
+		user = this.userService.create({
 			...input.user,
 			tenant,
-			initials,
-			userNumber,
-			lastInvoiceNumber: 0,
 			...(input.password ? { hash: await this.getPasswordHash(input.password) } : {})
 		});
-		user = await this.typeOrmUserRepository.save(entity);
 
 		// 4. Create employee for specific user
 		if (input.featureAsEmployee) {

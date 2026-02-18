@@ -11,7 +11,8 @@ import {
 	In,
 	UpdateResult,
 	DeleteResult,
-	MoreThan
+	MoreThan,
+	DeepPartial
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from 'jsonwebtoken';
@@ -32,7 +33,7 @@ import { ConfigService, environment as env } from '@gauzy/config';
 import { prepareSQLQuery as p } from './../database/database.helper';
 import { TenantAwareCrudService } from './../core/crud';
 import { RequestContext } from './../core/context';
-import { freshTimestamp, MultiORMEnum } from './../core/utils';
+import { freshTimestamp, MultiORMEnum, retryQuery } from './../core/utils';
 import { EmployeeService } from '../employee/employee.service';
 import { TaskService } from '../tasks/task.service';
 import { MikroOrmUserRepository } from './repository/mikro-orm-user.repository';
@@ -279,33 +280,34 @@ export class UserService extends TenantAwareCrudService<User> {
 		}
 	}
 
-	async create(user: User): Promise<User> {
-		if (!user.initials) {
-			user.initials = this.generateInitials(user.firstName, user.lastName);
-		}
-
-		if (!user.userNumber) {
-			user.userNumber = await this.getNextUserNumber();
-		}
-
-		return await super.create(user);
-	}
-
 	/**
 	 * Creates a new user.
-	 * @param {User} user - The user object to create.
-	 * @returns {Promise<InsertResult>} - A promise that resolves to the insert result.
+	 * @param {DeepPartial<User>} user - The user object to create.
+	 * @returns {Promise<User>} - A promise that resolves to the created user.
 	 */
-	async createOne(user: User): Promise<InsertResult> {
+	async create(user: DeepPartial<User>): Promise<User> {
 		if (!user.initials) {
 			user.initials = this.generateInitials(user.firstName, user.lastName);
 		}
 
-		if (!user.userNumber) {
-			user.userNumber = await this.getNextUserNumber();
-		}
+		return await retryQuery(async (): Promise<User> => {
+			return await this.typeOrmRepository.manager.transaction(
+				'SERIALIZABLE',
+				async (transactionManager) => {
+					if (!user.userNumber) {
+						const { maxUserNumber } = await transactionManager.createQueryBuilder(User, 'user')
+						.select('COALESCE(MAX(user.userNumber), 0)', 'maxUserNumber')
+						.getRawOne<{ maxUserNumber: string }>();
 
-		return await this.typeOrmRepository.insert(user);
+						user.userNumber = parseInt(maxUserNumber, 10) + 1;
+					}
+
+					const userEntity = transactionManager.create(User, user);
+
+					return await transactionManager.save(userEntity);
+				}
+			);
+		});
 	}
 
 	/**
@@ -321,21 +323,6 @@ export class UserService extends TenantAwareCrudService<User> {
 		const firstInitial = firstName?.charAt(0)?.toUpperCase() || 'X';
 		const lastInitial = lastName?.charAt(0)?.toUpperCase() || 'X';
 		return `${firstInitial}${lastInitial}`;
-	}
-
-	/**
-	 * Gets the next available user number for semantic document IDs.
-	 * This number is globally unique across all users.
-	 *
-	 * @returns The next user number (MAX(userNumber) + 1)
-	 */
-	async getNextUserNumber(): Promise<number> {
-		const result = await this.typeOrmRepository
-			.createQueryBuilder('user')
-			.select('COALESCE(MAX(user.userNumber), 0)', 'maxUserNumber')
-			.getRawOne<{ maxUserNumber: string }>();
-
-		return parseInt(result.maxUserNumber, 10) + 1;
 	}
 
 	/**
@@ -429,10 +416,6 @@ export class UserService extends TenantAwareCrudService<User> {
 
 			if (shouldUpdateInitials) {
 				entity.initials = this.generateInitials(entity.firstName, entity.lastName);
-			}
-
-			if (!user?.userNumber) {
-				entity.userNumber = await this.getNextUserNumber();
 			}
 
 			// Save the updated user entity
