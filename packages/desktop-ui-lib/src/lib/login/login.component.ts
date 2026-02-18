@@ -13,10 +13,10 @@ import { ErrorHandlerService } from '../services';
 
 @UntilDestroy({ checkProperties: true })
 @Component({
-    selector: 'ngx-desktop-timer-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    standalone: false
+	selector: 'ngx-desktop-timer-login',
+	templateUrl: './login.component.html',
+	styleUrls: ['./login.component.scss'],
+	standalone: false
 })
 export class NgxLoginComponent extends NbLoginComponent implements OnInit {
 	@ViewChild('form')
@@ -107,11 +107,11 @@ export class NgxLoginComponent extends NbLoginComponent implements OnInit {
 	}
 
 	get forgotPasswordUrl(): string {
-		return this.environment.FORGOT_PASSWORD_URL || 'https://app.gauzy.co/#/auth/request-password';
+		return this.environment.FORGOT_PASSWORD_URL || 'https://erp.dspot.com.pl/#/auth/request-password';
 	}
 
 	get registerUrl(): string {
-		return this.environment.REGISTER_URL || 'https://app.gauzy.co/#/auth/register';
+		return this.environment.REGISTER_URL || 'https://erp.dspot.com.pl/#/auth/register';
 	}
 
 	get isAgent(): boolean {
