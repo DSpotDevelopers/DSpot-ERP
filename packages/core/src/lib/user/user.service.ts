@@ -279,12 +279,32 @@ export class UserService extends TenantAwareCrudService<User> {
 		}
 	}
 
+	async create(user: User): Promise<User> {
+		if (!user.initials) {
+			user.initials = this.generateInitials(user.firstName, user.lastName);
+		}
+
+		if (!user.userNumber) {
+			user.userNumber = await this.getNextUserNumber();
+		}
+
+		return await super.create(user);
+	}
+
 	/**
 	 * Creates a new user.
 	 * @param {User} user - The user object to create.
 	 * @returns {Promise<InsertResult>} - A promise that resolves to the insert result.
 	 */
 	async createOne(user: User): Promise<InsertResult> {
+		if (!user.initials) {
+			user.initials = this.generateInitials(user.firstName, user.lastName);
+		}
+
+		if (!user.userNumber) {
+			user.userNumber = await this.getNextUserNumber();
+		}
+
 		return await this.typeOrmRepository.insert(user);
 	}
 
@@ -404,10 +424,15 @@ export class UserService extends TenantAwareCrudService<User> {
 
 			const shouldUpdateInitials = !user
 				|| user.firstName !== entity.firstName
-				|| user.lastName !== entity.lastName;
+				|| user.lastName !== entity.lastName
+				|| !user.initials
 
 			if (shouldUpdateInitials) {
 				entity.initials = this.generateInitials(entity.firstName, entity.lastName);
+			}
+
+			if (!user?.userNumber) {
+				entity.userNumber = await this.getNextUserNumber();
 			}
 
 			// Save the updated user entity

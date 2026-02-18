@@ -375,6 +375,39 @@ function getRandomDateWithinLast3Months(): Date {
 	return randomDate.toDate();
 }
 
+const generateInitials = (firstName?: string, lastName?: string): string => {
+	const firstInitial = firstName?.charAt(0)?.toUpperCase() || 'X';
+	const lastInitial = lastName?.charAt(0)?.toUpperCase() || 'X';
+	return `${firstInitial}${lastInitial}`;
+};
+
 const insertUsers = async (dataSource: DataSource, users: IUser[]): Promise<IUser[]> => {
-	return await dataSource.manager.save(users);
+	if (!users?.length) {
+		return [];
+	}
+
+	const userRepository = dataSource.getRepository(User);
+
+	const result = await userRepository
+		.createQueryBuilder('user')
+		.select('COALESCE(MAX(user.userNumber), 0)', 'maxUserNumber')
+		.getRawOne<{ maxUserNumber: string }>();
+
+	let nextUserNumber = Number(result?.maxUserNumber ?? 0) + 1;
+
+	for (const user of users) {
+		if (!user.initials) {
+			user.initials = generateInitials(user.firstName, user.lastName);
+		}
+
+		if (!user.userNumber) {
+			user.userNumber = nextUserNumber++;
+		}
+
+		if (user.lastInvoiceNumber == null) {
+			user.lastInvoiceNumber = 0;
+		}
+	}
+
+	return await dataSource.manager.save(users as User[]);
 };

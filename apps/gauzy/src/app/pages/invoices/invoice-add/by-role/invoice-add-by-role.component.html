@@ -31,6 +31,16 @@
 									id="inputInvoiceNumber"
 									fullWidth
 								/>
+								<div
+									*ngIf="
+										isEstimate &&
+										form.get('invoiceNumber')?.errors?.required &&
+										form.get('invoiceNumber')?.touched
+									"
+									class="invalid-feedback d-block"
+								>
+									{{ 'INVOICES_PAGE.VALIDATION.REQUIRED_INVOICE_NUMBER' | translate }}
+								</div>
 							</div>
 						</div>
 						<div class="col-sm-6">

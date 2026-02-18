@@ -1019,6 +1019,8 @@ export class InviteService extends TenantAwareCrudService<Invite> {
 		const create = this.typeOrmUserRepository.create({
 			...input.user,
 			tenant,
+			initials: this.userService.generateInitials(input.user.firstName, input.user.lastName),
+			userNumber: await this.userService.getNextUserNumber(),
 			...(input.password ? { hash: await this.authService.getPasswordHash(input.password) } : {})
 		});
 		const entity = await this.typeOrmUserRepository.save(create);
