@@ -35,6 +35,27 @@ export class InvoicesService {
 		);
 	}
 
+	existsInvoiceNumber(invoiceNumber: number, excludeIds: string[] = []): Promise<{ exists: boolean }> {
+		return firstValueFrom(
+			this.http.get<{ exists: boolean }>(`${API_PREFIX}/invoices/exists-invoice-number`, {
+				params: toParams({ invoiceNumber, excludeIds })
+			})
+		);
+	}
+
+	/**
+	 * Get the next semantic ID for a user
+	 * @param userId - The ID of the user
+	 * @returns Promise with the next semantic ID preview
+	 */
+	getNextSemanticId(userId: ID): Promise<{ semanticId: string; initials: string; userNumber: number; nextInvoiceSequence: number }> {
+		return firstValueFrom(
+			this.http.get<{ semanticId: string; initials: string; userNumber: number; nextInvoiceSequence: number }>(
+				`${API_PREFIX}/invoices/next-semantic-id/${userId}`
+			)
+		);
+	}
+
 	getById(id: ID, relations?: string[], findInput?: IInvoiceFindInput) {
 		const data = JSON.stringify({ relations, findInput });
 		return firstValueFrom(
@@ -94,7 +115,8 @@ export class InvoicesService {
 		invoiceId: ID,
 		isEstimate: boolean,
 		organizationId: ID,
-		tenantId: ID
+		tenantId: ID,
+		semanticId: string
 	): Promise<any> {
 		return firstValueFrom(
 			this.http.put<any>(`${API_PREFIX}/invoices/email/${email}`, {
@@ -103,7 +125,8 @@ export class InvoicesService {
 					invoiceNumber,
 					organizationId,
 					tenantId,
-					invoiceId
+					invoiceId,
+					semanticId
 				}
 			})
 		);

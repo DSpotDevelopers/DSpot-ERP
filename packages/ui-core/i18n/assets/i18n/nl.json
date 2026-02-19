@@ -3308,6 +3308,13 @@
 			"ACCESS": "Iedereen met toegang tot deze link kan de {{ text }} bekijken.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "Publieke link naar klembord kopiëren"
 		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "Factuur Automatisch Aangepast",
+			"ESTIMATE_UPDATED_TITLE": "Offerte Automatisch Aangepast",
+			"MESSAGE": "Om uniciteit te garanderen, zijn sommige waarden automatisch aangepast. Controleer de wijzigingen hieronder.",
+			"COPIED_TO_CLIPBOARD": "{{ field }} gekopieerd naar klembord",
+			"COPY_FAILED": "Kopiëren naar klembord mislukt"
+		},
 		"ERRORS": {
 			"DELETE": "Fout opgetreden bij het verwijderen van de factuur",
 			"DOWNLOAD": "Fout opgetreden bij het downloaden van de factuur",

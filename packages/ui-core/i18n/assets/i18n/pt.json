@@ -3308,6 +3308,13 @@
 			"ACCESS": "Qualquer pessoa com acesso a este link pode visualizar o {{ text }}.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "Copiar link público para a área de transferência"
 		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "Fatura Ajustada Automaticamente",
+			"ESTIMATE_UPDATED_TITLE": "Orçamento Ajustado Automaticamente",
+			"MESSAGE": "Para garantir a unicidade, alguns valores foram ajustados automaticamente. Por favor, revise as alterações abaixo.",
+			"COPIED_TO_CLIPBOARD": "{{ field }} copiado para a área de transferência",
+			"COPY_FAILED": "Falha ao copiar para a área de transferência"
+		},
 		"ERRORS": {
 			"DELETE": "Ocorreu um erro ao excluir a fatura",
 			"DOWNLOAD": "Ocorreu um erro ao baixar a fatura",

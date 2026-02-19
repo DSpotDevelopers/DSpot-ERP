@@ -1,0 +1,71 @@
+@use 'gauzy/_gauzy-dialogs' as *;
+
+:host {
+	.invoice-changes-notification {
+		min-width: 400px;
+		max-width: 500px;
+
+		.header-title {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-weight: 600;
+
+			nb-icon {
+				font-size: 1.2rem;
+			}
+		}
+
+		.notification-message {
+			margin-bottom: 16px;
+			color: var(--text-hint-color);
+		}
+
+		.changes-list {
+			.change-item {
+				display: flex;
+				flex-direction: column;
+				padding: 12px;
+				margin-bottom: 8px;
+				background-color: var(--background-basic-color-2);
+				border-radius: 4px;
+				border-left: 3px solid var(--color-warning-500);
+
+				.change-label {
+					font-weight: 500;
+					margin-bottom: 8px;
+					color: var(--text-basic-color);
+				}
+
+				.change-values {
+					display: flex;
+					align-items: center;
+					gap: 8px;
+
+					.old-value {
+						color: var(--text-hint-color);
+						text-decoration: line-through;
+					}
+
+					.arrow-icon {
+						color: var(--color-warning-500);
+					}
+
+					.new-value {
+						font-weight: 600;
+						color: var(--color-danger-default);
+					}
+
+					.copy-btn {
+						margin-left: 4px;
+					}
+				}
+			}
+		}
+
+		.footer-actions {
+			display: flex;
+			justify-content: flex-end;
+		}
+	}
+}

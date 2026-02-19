@@ -651,12 +651,11 @@ export class AuthService extends SocialAuthService {
 		}
 
 		// 3. Register new user
-		const entity = this.typeOrmUserRepository.create({
+		user = this.userService.create({
 			...input.user,
 			tenant,
 			...(input.password ? { hash: await this.getPasswordHash(input.password) } : {})
 		});
-		user = await this.typeOrmUserRepository.save(entity);
 
 		// 4. Create employee for specific user
 		if (input.featureAsEmployee) {

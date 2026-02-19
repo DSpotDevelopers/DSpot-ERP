@@ -24,6 +24,7 @@
 				<div class="block mt-2">
 					<div class="row">
 						<div class="col-sm-6">
+							<!-- Estimate Number / Invoice Semantic ID -->
 							<div class="form-group">
 								<label for="inputInvoiceNumber" class="label required-asterisk">
 									<span>
@@ -36,19 +37,18 @@
 									</span>
 								</label>
 								<input
-									type="number"
+									[type]="invoiceNumberConfig.type"
 									[min]="0"
 									nbInput
-									[placeholder]="
-										(isEstimate ? 'INVOICES_PAGE.ESTIMATE_NUMBER' : 'INVOICES_PAGE.INVOICE_NUMBER')
-											| translate
-									"
-									formControlName="invoiceNumber"
-									id="inputInvoiceNumber"
+									[placeholder]="invoiceNumberConfig.placeholder"
+									[formControl]="invoiceNumberConfig.control"
+									[id]="invoiceNumberConfig.id"
 									fullWidth
 								/>
+
 								<div
 									*ngIf="
+										isEstimate &&
 										form.get('invoiceNumber')?.errors?.required &&
 										form.get('invoiceNumber')?.touched
 									"

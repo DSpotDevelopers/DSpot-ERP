@@ -3302,6 +3302,13 @@
 			"ACCESS": "כל מי שיש לו גישה לקישור זה יוכל לצפות ב-{{ text }}.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "העתק קישור ציבורי ללוח"
 		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "החשבונית עודכנה אוטומטית",
+			"ESTIMATE_UPDATED_TITLE": "ההצעה עודכנה אוטומטית",
+			"MESSAGE": "כדי להבטיח ייחודיות, חלק מהערכים הותאמו אוטומטית. אנא בדוק את השינויים למטה.",
+			"COPIED_TO_CLIPBOARD": "{{ field }} הועתק ללוח",
+			"COPY_FAILED": "העתקה ללוח נכשלה"
+		},
 		"ERRORS": {
 			"DELETE": "אירעה שגיאה בעת מחיקת החשבונית",
 			"DOWNLOAD": "אירעה שגיאה בעת הורדת החשבונית",

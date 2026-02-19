@@ -3307,6 +3307,13 @@
 			"ACCESS": "Każdy z dostępem do tego linku może zobaczyć {{ text }}.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "Skopiuj publiczny link do schowka"
 		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "Faktura Automatycznie Dostosowana",
+			"ESTIMATE_UPDATED_TITLE": "Wycena Automatycznie Dostosowana",
+			"MESSAGE": "Aby zapewnić unikalność, niektóre wartości zostały automatycznie dostosowane. Proszę przejrzeć zmiany poniżej.",
+			"COPIED_TO_CLIPBOARD": "{{ field }} skopiowano do schowka",
+			"COPY_FAILED": "Nie udało się skopiować do schowka"
+		},
 		"ERRORS": {
 			"DELETE": "Wystąpił błąd podczas usuwania faktury",
 			"DOWNLOAD": "Wystąpił błąd podczas pobierania faktury",

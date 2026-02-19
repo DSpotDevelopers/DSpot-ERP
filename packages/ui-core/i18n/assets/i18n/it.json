@@ -3308,6 +3308,13 @@
 			"ACCESS": "Chiunque abbia accesso a questo link può visualizzare il {{ text }}.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "Copia link pubblico negli appunti"
 		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "Fattura Aggiornata Automaticamente",
+			"ESTIMATE_UPDATED_TITLE": "Preventivo Aggiornato Automaticamente",
+			"MESSAGE": "Per garantire l'unicità, alcuni valori sono stati modificati automaticamente. Si prega di verificare le modifiche di seguito.",
+			"COPIED_TO_CLIPBOARD": "{{ field }} copiato negli appunti",
+			"COPY_FAILED": "Copia negli appunti non riuscita"
+		},
 		"ERRORS": {
 			"DELETE": "Si è verificato un errore durante l'eliminazione della fattura",
 			"DOWNLOAD": "Si è verificato un errore durante il download della fattura",

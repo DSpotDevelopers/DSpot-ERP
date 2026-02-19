@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import {
 	FindOptions as MikroORMFindOptions,
@@ -711,6 +711,9 @@ export async function retryQuery<T>(query: () => Promise<T>, retries = 3): Promi
 			return retryQuery(query, retries - 1);
 		}
 
-		throw new Error(`Failed to fetch data: ${error?.message}`, error);
+		const logger = new Logger('GZY - RetryQuery');
+		logger.error(`Operation failed after ${retries} retries`, error.message, error.stack);
+		
+		throw new Error(`Operation failed after ${retries} retries`);
 	}
 }

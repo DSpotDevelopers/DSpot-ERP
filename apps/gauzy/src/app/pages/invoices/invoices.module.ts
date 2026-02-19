@@ -63,6 +63,7 @@ import {
 	SelectorsModule
 } from '@gauzy/ui-core/shared';
 import { InvoiceEmailMutationComponent } from './invoice-email/invoice-email-mutation.component';
+import { InvoiceChangesNotificationComponent } from './invoice-changes-notification/invoice-changes-notification.component';
 import { InvoiceDownloadMutationComponent } from './invoice-download/invoice-download-mutation.component';
 import { InvoicePdfComponent } from './invoice-pdf/invoice-pdf.component';
 import { AddInternalNoteComponent } from './add-internal-note/add-internal-note.component';
@@ -179,7 +180,8 @@ import { InvoicesByRoleComponent } from './invoices/by-role/invoices-by-role.com
 		PublicLinkComponent,
 		InvoicePaymentReceiptMutationComponent,
 		InvoicesByOrganizationComponent,
-		InvoicesByRoleComponent
+		InvoicesByRoleComponent,
+		InvoiceChangesNotificationComponent
 	],
 	exports: []
 })

@@ -12,6 +12,7 @@ import {
 	ToastrService
 } from '@gauzy/ui-core/core';
 import moment from 'moment';
+import { IInvoiceFieldChange } from '../invoice-changes-notification/invoice-changes-notification.component';
 
 @Component({
 	selector: 'ga-invoice-email',
@@ -26,6 +27,7 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 	invoiceItems: IInvoiceItem[];
 	createdInvoice: IInvoice;
 	shouldSendEmail = true;
+	invoiceChanges: IInvoiceFieldChange[] = [];
 
 	constructor(
 		public readonly translateService: TranslateService,
@@ -59,7 +61,27 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 
 		if (!this.invoice.id) {
 			const createdInvoice = await this.createInvoiceEstimate(InvoiceStatusTypesEnum.SENT);
-			if (createdInvoice) await this.createInvoiceEstimateItems();
+
+			if (createdInvoice) {
+				// Store original semantic id values to detect changes
+				const originalSemanticId = this.invoice.semanticId;
+
+				// Track changes if semantic ID changed
+				if (originalSemanticId !== createdInvoice.semanticId) {
+					// Update invoice with created values
+					this.invoice.semanticId = createdInvoice.semanticId;
+
+					this.invoiceChanges.push({
+						field: 'semanticId',
+						label: 'INVOICES_PAGE.INVOICE_NUMBER',
+						oldValue: originalSemanticId,
+						newValue: createdInvoice.semanticId,
+						copyable: true
+					});
+				}
+
+				await this.createInvoiceEstimateItems();
+			}
 		}
 
 		if (this.shouldSendEmail) {
@@ -69,7 +91,8 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 				this.invoice.id ? this.invoice?.id : this.createdInvoice?.id,
 				this.isEstimate,
 				organizationId,
-				tenantId
+				tenantId,
+				this.invoice.semanticId
 			);
 
 			this.toastrService.success('INVOICES_PAGE.EMAIL.EMAIL_SENT');
@@ -85,7 +108,9 @@ export class InvoiceEmailMutationComponent extends TranslationBaseComponent impl
 
 		this.dialogRef.close({
 			success: true,
-			email: this.shouldSendEmail ? null : email
+			email: this.shouldSendEmail ? null : email,
+			changes: this.invoiceChanges,
+			isEstimate: this.isEstimate
 		});
 	}
 

@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { Angular2SmartTableComponent, Cell, Settings } from 'angular2-smart-table';
+import { Angular2SmartTableComponent, Cell, IColumns, Settings } from 'angular2-smart-table';
 import { TranslateService } from '@ngx-translate/core';
 import { NbDialogService, NbMenuItem, NbPopoverDirective, NbTabComponent } from '@nebular/theme';
 import {
@@ -577,11 +577,16 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 						? this.getTranslation('INVOICES_PAGE.ESTIMATES.ESTIMATE_NUMBER')
 						: this.getTranslation('INVOICES_PAGE.INVOICE_NUMBER'),
 					type: 'custom',
+					sortDirection: 'asc',
 					width: '17%',
 					renderComponent: NotesWithTagsComponent,
 					componentInitFunction: (instance: NotesWithTagsComponent, cell: Cell) => {
-						instance.rowData = cell.getRow().getData();
-						instance.value = cell.getRawValue();
+						const row = cell.getRow().getData();
+						instance.rowData = {
+							...row,
+							invoiceNumber: row.semanticId ?? row.invoiceNumber,
+						};
+						instance.value = row.semanticId ?? row.invoiceNumber;
 					}
 				}
 			}
@@ -746,9 +751,12 @@ export class InvoicesByRoleComponent extends PaginationFilterBaseComponent imple
 
 		if (invoiceNumber) {
 			const invoiceNumberAsNumber = Number(invoiceNumber);
-			if (!isNaN(invoiceNumberAsNumber)) {
-				this.setFilter({ field: 'invoiceNumber', search: invoiceNumberAsNumber }, false);
-			}
+
+			const filter = !isNaN(invoiceNumberAsNumber)
+			? { field: 'invoiceNumber', search: invoiceNumberAsNumber }
+			: { field: 'semanticId', search: invoiceNumber };
+
+			this.setFilter(filter, false);
 		}
 
 		// Filter by invoice date

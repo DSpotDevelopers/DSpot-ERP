@@ -3297,6 +3297,13 @@
 			"ACCESS": "أي شخص لديه هذا الرابط يمكنه عرض {{ text }}.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "نسخ الرابط العام إلى الحافظة"
 		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "تم تعديل الفاتورة تلقائياً",
+			"ESTIMATE_UPDATED_TITLE": "تم تعديل التقدير تلقائياً",
+			"MESSAGE": "لضمان التفرد، تم تعديل بعض القيم تلقائياً. يرجى مراجعة التغييرات أدناه.",
+			"COPIED_TO_CLIPBOARD": "تم نسخ {{ field }} إلى الحافظة",
+			"COPY_FAILED": "فشل النسخ إلى الحافظة"
+		},
 		"ERRORS": {
 			"DELETE": "حدث خطأ أثناء حذف الفاتورة",
 			"DOWNLOAD": "حدث خطأ أثناء تنزيل الفاتورة",

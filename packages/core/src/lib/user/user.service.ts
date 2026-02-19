@@ -11,7 +11,8 @@ import {
 	In,
 	UpdateResult,
 	DeleteResult,
-	MoreThan
+	MoreThan,
+	DeepPartial
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from 'jsonwebtoken';
@@ -32,7 +33,7 @@ import { ConfigService, environment as env } from '@gauzy/config';
 import { prepareSQLQuery as p } from './../database/database.helper';
 import { TenantAwareCrudService } from './../core/crud';
 import { RequestContext } from './../core/context';
-import { freshTimestamp, MultiORMEnum } from './../core/utils';
+import { freshTimestamp, MultiORMEnum, retryQuery } from './../core/utils';
 import { EmployeeService } from '../employee/employee.service';
 import { TaskService } from '../tasks/task.service';
 import { MikroOrmUserRepository } from './repository/mikro-orm-user.repository';
@@ -281,11 +282,47 @@ export class UserService extends TenantAwareCrudService<User> {
 
 	/**
 	 * Creates a new user.
-	 * @param {User} user - The user object to create.
-	 * @returns {Promise<InsertResult>} - A promise that resolves to the insert result.
+	 * @param {DeepPartial<User>} user - The user object to create.
+	 * @returns {Promise<User>} - A promise that resolves to the created user.
 	 */
-	async createOne(user: User): Promise<InsertResult> {
-		return await this.typeOrmRepository.insert(user);
+	async create(user: DeepPartial<User>): Promise<User> {
+		if (!user.initials) {
+			user.initials = this.generateInitials(user.firstName, user.lastName);
+		}
+
+		return await retryQuery(async (): Promise<User> => {
+			return await this.typeOrmRepository.manager.transaction(
+				'SERIALIZABLE',
+				async (transactionManager) => {
+					if (!user.userNumber) {
+						const { maxUserNumber } = await transactionManager.createQueryBuilder(User, 'user')
+						.select('COALESCE(MAX(user.userNumber), 0)', 'maxUserNumber')
+						.getRawOne<{ maxUserNumber: string }>();
+
+						user.userNumber = parseInt(maxUserNumber, 10) + 1;
+					}
+
+					const userEntity = transactionManager.create(User, user);
+
+					return await transactionManager.save(userEntity);
+				}
+			);
+		});
+	}
+
+	/**
+	 * Generates initials from first name and last name.
+	 * Takes the first character of each name and converts to uppercase.
+	 * Falls back to 'XX' if names are not provided.
+	 *
+	 * @param firstName - The user's first name
+	 * @param lastName - The user's last name
+	 * @returns The generated initials (e.g., "VE" for "Victor Escobar")
+	 */
+	generateInitials(firstName?: string, lastName?: string): string {
+		const firstInitial = firstName?.charAt(0)?.toUpperCase() || 'X';
+		const lastInitial = lastName?.charAt(0)?.toUpperCase() || 'X';
+		return `${firstInitial}${lastInitial}`;
 	}
 
 	/**
@@ -370,6 +407,15 @@ export class UserService extends TenantAwareCrudService<User> {
 			// Update password hash if provided
 			if (entity['hash']) {
 				entity['hash'] = await this.getPasswordHash(entity['hash']);
+			}
+
+			const shouldUpdateInitials = !user
+				|| user.firstName !== entity.firstName
+				|| user.lastName !== entity.lastName
+				|| !user.initials
+
+			if (shouldUpdateInitials) {
+				entity.initials = this.generateInitials(entity.firstName, entity.lastName);
 			}
 
 			// Save the updated user entity

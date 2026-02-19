@@ -1,0 +1,48 @@
+<nb-card class="invoice-changes-notification">
+	<nb-card-header>
+		<span class="header-title">
+			<nb-icon icon="alert-circle-outline" status="warning"></nb-icon>
+			{{
+				(isEstimate
+					? 'INVOICES_PAGE.CHANGES_NOTIFICATION.ESTIMATE_UPDATED_TITLE'
+					: 'INVOICES_PAGE.CHANGES_NOTIFICATION.INVOICE_UPDATED_TITLE'
+				) | translate
+			}}
+		</span>
+	</nb-card-header>
+
+	<nb-card-body>
+		<p class="notification-message">
+			{{ 'INVOICES_PAGE.CHANGES_NOTIFICATION.MESSAGE' | translate }}
+		</p>
+
+		<div class="changes-list">
+			<div *ngFor="let change of changes" class="change-item">
+				<div class="change-label">{{ change.label | translate }}:</div>
+				<div class="change-values">
+					<span class="old-value">{{ change.oldValue }}</span>
+					<nb-icon icon="arrow-forward-outline" class="arrow-icon"></nb-icon>
+					<span class="new-value">{{ change.newValue }}</span>
+					<button
+						*ngIf="change.copyable"
+						nbButton
+						ghost
+						size="tiny"
+						status="primary"
+						class="copy-btn"
+						(click)="copyToClipboard(change.newValue, change.label)"
+						[nbTooltip]="'BUTTONS.COPY' | translate"
+					>
+						<nb-icon icon="copy-outline"></nb-icon>
+					</button>
+				</div>
+			</div>
+		</div>
+	</nb-card-body>
+
+	<nb-card-footer class="footer-actions">
+		<button nbButton status="success" (click)="confirm()">
+			{{ 'BUTTONS.OK' | translate }}
+		</button>
+	</nb-card-footer>
+</nb-card>

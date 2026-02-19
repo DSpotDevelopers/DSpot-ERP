@@ -76,7 +76,7 @@
 								<nb-accordion-item-body>
 									<form [formGroup]="searchForm" (ngSubmit)="search()">
 										<div class="row w-100">
-											<div class="col-sm-4">
+											<div class="col-sm-4" [class.col-sm-4]="isEstimate" [class.col-sm-3]="!isEstimate">
 												<div class="form-group">
 													<label for="inputInvoiceNumber" class="label">
 														<span>
@@ -89,12 +89,12 @@
 														</span>
 													</label>
 													<input
-														type="number"
+														type="text"
 														nbInput
 														[placeholder]="
-															(!isEstimate
-																? 'INVOICES_PAGE.INVOICE_NUMBER'
-																: 'INVOICES_PAGE.ESTIMATE_NUMBER'
+															(isEstimate
+																? 'INVOICES_PAGE.ESTIMATE_NUMBER'
+																: 'INVOICES_PAGE.INVOICE_NUMBER'
 															) | translate
 														"
 														formControlName="invoiceNumber"

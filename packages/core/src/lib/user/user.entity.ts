@@ -7,7 +7,7 @@ import { JoinColumn, RelationId, JoinTable } from 'typeorm';
 
 import { EntityRepositoryType } from '@mikro-orm/core';
 import { Exclude } from 'class-transformer';
-import { IsEmail, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEmail, IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 import {
 	IUser,
 	IRole,
@@ -173,6 +173,33 @@ export class User extends TenantBaseEntity implements IUser {
 	@Exclude({ toPlainOnly: true })
 	@MultiORMColumn({ insert: false, nullable: true })
 	emailToken?: string;
+
+	/**
+	 * User initials for semantic document IDs (e.g., "JD" for "John Doe")
+	 */
+	@ApiPropertyOptional({ type: () => String })
+	@IsOptional()
+	@IsString()
+	@MultiORMColumn({ nullable: true })
+	initials?: string;
+
+	/**
+	 * Unique user number for semantic document IDs (globally unique, auto-assigned)
+	 */
+	@ApiPropertyOptional({ type: () => Number })
+	@IsOptional()
+	@IsNumber()
+	@MultiORMColumn({ nullable: true, unique: true })
+	userNumber?: number;
+
+	/**
+	 * Counter for the last invoice number created by this user (used for semantic invoice ID)
+	 */
+	@ApiPropertyOptional({ type: () => Number })
+	@IsOptional()
+	@IsNumber()
+	@MultiORMColumn({ default: 0 })
+	lastInvoiceNumber?: number;
 
 	/** Additional virtual columns */
 	@VirtualMultiOrmColumn()

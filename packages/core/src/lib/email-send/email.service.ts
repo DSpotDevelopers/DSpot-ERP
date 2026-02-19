@@ -117,6 +117,7 @@ export class EmailService {
 	 * @param email
 	 * @param base64
 	 * @param invoiceNumber
+	 * @param semanticId
 	 * @param invoiceId
 	 * @param isEstimate
 	 * @param token
@@ -128,6 +129,7 @@ export class EmailService {
 		email: string,
 		base64: string,
 		invoiceNumber: number,
+		semanticId: string,
 		invoiceId: string,
 		isEstimate: boolean,
 		token: any,
@@ -143,7 +145,7 @@ export class EmailService {
 				to: `${email}`,
 				attachments: [
 					{
-						filename: `${isEstimate ? 'Estimate' : 'Invoice'}-${invoiceNumber}.pdf`,
+						filename: `${isEstimate ? 'Estimate' : 'Invoice'}-${semanticId ?? invoiceNumber}.pdf`,
 						content: base64,
 						encoding: 'base64'
 					}
@@ -173,8 +175,8 @@ export class EmailService {
 
 				body['message'] = send.originalMessage;
 			} catch (error) {
-				console.log(`Error while sending email invoice ${invoiceNumber}: %s`, error?.message);
-				throw new BadRequestException(`Error while sending email invoice ${invoiceNumber}: ${error?.message}`);
+				console.log(`Error while sending email invoice ${isEstimate ? invoiceNumber : semanticId}: %s`, error?.message);
+				throw new BadRequestException(`Error while sending email invoice ${isEstimate ? invoiceNumber : semanticId}: ${error?.message}`);
 			} finally {
 				await this.createEmailRecord(body);
 			}

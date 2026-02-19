@@ -74,6 +74,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 		data: any,
 		isSelected: false
 	};
+	isLegacyInvoice: boolean = false;
 
 	private _isEstimate = false;
 	@Input() set isEstimate(val: boolean) {
@@ -175,6 +176,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 				{ tenantId, organizationId }
 			)
 			.then(async (invoice: IInvoice) => {
+				this.isLegacyInvoice = !invoice.semanticId;
 				this.invoice = invoice;
 				this.invoiceItems = invoice?.invoiceItems;
 				this.discountAfterTax = invoice?.toOrganization?.discountAfterTax;
@@ -196,7 +198,8 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 		this.form = this.fb.group({
 			id: ['', Validators.required],
 			invoiceDate: [this.organizationSettingService.getDateFromOrganizationSettings(), Validators.required],
-			invoiceNumber: [this.invoice?.invoiceNumber, Validators.compose([Validators.required, Validators.min(1)])],
+			semanticId: [{ value: this.invoice?.semanticId, disabled: true }],
+			invoiceNumber: [{ value: this.invoice?.invoiceNumber, disabled: !this.isEstimate }, Validators.compose([Validators.required, Validators.min(1)])],
 			dueDate: ['', Validators.required],
 			discountValue: ['', Validators.compose([Validators.required, Validators.min(0)])],
 			tax: ['', Validators.compose([Validators.required, Validators.min(0)])],
@@ -213,6 +216,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 	updateValueAndValidity(invoice: IInvoice) {
 		this.form.setValue({
 			id: invoice.id,
+			semanticId: invoice.semanticId || '',
 			invoiceNumber: invoice.invoiceNumber,
 			invoiceDate: new Date(invoice.invoiceDate),
 			dueDate: new Date(invoice.dueDate),
@@ -227,6 +231,27 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			tags: invoice.tags
 		});
 		this.form.updateValueAndValidity();
+	}
+
+	get invoiceNumberConfig() {
+		const placeholder = this.isEstimate
+			? 'INVOICES_PAGE.ESTIMATE_NUMBER'
+			: 'INVOICES_PAGE.INVOICE_NUMBER';
+
+		const control = (this.isEstimate || this.isLegacyInvoice)
+			? this.form.get('invoiceNumber')
+			: this.form.get('semanticId');
+
+		const id = this.isEstimate || this.isLegacyInvoice
+			? 'inputInvoiceNumber'
+			: 'inputSemanticId';
+
+		return {
+			type: this.isEstimate ? 'number' : 'text',
+			placeholder: this.getTranslation(placeholder),
+			control,
+			id
+		}
 	}
 
 	async loadSmartTable() {
@@ -453,6 +478,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 	private async updateInvoice(status: string, sendTo?: string) {
 		const tableData = await this.smartTableSource.getAll();
 		if (tableData.length) {
+			const { invoiceNumber } = this.form.getRawValue();
 			const invoiceData = this.form.value;
 			if (
 				!invoiceData.invoiceDate ||
@@ -464,20 +490,17 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			}
 			const { tenantId } = this.store.user;
 			const { id: organizationId } = this.organization;
-			const invoice = await this.invoicesService.getAll({
-				invoiceNumber: invoiceData.invoiceNumber,
-				organizationId,
-				tenantId
-			});
 
-			if (invoice.items.length && +invoice.items[0].invoiceNumber !== +this.invoice.invoiceNumber) {
+			const invoiceNumberExists = await this.invoicesService.existsInvoiceNumber(invoiceData.invoiceNumber, [this.invoice.id]);
+
+			if (invoiceNumberExists.exists) {
 				this.toastrService.danger('INVOICES_PAGE.INVOICE_NUMBER_DUPLICATE');
 				return;
 			}
 
 			const { invoiceDate } = this.form.getRawValue();
 			await this.invoicesService.update(this.invoice.id, {
-				invoiceNumber: invoiceData.invoiceNumber,
+				invoiceNumber,
 				invoiceDate: moment(invoiceData.invoiceDate).startOf('day').toDate(),
 				dueDate: moment(invoiceData.dueDate).endOf('day').toDate(),
 				discountValue: invoiceData.discountValue,
@@ -616,6 +639,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 	async sendViaEmail() {
 		const tableData = await this.smartTableSource.getAll();
 		if (tableData.length) {
+			const { invoiceNumber } = this.form.getRawValue();
 			const invoiceData = this.form.value;
 			if (
 				!invoiceData.invoiceDate ||
@@ -628,7 +652,7 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 			const { tenantId } = this.store.user;
 			const { id: organizationId } = this.organization;
 			const invoiceExists = await this.invoicesService.getAll({
-				invoiceNumber: invoiceData.invoiceNumber,
+				invoiceNumber,
 				organizationId,
 				tenantId
 			});
@@ -640,7 +664,8 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 
 			const invoice = {
 				id: invoiceData.id,
-				invoiceNumber: invoiceData.invoiceNumber,
+				invoiceNumber,
+				semanticId: this.invoice.semanticId,
 				invoiceDate: invoiceData.invoiceDate,
 				currency: this.invoice?.currency,
 				dueDate: invoiceData.dueDate,
@@ -724,7 +749,8 @@ export class InvoiceEditByRoleComponent extends PaginationFilterBaseComponent im
 					this.invoice.id,
 					this.isEstimate,
 					organizationId,
-					tenantId
+					tenantId,
+					this.invoice.semanticId
 				);
 
 				this.toastrService.success('INVOICES_PAGE.EMAIL.EMAIL_SENT');

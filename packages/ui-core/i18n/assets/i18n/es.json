@@ -3308,6 +3308,13 @@
 			"ACCESS": "Cualquiera con acceso a este enlace puede ver el {{ text }}.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "Copiar enlace público al portapapeles"
 		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "Factura Ajustada Automáticamente",
+			"ESTIMATE_UPDATED_TITLE": "Presupuesto Ajustado Automáticamente",
+			"MESSAGE": "Para garantizar la unicidad, algunos valores fueron ajustados automáticamente. Por favor revise los cambios a continuación.",
+			"COPIED_TO_CLIPBOARD": "{{ field }} copiado al portapapeles",
+			"COPY_FAILED": "Error al copiar al portapapeles"
+		},
 		"ERRORS": {
 			"DELETE": "Ocurrió un error al eliminar la factura",
 			"DOWNLOAD": "Ocurrió un error al descargar la factura",

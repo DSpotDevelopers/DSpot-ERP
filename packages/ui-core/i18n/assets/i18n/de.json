@@ -3308,6 +3308,13 @@
 			"ACCESS": "Jeder mit Zugriff auf diesen Link kann das {{ text }} anzeigen.",
 			"COPY_TO_CLIPBOARD_TOOLTIP": "Öffentlichen Link in die Zwischenablage kopieren"
 		},
+		"CHANGES_NOTIFICATION": {
+			"INVOICE_UPDATED_TITLE": "Rechnung Automatisch Angepasst",
+			"ESTIMATE_UPDATED_TITLE": "Angebot Automatisch Angepasst",
+			"MESSAGE": "Um Eindeutigkeit zu gewährleisten, wurden einige Werte automatisch angepasst. Bitte überprüfen Sie die Änderungen unten.",
+			"COPIED_TO_CLIPBOARD": "{{ field }} in die Zwischenablage kopiert",
+			"COPY_FAILED": "Kopieren in die Zwischenablage fehlgeschlagen"
+		},
 		"ERRORS": {
 			"DELETE": "Fehler beim Löschen der Rechnung",
 			"DOWNLOAD": "Fehler beim Herunterladen der Rechnung",
